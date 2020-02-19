@@ -30,7 +30,7 @@ public class Wheel : MonoBehaviour
     [HideInInspector] public float steerAngle;
     [HideInInspector] public float motorPower;
     [HideInInspector] public float steeringPower;
-    [HideInInspector] public float throttle; // NN
+    [HideInInspector] public float throttle;
     private Vector3 suspensionForce;
     private Vector3 wheelVelocity;
     private float forwardForce;
@@ -53,7 +53,7 @@ public class Wheel : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (Physics.Raycast(transform.position, -transform.up, out RaycastHit hit, maxLength + wheelRadius))
+        if (Physics.Raycast(transform.position, -transform.up, out RaycastHit hit, maxLength + wheelRadius, LayerMask.GetMask("Floor")))
         {
             lastLength = springLength;
             springLength = hit.distance - wheelRadius;

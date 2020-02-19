@@ -43,7 +43,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6f32bcba944b0a4da1586365efcead5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  restLength: 0.5
+  restLength: 0.4
   springTravel: 0.2
   springStiffness: 85000
   damperStiffness: 6000
@@ -65,7 +65,6 @@ GameObject:
   - component: {fileID: 6791551976333570431}
   - component: {fileID: 6791551976333570430}
   - component: {fileID: 6791551976333570428}
-  - component: {fileID: 3649193189990214136}
   m_Layer: 8
   m_Name: Car
   m_TagString: Untagged
@@ -130,25 +129,11 @@ MonoBehaviour:
   turnRadius: 12
   motorPower: 10000
   steeringPower: 1000
-  length: 10
-  steerInput: 0
+  length: 15
+  steering: 0
   throttle: 0
---- !u!114 &3649193189990214136
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6791551976333570425}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e5ec315402588445be3caeaa4c36c36, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  inputsCount: 5
-  outputsCount: 2
-  hiddenLayerCount: 2
-  neuronsPerHiddenLayer: 4
+  debug: 1
+  manager: {fileID: 0}
 --- !u!1 &6791551976658705101
 GameObject:
   m_ObjectHideFlags: 0
@@ -192,7 +177,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6f32bcba944b0a4da1586365efcead5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  restLength: 0.5
+  restLength: 0.4
   springTravel: 0.2
   springStiffness: 85000
   damperStiffness: 6000
@@ -246,11 +231,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6f32bcba944b0a4da1586365efcead5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  restLength: 0.5
+  restLength: 0.4
   springTravel: 0.2
   springStiffness: 75000
   damperStiffness: 6000
-  wheelRadius: 0.25
+  wheelRadius: 0.225
   type: 0
   steerTime: 6
   steerAngle: 0
@@ -300,11 +285,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6f32bcba944b0a4da1586365efcead5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  restLength: 0.5
+  restLength: 0.4
   springTravel: 0.2
   springStiffness: 75000
   damperStiffness: 6000
-  wheelRadius: 0.25
+  wheelRadius: 0.225
   type: 1
   steerTime: 6
   steerAngle: 0
