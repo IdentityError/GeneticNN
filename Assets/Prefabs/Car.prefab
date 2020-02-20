@@ -46,8 +46,8 @@ MonoBehaviour:
   restLength: 0.4
   springTravel: 0.2
   springStiffness: 85000
-  damperStiffness: 6000
-  wheelRadius: 0.25
+  damperStiffness: 2000
+  wheelRadius: 0.275
   type: 3
   steerTime: 6
   steerAngle: 0
@@ -127,13 +127,12 @@ MonoBehaviour:
   wheelBase: 2.25
   rearTrack: 1.45
   turnRadius: 12
-  motorPower: 20000
-  steeringPower: 2250
-  length: 8
+  motorPower: 22000
+  steeringPower: 2500
+  length: 7
   steering: 0
   throttle: 0
-  debug: 0
-  lastAverageThrottle: 0
+  averageThrottle: 0
   timeTravelled: 0
   distanceTravelled: 0
   manager: {fileID: 0}
@@ -185,8 +184,8 @@ MonoBehaviour:
   restLength: 0.4
   springTravel: 0.2
   springStiffness: 85000
-  damperStiffness: 6000
-  wheelRadius: 0.25
+  damperStiffness: 2000
+  wheelRadius: 0.275
   type: 2
   steerTime: 6
   steerAngle: 0
@@ -238,8 +237,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   restLength: 0.4
   springTravel: 0.2
-  springStiffness: 75000
-  damperStiffness: 6000
+  springStiffness: 85000
+  damperStiffness: 2000
   wheelRadius: 0.225
   type: 0
   steerTime: 6
@@ -292,8 +291,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   restLength: 0.4
   springTravel: 0.2
-  springStiffness: 75000
-  damperStiffness: 6000
+  springStiffness: 85000
+  damperStiffness: 2000
   wheelRadius: 0.225
   type: 1
   steerTime: 6

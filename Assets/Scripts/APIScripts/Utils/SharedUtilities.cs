@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public class SharedUtilities
 {
     private static SharedUtilities instance = null;
+
     /// <summary>
     ///   Returns: the SharedUtilities singleton instance
     /// </summary>

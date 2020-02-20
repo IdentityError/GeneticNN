@@ -1,24 +1,44 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class GeneticManager : MonoBehaviour
 {
     [Header("References")]
     public GameObject carIndividualPrefab;
+    [Header("Parameters")]
     public float timeScale = 1F;
     public int populationNumber;
     [Range(0F, 1F)]
     public float mutationRate;
+    public bool saveFittest;
+    public bool trainFittest;
 
     [Header("Neural Net")]
     public DNA.DnaTopology topology;
 
-    private Car[] population = null;
+    [Header("UI")]
+    public Text generationTxt = null;
+    public Text savedMaxFitnessTxt = null;
+    public Text currentMaxFitnessTxt = null;
+
+    private int generationCount = 0;
+    private CarIndividual[] population = null;
     private int currentAlive;
+    private float currentMaxFitness = 0F;
 
     private void Start()
     {
-        population = new Car[populationNumber];
-        InitializeRandomPopulation();
+        population = new CarIndividual[populationNumber];
+        CarIndividualData seedData = SaveManager.GetInstance().LoadPersistentData(SaveManager.FITTEST_DATA).GetData<CarIndividualData>();
+        savedMaxFitnessTxt.text = "Saved max fitness: " + seedData.GetFitness();
+        if (trainFittest)
+        {
+            StartNewSimulation(CreatePopulationFromSeedDNA(seedData.GetDNA()));
+        }
+        else
+        {
+            StartNewSimulation(null);
+        }
     }
 
     private void Update()
@@ -28,19 +48,40 @@ public class GeneticManager : MonoBehaviour
         {
             EndCurrentSimulation();
         }
+        foreach (CarIndividual car in population)
+        {
+            if (car.fitness > currentMaxFitness)
+            {
+                currentMaxFitness = car.fitness;
+            }
+        }
+        currentMaxFitnessTxt.text = "Current max fitness: " + currentMaxFitness;
     }
 
-    private Car[] CrossoverPopulation()
+    private CarIndividual[] CrossoverPopulation()
     {
         //NormalizePopulationBreedingProbabilities();
-        Car[] newPopulation = new Car[populationNumber];
-        Car[] parents = PickFittestTwo();
+        CarIndividual[] newPopulation = new CarIndividual[populationNumber];
+
+        CarIndividualData[] parents = PickFittestTwo();
+
+        if (saveFittest)
+        {
+            CarIndividualData currentFittest = SaveManager.GetInstance().LoadPersistentData(SaveManager.FITTEST_DATA).GetData<CarIndividualData>();
+            if (parents[0].GetFitness() > currentFittest.GetFitness())
+            {
+                SaveManager.GetInstance().SavePersistentData<CarIndividualData>(parents[0], SaveManager.FITTEST_DATA);
+                Debug.Log("Overridden the fittest data, fitness: " + parents[0].GetFitness());
+                savedMaxFitnessTxt.text = "Saved max fitness: " + parents[0].GetFitness();
+            }
+        }
+
         for (int i = 0; i < populationNumber; i++)
         {
-            DNA childDna = parents[0].neuralNet.dna.Crossover(parents[1].neuralNet.dna);
+            DNA childDna = parents[0].GetDNA().Crossover(parents[1].GetDNA());
             childDna.Mutate(mutationRate);
 
-            Car child = Instantiate(carIndividualPrefab, new Vector3(0F, 0.75F, 0F), Quaternion.identity).GetComponent<Car>();
+            CarIndividual child = Instantiate(carIndividualPrefab, new Vector3(0F, 0.75F, 0F), Quaternion.identity).GetComponent<CarIndividual>();
             child.gameObject.name = "Car" + i;
             child.InitializeNeuralNet(childDna);
             child.manager = this;
@@ -49,20 +90,6 @@ public class GeneticManager : MonoBehaviour
             newPopulation[i] = child;
         }
         return newPopulation;
-    }
-
-    private void InitializeRandomPopulation()
-    {
-        currentAlive = populationNumber;
-        for (int i = 0; i < populationNumber; i++)
-        {
-            Car car = Instantiate(carIndividualPrefab, new Vector3(0F, 0.75F, 0F), Quaternion.identity).GetComponent<Car>();
-            car.gameObject.name = "Car" + i;
-            car.manager = this;
-            DNA individualDna = new DNA(topology);
-            car.InitializeNeuralNet(individualDna);
-            population[i] = car;
-        }
     }
 
     public void DecrementPopulationAliveCount()
@@ -80,23 +107,90 @@ public class GeneticManager : MonoBehaviour
     private void EndCurrentSimulation()
     {
         currentAlive = 0;
-        Car[] newPopulation = CrossoverPopulation();
+        CarIndividual[] newPopulation = CrossoverPopulation();
         StartNewSimulation(newPopulation);
     }
 
-    private void StartNewSimulation(Car[] newPopulation)
+    private void StartNewSimulation(CarIndividual[] newPopulation)
     {
+        if (newPopulation == null)
+        {
+            for (int i = 0; i < populationNumber; i++)
+            {
+                CarIndividual car = Instantiate(carIndividualPrefab, new Vector3(0F, 0.75F, 0F), Quaternion.identity).GetComponent<CarIndividual>();
+                car.gameObject.name = "Car" + i;
+                car.manager = this;
+                DNA individualDna = new DNA(topology);
+                car.InitializeNeuralNet(individualDna);
+                population[i] = car;
+            }
+            return;
+        }
+
         currentAlive = populationNumber;
+        generationCount++;
+        generationTxt.text = generationCount + "° Generation";
 
         for (int i = 0; i < populationNumber; i++)
         {
-            Destroy(population[i].gameObject);
+            if (population[i] != null)
+            {
+                Destroy(population[i].gameObject);
+            }
             newPopulation[i].gameObject.SetActive(true);
             population[i] = newPopulation[i];
         }
     }
 
-    private Car PickRandom()
+    private CarIndividualData[] PickFittestTwo()
+    {
+        CarIndividual firstCar = null;
+        float firstFitness = 0F;
+        foreach (CarIndividual car in population)
+        {
+            if (car.fitness > firstFitness)
+            {
+                firstCar = car;
+                firstFitness = car.fitness;
+            }
+        }
+
+        float secondFitness = 0F;
+
+        CarIndividual secondCar = null;
+        foreach (CarIndividual car in population)
+        {
+            if (car.fitness > secondFitness)
+            {
+                if (car != firstCar)
+                {
+                    secondCar = car;
+                    secondFitness = car.fitness;
+                }
+            }
+        }
+
+        CarIndividualData[] returnOut = new CarIndividualData[2];
+        returnOut[0] = new CarIndividualData(firstCar.neuralNet.dna, firstFitness);
+        returnOut[1] = new CarIndividualData(secondCar.neuralNet.dna, secondFitness);
+        return returnOut;
+    }
+
+    private void NormalizePopulationBreedingProbabilities()
+    {
+        float fitnessSum = 0;
+        foreach (CarIndividual car in population)
+        {
+            fitnessSum += car.fitness;
+        }
+
+        foreach (CarIndividual car in population)
+        {
+            car.breedingProbability = car.fitness / fitnessSum;
+        }
+    }
+
+    private CarIndividual PickRandom()
     {
         float seed = Random.Range(0F, 1F);
         int index = -1;
@@ -107,52 +201,19 @@ public class GeneticManager : MonoBehaviour
         return population[index];
     }
 
-    private Car[] PickFittestTwo()
+    private CarIndividual[] CreatePopulationFromSeedDNA(DNA seedDna)
     {
-        float maxFitness = 0;
-
-        Car firstCar = null;
-        foreach (Car car in population)
+        CarIndividual[] newPopulation = new CarIndividual[populationNumber];
+        for (int i = 0; i < populationNumber; i++)
         {
-            if (car.fitness > maxFitness)
-            {
-                firstCar = car;
-                maxFitness = car.fitness;
-            }
+            CarIndividual car = Instantiate(carIndividualPrefab, new Vector3(0F, 0.75F, 0F), Quaternion.identity).GetComponent<CarIndividual>();
+            car.gameObject.name = "Car" + i;
+            car.manager = this;
+            DNA individualDna = new DNA(seedDna.topology, seedDna.weights);
+            individualDna.Mutate(mutationRate);
+            car.InitializeNeuralNet(individualDna);
+            newPopulation[i] = car;
         }
-
-        maxFitness = 0F;
-
-        Car secondCar = null;
-        foreach (Car car in population)
-        {
-            if (car.fitness > maxFitness)
-            {
-                if (car != firstCar)
-                {
-                    secondCar = car;
-                    maxFitness = car.fitness;
-                }
-            }
-        }
-
-        Car[] returnOut = new Car[2];
-        returnOut[0] = firstCar;
-        returnOut[1] = secondCar;
-        return returnOut;
-    }
-
-    private void NormalizePopulationBreedingProbabilities()
-    {
-        float fitnessSum = 0;
-        foreach (Car car in population)
-        {
-            fitnessSum += car.fitness;
-        }
-
-        foreach (Car car in population)
-        {
-            car.breedingProbability = car.fitness / fitnessSum;
-        }
+        return newPopulation;
     }
 }

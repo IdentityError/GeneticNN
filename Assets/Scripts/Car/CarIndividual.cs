@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
-public class Car : MonoBehaviour
+public class CarIndividual : MonoBehaviour
 {
     [Header("Specifications")]
     public Wheel[] wheels;
@@ -25,10 +26,12 @@ public class Car : MonoBehaviour
     public float throttle;
 
     [Header("Debug")]
-    public bool debug;
-    public float lastAverageThrottle = 0F;
+    public float averageThrottle = 0F;
     public float timeTravelled = 0F;
     public float distanceTravelled = 0F;
+
+    private int updateCycles = 0;
+    private float currentThrottleSum = 0F;
 
     private float ackermanAngleRight;
     private float ackermanAngleLeft;
@@ -40,7 +43,6 @@ public class Car : MonoBehaviour
     private bool netInitialized = false;
     private float angleStride;
     private Vector3 lastPosition;
-    private float lastThrottle = 0F;
 
     [HideInInspector] public NeuralNet neuralNet;
     [HideInInspector]
@@ -52,7 +54,6 @@ public class Car : MonoBehaviour
     private void Start()
     {
         lastPosition = transform.position;
-        lastThrottle = throttle;
 
         foreach (Wheel w in wheels)
         {
@@ -68,7 +69,6 @@ public class Car : MonoBehaviour
         sensesDirections = new Vector3[directionsCount];
         neuralNetInput = new float[neuralNet.dna.topology.inputCount];
         angleStride = (180F / (directionsCount + 1));
-
         netInitialized = true;
     }
 
@@ -79,14 +79,8 @@ public class Car : MonoBehaviour
             Sense();
             neuralNetOutput = neuralNet.Process(neuralNetInput);
             ManageWheels();
-
-            distanceTravelled += Vector3.Distance(transform.position, lastPosition);
-            lastPosition = transform.position;
-            timeTravelled += Time.deltaTime;
-            lastAverageThrottle = (lastThrottle + Mathf.Abs(throttle)) / 2F;
-            lastThrottle = lastAverageThrottle;
-
-            CalculateFitness();
+            UpdateStats();
+            UpdateFitness();
         }
     }
 
@@ -94,12 +88,6 @@ public class Car : MonoBehaviour
     {
         steering = neuralNetOutput[0];//Input.GetAxis("Horizontal"); //TODO NN
         throttle = neuralNetOutput[1];//Input.GetAxis("Vertical");
-
-        if (debug)
-        {
-            Debug.Log("OUTPUT");
-            Debug.Log("throttle: " + throttle + ", steering: " + steering);
-        }
 
         if (steering > 0)
         {
@@ -134,17 +122,16 @@ public class Car : MonoBehaviour
     private void Sense()
     {
         RaycastHit[] hits = new RaycastHit[directionsCount];
-        if (debug)
-            Debug.Log("INPUT");
         for (int i = 0; i < directionsCount; i++)
         {
             float currentAngle = angleStride * (i + 1);
-            currentAngle -= (transform.rotation.eulerAngles.y);
+            currentAngle -= transform.rotation.eulerAngles.y;
             sensesDirections[i] = new Vector3(Mathf.Cos(currentAngle * TMath.DegToRad), 0F, Mathf.Sin(currentAngle * TMath.DegToRad));
 
             sensesDirections[i].Normalize();
 
-            if (Physics.Raycast(transform.position, sensesDirections[i], out hits[i], length, LayerMask.GetMask("Obstacles")))
+            LayerMask ignore = ~LayerMask.GetMask("CarIndividual");
+            if (Physics.Raycast(transform.position, sensesDirections[i], out hits[i], length, ignore))
             {
                 float inversedNormalizedDistance = (hits[i].distance / length);
                 neuralNetInput[i] = inversedNormalizedDistance;
@@ -155,12 +142,8 @@ public class Car : MonoBehaviour
                 neuralNetInput[i] = 1F;
                 Debug.DrawRay(transform.position, sensesDirections[i] * length, Color.cyan);
             }
-            if (debug)
-                Debug.Log("input[" + i + "]: " + neuralNetInput[i]);
         }
         neuralNetInput[neuralNet.dna.topology.inputCount - 1] = throttle;
-        if (debug)
-            Debug.Log("throttle: " + throttle);
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -174,8 +157,19 @@ public class Car : MonoBehaviour
         }
     }
 
-    private void CalculateFitness()
+    private void UpdateFitness()
     {
-        fitness = (TMath.Sinh(lastAverageThrottle) / 1.3F) * (2.5F * distanceTravelled + (0.15F * timeTravelled));
+        fitness += 0.0012F * (2F * (float)Math.Exp(3F * (throttle - 1F)) * (1.5F * distanceTravelled + (0.075F * timeTravelled)));
+    }
+
+    private void UpdateStats()
+    {
+        distanceTravelled += Vector3.Distance(transform.position, lastPosition);
+        lastPosition = transform.position;
+        timeTravelled += Time.deltaTime;
+
+        updateCycles++;
+        currentThrottleSum += throttle;
+        averageThrottle = currentThrottleSum / updateCycles;
     }
 }

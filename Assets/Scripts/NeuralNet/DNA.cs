@@ -156,7 +156,7 @@ public class DNA
         {
             for (int j = 0; j < topology.neuronsPerHiddenLayer; j++)
             {
-                if (Random.Range(0, 2) == 0)
+                if ((i + j) % 3 == 0)
                 {
                     childDna.weights.i_h0Weights[i][j] = partnerDna.weights.i_h0Weights[i][j];
                 }
@@ -169,7 +169,7 @@ public class DNA
             {
                 for (int k = 0; k < topology.neuronsPerHiddenLayer; k++)
                 {
-                    if (Random.Range(0, 2) == 0)
+                    if ((j + k) % 3 == 0)
                     {
                         childDna.weights.intraNetWeights[i][j][k] = partnerDna.weights.intraNetWeights[i][j][k];
                     }
@@ -181,7 +181,7 @@ public class DNA
         {
             for (int j = 0; j < topology.outputCount; j++)
             {
-                if (Random.Range(0, 2) == 0)
+                if ((i + j) % 3 == 0)
                 {
                     childDna.weights.hn_oWeights[i][j] = partnerDna.weights.hn_oWeights[i][j];
                 }

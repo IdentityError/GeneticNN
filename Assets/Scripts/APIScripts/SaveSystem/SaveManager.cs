@@ -17,8 +17,7 @@ public class SaveManager
     }
 
     //Can write here the static file names to use in the game
-    public static readonly string FITTEST_DNA_DATA = Application.persistentDataPath + "/fittest_dna.data";
-    public static readonly string BEST_FITNESS_DATA = Application.persistentDataPath + "/best_fitness.data";
+    public static readonly string FITTEST_DATA = Application.persistentDataPath + "/fittest.data";
     //I.E
     //public static readonly string PLAYER_DATA = Application.persistentDataPath + "/player_data.data";
     //Calling the methods will look like this:
