@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-public class NeuralNet
+﻿public class NeuralNet
 {
     public DNA dna;
 
@@ -24,7 +22,7 @@ public class NeuralNet
             {
                 sum += vector[j] * matrix[j][i];
             }
-            output[i] = Tanh(sum);
+            output[i] = TMath.Tanh(sum);
         }
 
         return output;
@@ -52,11 +50,5 @@ public class NeuralNet
         float[] output = ActivationVector_Matrix(current, dna.weights.hn_oWeights, dna.topology.neuronsPerHiddenLayer, dna.topology.outputCount);
 
         return output;
-    }
-
-    private float Tanh(float x)
-    {
-        float exp = Mathf.Exp(2 * x);
-        return (exp - 1) / (exp + 1);
     }
 }

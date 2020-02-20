@@ -127,12 +127,15 @@ MonoBehaviour:
   wheelBase: 2.25
   rearTrack: 1.45
   turnRadius: 12
-  motorPower: 16000
-  steeringPower: 1500
-  length: 15
+  motorPower: 20000
+  steeringPower: 2250
+  length: 8
   steering: 0
   throttle: 0
   debug: 0
+  lastAverageThrottle: 0
+  timeTravelled: 0
+  distanceTravelled: 0
   manager: {fileID: 0}
   fitness: 0
   breedingProbability: 0

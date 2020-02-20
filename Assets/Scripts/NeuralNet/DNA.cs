@@ -27,11 +27,65 @@ public class DNA
         public float[][][] intraNetWeights;
         public float[][] hn_oWeights;
 
-        public DnaWeights(float[][] i_h0Weights, float[][][] intraNetWeights, float[][] hn_oWeights)
+        public DnaWeights(DnaTopology topology, float[][] i_h0Weights, float[][][] intraNetWeights, float[][] hn_oWeights)
         {
-            this.i_h0Weights = i_h0Weights;
-            this.intraNetWeights = intraNetWeights;
-            this.hn_oWeights = hn_oWeights;
+            //Weights matrix for the first layer I_H0
+            this.i_h0Weights = new float[topology.inputCount][];
+            for (int i = 0; i < topology.inputCount; i++)
+            {
+                this.i_h0Weights[i] = new float[topology.neuronsPerHiddenLayer];
+                for (int j = 0; j < topology.neuronsPerHiddenLayer; j++)
+                {
+                    if (i_h0Weights == null)
+                    {
+                        this.i_h0Weights[i][j] = Random.Range(-1F, 1F);
+                    }
+                    else
+                    {
+                        this.i_h0Weights[i][j] = i_h0Weights[i][j];
+                    }
+                }
+            }
+
+            //Weights matrices for all the hidden layers, 3D array required: intraNetWeights[layerNumber][neuron][neuron]
+            this.intraNetWeights = new float[topology.hiddenLayerCount][][];
+            for (int i = 0; i < topology.hiddenLayerCount; i++)
+            {
+                this.intraNetWeights[i] = new float[topology.neuronsPerHiddenLayer][];
+                for (int j = 0; j < topology.neuronsPerHiddenLayer; j++)
+                {
+                    this.intraNetWeights[i][j] = new float[topology.neuronsPerHiddenLayer];
+                    for (int k = 0; k < topology.neuronsPerHiddenLayer; k++)
+                    {
+                        if (intraNetWeights == null)
+                        {
+                            this.intraNetWeights[i][j][k] = Random.Range(-1F, 1F);
+                        }
+                        else
+                        {
+                            this.intraNetWeights[i][j][k] = intraNetWeights[i][j][k];
+                        }
+                    }
+                }
+            }
+
+            //Weights matrix for last layer and output Hn_O
+            this.hn_oWeights = new float[topology.neuronsPerHiddenLayer][];
+            for (int i = 0; i < topology.neuronsPerHiddenLayer; i++)
+            {
+                this.hn_oWeights[i] = new float[topology.outputCount];
+                for (int j = 0; j < topology.outputCount; j++)
+                {
+                    if (hn_oWeights == null)
+                    {
+                        this.hn_oWeights[i][j] = Random.Range(-1F, 1F);
+                    }
+                    else
+                    {
+                        this.hn_oWeights[i][j] = hn_oWeights[i][j];
+                    }
+                }
+            }
         }
     }
 
@@ -42,56 +96,16 @@ public class DNA
     /// <summary>
     ///  Initialize a DNA with a random set of weights
     ///</summary>
-    public DNA(DnaTopology parameters)
+    public DNA(DnaTopology topology)
     {
-        this.topology = parameters;
-        InitializeRandomDNAWeights();
+        this.topology = new DnaTopology(topology.inputCount, topology.outputCount, topology.hiddenLayerCount, topology.neuronsPerHiddenLayer);
+        this.weights = new DnaWeights(this.topology, null, null, null);
     }
 
-    public DNA(DnaTopology parameters, DnaWeights weights)
+    public DNA(DnaTopology topology, DnaWeights weights)
     {
-        this.topology = parameters;
-        this.weights = weights;
-    }
-
-    private void InitializeRandomDNAWeights()
-    {
-        //Weights matrix for the first layer I_H0
-        weights.i_h0Weights = new float[topology.inputCount][];
-        for (int i = 0; i < topology.inputCount; i++)
-        {
-            weights.i_h0Weights[i] = new float[topology.neuronsPerHiddenLayer];
-            for (int j = 0; j < topology.neuronsPerHiddenLayer; j++)
-            {
-                weights.i_h0Weights[i][j] = Random.Range(-1F, 1F);
-            }
-        }
-
-        //Weights matrices for all the hidden layers, 3D array required: intraNetWeights[layerNumber][neuron][neuron]
-        weights.intraNetWeights = new float[topology.hiddenLayerCount][][];
-        for (int i = 0; i < topology.hiddenLayerCount; i++)
-        {
-            weights.intraNetWeights[i] = new float[topology.neuronsPerHiddenLayer][];
-            for (int j = 0; j < topology.neuronsPerHiddenLayer; j++)
-            {
-                weights.intraNetWeights[i][j] = new float[topology.neuronsPerHiddenLayer];
-                for (int k = 0; k < topology.neuronsPerHiddenLayer; k++)
-                {
-                    weights.intraNetWeights[i][j][k] = Random.Range(-1F, 1F);
-                }
-            }
-        }
-
-        //Weights matrix for last layer and output Hn_O
-        weights.hn_oWeights = new float[topology.neuronsPerHiddenLayer][];
-        for (int i = 0; i < topology.neuronsPerHiddenLayer; i++)
-        {
-            weights.hn_oWeights[i] = new float[topology.outputCount];
-            for (int j = 0; j < topology.outputCount; j++)
-            {
-                weights.hn_oWeights[i][j] = Random.Range(-1F, 1F);
-            }
-        }
+        this.topology = new DnaTopology(topology.inputCount, topology.outputCount, topology.hiddenLayerCount, topology.neuronsPerHiddenLayer);
+        this.weights = new DnaWeights(this.topology, weights.i_h0Weights, weights.intraNetWeights, weights.hn_oWeights);
     }
 
     public void Mutate(float mutationRate)
@@ -102,6 +116,7 @@ public class DNA
             {
                 if (Random.Range(0F, 1F) < mutationRate)
                 {
+                    //Debug.Log("MUTATED");
                     this.weights.i_h0Weights[i][j] = Random.Range(-1F, 1F);
                 }
             }
@@ -141,9 +156,9 @@ public class DNA
         {
             for (int j = 0; j < topology.neuronsPerHiddenLayer; j++)
             {
-                if ((i + j) % 2 == 0)
+                if (Random.Range(0, 2) == 0)
                 {
-                    childDna.weights.i_h0Weights[i][j] = -partnerDna.weights.i_h0Weights[i][j];
+                    childDna.weights.i_h0Weights[i][j] = partnerDna.weights.i_h0Weights[i][j];
                 }
             }
         }
@@ -154,9 +169,9 @@ public class DNA
             {
                 for (int k = 0; k < topology.neuronsPerHiddenLayer; k++)
                 {
-                    if ((i + j + k) % 2 == 0)
+                    if (Random.Range(0, 2) == 0)
                     {
-                        childDna.weights.intraNetWeights[i][j][k] = -partnerDna.weights.intraNetWeights[i][j][k];
+                        childDna.weights.intraNetWeights[i][j][k] = partnerDna.weights.intraNetWeights[i][j][k];
                     }
                 }
             }
@@ -166,13 +181,12 @@ public class DNA
         {
             for (int j = 0; j < topology.outputCount; j++)
             {
-                if ((i + j) % 2 == 0)
+                if (Random.Range(0, 2) == 0)
                 {
-                    childDna.weights.hn_oWeights[i][j] = -partnerDna.weights.hn_oWeights[i][j];
+                    childDna.weights.hn_oWeights[i][j] = partnerDna.weights.hn_oWeights[i][j];
                 }
             }
         }
-
         return childDna;
     }
 }

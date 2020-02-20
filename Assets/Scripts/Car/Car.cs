@@ -20,14 +20,15 @@ public class Car : MonoBehaviour
     [Tooltip("Length of the raycasted senses")]
     public float length;
 
-    private float angleStride;
-
     [Header("Live Values")]
     public float steering;
     public float throttle;
 
     [Header("Debug")]
     public bool debug;
+    public float lastAverageThrottle = 0F;
+    public float timeTravelled = 0F;
+    public float distanceTravelled = 0F;
 
     private float ackermanAngleRight;
     private float ackermanAngleLeft;
@@ -37,8 +38,9 @@ public class Car : MonoBehaviour
     private float[] neuralNetOutput;
     private bool endedSimulation = false;
     private bool netInitialized = false;
-    private float distanceTravelled = 0F;
+    private float angleStride;
     private Vector3 lastPosition;
+    private float lastThrottle = 0F;
 
     [HideInInspector] public NeuralNet neuralNet;
     [HideInInspector]
@@ -50,6 +52,7 @@ public class Car : MonoBehaviour
     private void Start()
     {
         lastPosition = transform.position;
+        lastThrottle = throttle;
 
         foreach (Wheel w in wheels)
         {
@@ -76,8 +79,13 @@ public class Car : MonoBehaviour
             Sense();
             neuralNetOutput = neuralNet.Process(neuralNetInput);
             ManageWheels();
+
             distanceTravelled += Vector3.Distance(transform.position, lastPosition);
             lastPosition = transform.position;
+            timeTravelled += Time.deltaTime;
+            lastAverageThrottle = (lastThrottle + Mathf.Abs(throttle)) / 2F;
+            lastThrottle = lastAverageThrottle;
+
             CalculateFitness();
         }
     }
@@ -132,7 +140,7 @@ public class Car : MonoBehaviour
         {
             float currentAngle = angleStride * (i + 1);
             currentAngle -= (transform.rotation.eulerAngles.y);
-            sensesDirections[i] = new Vector3(Mathf.Cos(currentAngle * Mathf.Deg2Rad), 0F, Mathf.Sin(currentAngle * Mathf.Deg2Rad));
+            sensesDirections[i] = new Vector3(Mathf.Cos(currentAngle * TMath.DegToRad), 0F, Mathf.Sin(currentAngle * TMath.DegToRad));
 
             sensesDirections[i].Normalize();
 
@@ -157,15 +165,17 @@ public class Car : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        endedSimulation = true;
-        throttle = 0;
-        steering = 0;
-        manager?.DecrementPopulationAliveCount();
+        if (!endedSimulation)
+        {
+            endedSimulation = true;
+            throttle = 0;
+            steering = 0;
+            manager?.DecrementPopulationAliveCount();
+        }
     }
 
     private void CalculateFitness()
     {
-        fitness = distanceTravelled;
-        //TODO implement a fitness function
+        fitness = (TMath.Sinh(lastAverageThrottle) / 1.3F) * (2.5F * distanceTravelled + (0.15F * timeTravelled));
     }
 }
