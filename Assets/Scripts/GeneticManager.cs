@@ -4,8 +4,9 @@ public class GeneticManager : MonoBehaviour
 {
     [Header("References")]
     public GameObject carIndividualPrefab;
-
+    public float timeScale = 1F;
     public int populationNumber;
+    [Range(0F, 1F)]
     public float mutationRate;
 
     [Header("Neural Net")]
@@ -16,8 +17,23 @@ public class GeneticManager : MonoBehaviour
 
     private void Start()
     {
+        //SaveObject fittestDataObject = SaveManager.GetInstance().LoadPersistentData(SaveManager.BEST_FITNESS_DATA);
+        //if (fittestDataObject != null)
+        //{
+        //    Debug.Log("Retrieved fittest, fitness: " + fittestDataObject.GetData<float>());
+        //}
+
         population = new Car[populationNumber];
         InitializeRandomPopulation();
+    }
+
+    private void Update()
+    {
+        Time.timeScale = timeScale;
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            EndCurrentSimulation();
+        }
     }
 
     private Car[] CrossoverPopulation()
@@ -28,10 +44,16 @@ public class GeneticManager : MonoBehaviour
         {
             Car parent1 = PickRandom();
             Car parent2 = PickRandom();
+            Debug.Log("P1: " + parent1.gameObject.name + ", P2: " + parent2.gameObject.name);
 
             DNA childDna = parent1.neuralNet.dna.Crossover(parent2.neuralNet.dna);
             childDna.Mutate(mutationRate);
+
             Car child = Instantiate(carIndividualPrefab, new Vector3(0F, 0.75F, 0F), Quaternion.identity).GetComponent<Car>();
+            child.gameObject.name = "Car" + i;
+            child.InitializeNeuralNet(childDna);
+            child.manager = this;
+
             child.gameObject.SetActive(false);
             newPopulation[i] = child;
         }
@@ -43,8 +65,8 @@ public class GeneticManager : MonoBehaviour
         currentAlive = populationNumber;
         for (int i = 0; i < populationNumber; i++)
         {
-            GameObject individual = Instantiate(carIndividualPrefab, new Vector3(0F, 0.75F, 0F), Quaternion.identity);
-            Car car = individual.GetComponent<Car>();
+            Car car = Instantiate(carIndividualPrefab, new Vector3(0F, 0.75F, 0F), Quaternion.identity).GetComponent<Car>();
+            car.gameObject.name = "Car" + i;
             car.manager = this;
             DNA individualDna = new DNA(topology);
             car.InitializeNeuralNet(individualDna);
@@ -66,7 +88,21 @@ public class GeneticManager : MonoBehaviour
 
     private void EndCurrentSimulation()
     {
-        Debug.Log("Crossovering population");
+        currentAlive = 0;
+        Car fittest = null;
+        float maxFitness = 0F;
+        foreach (Car car in population)
+        {
+            if (car.fitness > maxFitness)
+            {
+                fittest = car;
+                maxFitness = car.fitness;
+            }
+        }
+        //SaveManager.GetInstance().SavePersistentData<DNA>(fittest.neuralNet.dna, SaveManager.FITTEST_DNA_DATA);
+        //SaveManager.GetInstance().SavePersistentData<float>(maxFitness, SaveManager.BEST_FITNESS_DATA);
+
+        Debug.Log("Max fitness: " + maxFitness);
         Car[] newPopulation = CrossoverPopulation();
         StartNewSimulation(newPopulation);
     }
@@ -84,6 +120,7 @@ public class GeneticManager : MonoBehaviour
             newPopulation[i].gameObject.SetActive(true);
             population[i] = newPopulation[i];
         }
+        currentAlive = populationNumber;
     }
 
     private Car PickRandom()
@@ -107,7 +144,7 @@ public class GeneticManager : MonoBehaviour
 
         foreach (Car car in population)
         {
-            car.breedingProbability = fitnessSum / fitnessSum;
+            car.breedingProbability = car.fitness / fitnessSum;
         }
     }
 }

@@ -37,16 +37,20 @@ public class Car : MonoBehaviour
     private float[] neuralNetOutput;
     private bool endedSimulation = false;
     private bool netInitialized = false;
+    private float distanceTravelled = 0F;
+    private Vector3 lastPosition;
 
     [HideInInspector] public NeuralNet neuralNet;
     [HideInInspector]
     public GeneticManager manager;
 
-    [HideInInspector] public float fitness;
-    [HideInInspector] public float breedingProbability;
+    public float fitness;
+    public float breedingProbability;
 
     private void Start()
     {
+        lastPosition = transform.position;
+
         foreach (Wheel w in wheels)
         {
             w.motorPower = this.motorPower;
@@ -72,6 +76,9 @@ public class Car : MonoBehaviour
             Sense();
             neuralNetOutput = neuralNet.Process(neuralNetInput);
             ManageWheels();
+            distanceTravelled += Vector3.Distance(transform.position, lastPosition);
+            lastPosition = transform.position;
+            CalculateFitness();
         }
     }
 
@@ -129,7 +136,7 @@ public class Car : MonoBehaviour
 
             sensesDirections[i].Normalize();
 
-            if (Physics.Raycast(transform.position, sensesDirections[i], out hits[i], length))
+            if (Physics.Raycast(transform.position, sensesDirections[i], out hits[i], length, LayerMask.GetMask("Obstacles")))
             {
                 float inversedNormalizedDistance = (hits[i].distance / length);
                 neuralNetInput[i] = inversedNormalizedDistance;
@@ -156,8 +163,9 @@ public class Car : MonoBehaviour
         manager?.DecrementPopulationAliveCount();
     }
 
-    private void FitnessFunction()
+    private void CalculateFitness()
     {
+        fitness = distanceTravelled;
         //TODO implement a fitness function
     }
 }

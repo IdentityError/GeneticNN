@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 
+[System.Serializable]
 public class DNA
 {
     [System.Serializable]
@@ -19,6 +20,7 @@ public class DNA
         }
     }
 
+    [System.Serializable]
     public struct DnaWeights
     {
         public float[][] i_h0Weights;
@@ -94,14 +96,83 @@ public class DNA
 
     public void Mutate(float mutationRate)
     {
-        float seed = Random.Range(0F, 1F);
-        //TODO implement random mutation on weights (number of layers and neurons per layer (?))
+        for (int i = 0; i < topology.inputCount; i++)
+        {
+            for (int j = 0; j < topology.neuronsPerHiddenLayer; j++)
+            {
+                if (Random.Range(0F, 1F) < mutationRate)
+                {
+                    this.weights.i_h0Weights[i][j] = Random.Range(-1F, 1F);
+                }
+            }
+        }
+
+        for (int i = 0; i < topology.hiddenLayerCount; i++)
+        {
+            for (int j = 0; j < topology.neuronsPerHiddenLayer; j++)
+            {
+                for (int k = 0; k < topology.neuronsPerHiddenLayer; k++)
+                {
+                    if (Random.Range(0F, 1F) < mutationRate)
+                    {
+                        this.weights.intraNetWeights[i][j][k] = Random.Range(-1F, 1F);
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < topology.neuronsPerHiddenLayer; i++)
+        {
+            for (int j = 0; j < topology.outputCount; j++)
+            {
+                if (Random.Range(0F, 1F) < mutationRate)
+                {
+                    this.weights.hn_oWeights[i][j] = Random.Range(-1F, 1F);
+                }
+            }
+        }
     }
 
     public DNA Crossover(DNA partnerDna)
     {
         DNA childDna = new DNA(this.topology, this.weights);
-        //TODO implement mixin DNA
-        return null;
+
+        for (int i = 0; i < topology.inputCount; i++)
+        {
+            for (int j = 0; j < topology.neuronsPerHiddenLayer; j++)
+            {
+                if ((i + j) % 2 == 0)
+                {
+                    childDna.weights.i_h0Weights[i][j] = -partnerDna.weights.i_h0Weights[i][j];
+                }
+            }
+        }
+
+        for (int i = 0; i < topology.hiddenLayerCount; i++)
+        {
+            for (int j = 0; j < topology.neuronsPerHiddenLayer; j++)
+            {
+                for (int k = 0; k < topology.neuronsPerHiddenLayer; k++)
+                {
+                    if ((i + j + k) % 2 == 0)
+                    {
+                        childDna.weights.intraNetWeights[i][j][k] = -partnerDna.weights.intraNetWeights[i][j][k];
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < topology.neuronsPerHiddenLayer; i++)
+        {
+            for (int j = 0; j < topology.outputCount; j++)
+            {
+                if ((i + j) % 2 == 0)
+                {
+                    childDna.weights.hn_oWeights[i][j] = -partnerDna.weights.hn_oWeights[i][j];
+                }
+            }
+        }
+
+        return childDna;
     }
 }
