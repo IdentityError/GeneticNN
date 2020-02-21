@@ -3,6 +3,26 @@ using UnityEngine;
 
 public class CarIndividual : MonoBehaviour
 {
+    [System.Serializable]
+    public struct SimulationStats
+    {
+        public float averageThrottle;
+        public float time;
+        public float distance;
+
+        public SimulationStats(float averageThrottle, float time, float distance)
+        {
+            this.averageThrottle = averageThrottle;
+            this.time = time;
+            this.distance = distance;
+        }
+
+        public override string ToString()
+        {
+            return "Average throttle: " + averageThrottle + "\nTime: " + time + "\nDistance: " + distance;
+        }
+    }
+
     [Header("Specifications")]
     public Wheel[] wheels;
 
@@ -17,18 +37,17 @@ public class CarIndividual : MonoBehaviour
     public float motorPower;
     public float steeringPower;
 
+    [Header("Neural Net")]
+    public DNA.DnaTopology topology;
+
     [Header("Senses")]
     [Tooltip("Length of the raycasted senses")]
     public float length;
 
-    [Header("Live Values")]
+    [Header("Debug")]
     public float steering;
     public float throttle;
-
-    [Header("Debug")]
-    public float averageThrottle = 0F;
-    public float timeTravelled = 0F;
-    public float distanceTravelled = 0F;
+    public SimulationStats stats;
 
     private int updateCycles = 0;
     private float currentThrottleSum = 0F;
@@ -46,7 +65,7 @@ public class CarIndividual : MonoBehaviour
 
     [HideInInspector] public NeuralNet neuralNet;
     [HideInInspector]
-    public GeneticManager manager;
+    public TrainingManager manager;
 
     public float fitness;
     public float breedingProbability;
@@ -80,7 +99,7 @@ public class CarIndividual : MonoBehaviour
             neuralNetOutput = neuralNet.Process(neuralNetInput);
             ManageWheels();
             UpdateStats();
-            UpdateFitness();
+            manager?.CalculateFitness(this);
         }
     }
 
@@ -130,8 +149,7 @@ public class CarIndividual : MonoBehaviour
 
             sensesDirections[i].Normalize();
 
-            LayerMask ignore = ~LayerMask.GetMask("CarIndividual");
-            if (Physics.Raycast(transform.position, sensesDirections[i], out hits[i], length, ignore))
+            if (Physics.Raycast(transform.position, sensesDirections[i], out hits[i], length, LayerMask.GetMask("Obstacles")))
             {
                 float inversedNormalizedDistance = (hits[i].distance / length);
                 neuralNetInput[i] = inversedNormalizedDistance;
@@ -150,26 +168,41 @@ public class CarIndividual : MonoBehaviour
     {
         if (!endedSimulation)
         {
-            endedSimulation = true;
-            throttle = 0;
-            steering = 0;
-            manager?.DecrementPopulationAliveCount();
+            StopSimulating(false);
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag.Equals("TrackCheckpoint"))
+        {
+            StopSimulating(throttle > 0);
         }
     }
 
     private void UpdateFitness()
     {
-        fitness += 0.0012F * (2F * (float)Math.Exp(3F * (throttle - 1F)) * (1.5F * distanceTravelled + (0.075F * timeTravelled)));
+        fitness = (6F * (float)Math.Exp(3F * (stats.averageThrottle - 1F)) * (0.2F * stats.distance)) * Time.deltaTime;
     }
 
     private void UpdateStats()
     {
-        distanceTravelled += Vector3.Distance(transform.position, lastPosition);
+        stats.distance += Vector3.Distance(transform.position, lastPosition);
         lastPosition = transform.position;
-        timeTravelled += Time.deltaTime;
+        stats.time += Time.deltaTime;
 
         updateCycles++;
         currentThrottleSum += throttle;
-        averageThrottle = currentThrottleSum / updateCycles;
+        stats.averageThrottle = currentThrottleSum / updateCycles;
+    }
+
+    public void StopSimulating(bool sendStats)
+    {
+        if (endedSimulation) return;
+
+        endedSimulation = true;
+        throttle = 0;
+        steering = 0;
+        manager?.HasEndedSimulation(sendStats ? this : null);
     }
 }

@@ -1,10 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class EvaluateManager : MonoBehaviour
+public class EvaluateManager : Manager
 {
-    [Header("References")]
-    public GameObject carPrefab;
     [Header("UI")]
     public Text fitnessTxt;
     public Text topologyTxt;
@@ -26,6 +24,7 @@ public class EvaluateManager : MonoBehaviour
 
     private void Update()
     {
+        Time.timeScale = timeScale;
         if (Input.GetKeyDown(KeyCode.R))
         {
             StartSimulation();
@@ -39,7 +38,13 @@ public class EvaluateManager : MonoBehaviour
             Destroy(fittest.gameObject);
         }
 
-        fittest = Instantiate(carPrefab, new Vector3(0F, 0.75F, 0F), Quaternion.identity).GetComponent<CarIndividual>();
-        fittest.InitializeNeuralNet(fittestData.GetDNA());
+        InstantiateAndInitializeIndividual(fittestData.GetDNA(), null);
+    }
+
+    protected override CarIndividual InstantiateAndInitializeIndividual(DNA dna, string name)
+    {
+        CarIndividual newCar = base.InstantiateAndInitializeIndividual(dna, name);
+        newCar.manager = null;
+        return newCar;
     }
 }

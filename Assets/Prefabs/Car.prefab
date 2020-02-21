@@ -44,10 +44,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   restLength: 0.4
-  springTravel: 0.2
-  springStiffness: 85000
-  damperStiffness: 2000
-  wheelRadius: 0.275
+  springTravel: 0.175
+  springStiffness: 120000
+  damperStiffness: 3000
+  wheelRadius: 0.3
   type: 3
   steerTime: 6
   steerAngle: 0
@@ -124,17 +124,23 @@ MonoBehaviour:
   - {fileID: 6791551977793162675}
   - {fileID: 6791551976658705091}
   - {fileID: 6791551976215878552}
+  topology:
+    inputCount: 5
+    outputCount: 2
+    hiddenLayerCount: 3
+    neuronsPerHiddenLayer: 8
   wheelBase: 2.25
   rearTrack: 1.45
   turnRadius: 12
-  motorPower: 22000
+  motorPower: 20000
   steeringPower: 2500
   length: 7
   steering: 0
   throttle: 0
-  averageThrottle: 0
-  timeTravelled: 0
-  distanceTravelled: 0
+  stats:
+    averageThrottle: 0
+    time: 0
+    distance: 0
   manager: {fileID: 0}
   fitness: 0
   breedingProbability: 0
@@ -182,10 +188,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   restLength: 0.4
-  springTravel: 0.2
-  springStiffness: 85000
-  damperStiffness: 2000
-  wheelRadius: 0.275
+  springTravel: 0.175
+  springStiffness: 120000
+  damperStiffness: 3000
+  wheelRadius: 0.3
   type: 2
   steerTime: 6
   steerAngle: 0

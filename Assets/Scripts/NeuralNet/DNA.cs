@@ -21,7 +21,7 @@ public class DNA
     }
 
     [System.Serializable]
-    public struct DnaWeights
+    public class DnaWeights
     {
         public float[][] i_h0Weights;
         public float[][][] intraNetWeights;
