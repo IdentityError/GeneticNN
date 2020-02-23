@@ -51,8 +51,7 @@ Each layer vector is calculated with a multiplication between a row vector and a
     <img src="Assets/Equations/vkelem.png"/>
 </p> 
 
-Now with *u* as the output vector, the propagation equation can be written as a sequential multiplication up to *n - 1*    
-since *k = 0 . . . n* with *n* the number of the layers in the Net, with the vector at *k = 0* being the input vector and the vector at *k = n* being the output vector:     
+Now with *u* as the output vector, the propagation equation can be written as a sequential multiplication up to *n - 1* with *k = 0 . . . n*, *n* the number of the layers in the Net, the vector at *k = 0* being the input vector and the vector at *k = n* being the output vector:     
 
 <p align="center">
     <img src="Assets/Equations/outputv.png"/>
@@ -69,10 +68,10 @@ The GA is based on three main steps:
 **3) Mutation**    
 
 ### Selection
-During this step the fitness function *(ff)* is calculated for each individual and the fittest individuals are selected as the designated to pass their DNA to the progeny. Usually, each individual has a certain probability of being selected, proportional to the fitness. In this project, in order to accelerate the convergence to the optimal, at each generation, only the two fittest individual are going to be selected.     
+During this step the fitness function *(ff)* is calculated for each individual and the fittest individuals are selected as the designated to pass their DNA to the progeny. Usually, each individual has a certain probability of being selected, proportional to their fitness. In this project, in order to accelerate the convergence to the optimal, at each generation, only the two fittest individual are going to be selected.     
 
 ### Crossover
-In this step the actual mixing of the DNA is implemented. As the *ff*, there is no predefined way to implement this step. In this project the mixing of the DNA only concerns the weight matrices. Since the two fittest individual are selected, the DNA is not equally selected from the two individuals, instead, the fittest one, is responsible of 2/3 of the DNA. In conclusion the child DNA is copied from the fittest one and then once every three cycles the DNA is selected from the partner. This can easily be implemented as follows:
+In this step the actual mixing of the DNA is implemented. There is no predefined way to implement this step. In this project the mixing of the DNA only concerns the weight matrices. Since the designated individuals are the two fittest, the DNA is not equally selected from both of them, instead, the fittest one, is responsible of handing down the 2/3 of the DNA. In conclusion the child DNA is copied from the fittest one and then once every three cycles the DNA is selected from the partner. This can easily be implemented as follows:
 
 ```C#
    for (int i = 0; i < rows; i++)
