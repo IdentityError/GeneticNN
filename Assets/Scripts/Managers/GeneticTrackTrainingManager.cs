@@ -99,6 +99,8 @@ public class GeneticTrackTrainingManager : TrainingManager
                 else
                 {
                     SaveManager.GetInstance().SavePersistentData<CarIndividualData>(new CarIndividualData(individual.neuralNet.dna, individual.fitness), SaveManager.FITTEST_DATA);
+                    Debug.Log("Overridden the fittest data, fitness: " + individual.fitness);
+                    savedMaxFitnessTxt.text = "Saved max fitness: " + individual.fitness;
                 }
             }
         }
@@ -165,13 +167,10 @@ public class GeneticTrackTrainingManager : TrainingManager
         CarIndividual secondCar = null;
         foreach (CarIndividual car in population)
         {
-            if (car.fitness > secondFitness)
+            if (car != firstCar && car.fitness > secondFitness)
             {
-                if (car != firstCar)
-                {
-                    secondCar = car;
-                    secondFitness = car.fitness;
-                }
+                secondCar = car;
+                secondFitness = car.fitness;
             }
         }
 
@@ -220,6 +219,6 @@ public class GeneticTrackTrainingManager : TrainingManager
 
     public override void CalculateFitness(CarIndividual individual)
     {
-        individual.fitness = (6F * (float)Math.Exp(3F * (individual.stats.averageThrottle - 1F)) * (0.2F * individual.stats.distance)) * Time.deltaTime;
+        individual.fitness = (6F * (float)Math.Exp(2F * (individual.stats.averageThrottle - 1F)) * (0.5F * individual.stats.distance)) * Time.deltaTime;
     }
 }

@@ -36,7 +36,7 @@ public static class TMath
     /// <summary>
     ///   Return: the arctan value given the 2 catetis
     /// </summary>
-    public static float ArctanCatetis(float x, float y)
+    public static float Arctan4(float x, float y)
     {
         if (x >= 0)
         {
