@@ -50,11 +50,11 @@ Each layer vector is calculated with a multiplication between a row vector and a
     <img src="Assets/Equations/vkelem.png"/>
 </p> 
 
-Now with *u* as the output vector, the propagation equation can be written as a sequential multiplication up to *k - 1*    
+Now with *u* as the output vector, the propagation equation can be written as a sequential multiplication up to *n - 1*    
 since *k = 0 . . . n* with *n* the number of the layers in the Net, with the vector at *k = 0* being the input vector and the vector at *k = n* being the output vector:     
 
 <p align="center">
-    <img src="Assets/Equations/output.png"/>
+    <img src="Assets/Equations/outputv.png"/>
 </p> 
       
 
