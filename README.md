@@ -27,51 +27,46 @@ The activation function of a node defines the output of that node given an input
 Basically it means that the output of each neuron is the Activation Function calculated in the input value. In this project the Activation Function is identified by the Hyperbolic Tangent:        
 
 <p align="center">
-    <img src="Assets/tanh.png"/>
+    <img src="Assets/Equations/tanh.png"/>
 </p>
 
-because of the following convenient property, it is assured that the output of each neuron, and so each output of the Net, is going to be bounded between -1 and 1    
+because of the following convenient property, it is assured that the output of each neuron, and so each element of the output vector of the Net, is going to be bounded between -1 and 1    
 
 <p align="center">
-    <img src="Assets/tanhlim.png"/>
+    <img src="Assets/Equations/tanhlim.png"/>
+</p>      
+      
+         
+### Basic Neural Net mathematics       
+In the following paragraph, the standard processing method of a Neural Network will be explained.     
+With *k* as the Net layer number, *v* as a generic *k-esim* vector and *W* as the *k-esim* weights matrix, the generic propagation equation takes the following recursive form:      
+<p align="center">
+    <img src="Assets/Equations/vk.png"/>
 </p>      
 
-### Basic Neural Net mathematics       
+Each layer vector is calculated with a multiplication between a row vector and a matrix, the vector element is calculated as follows:    
 
+<p align="center">
+    <img src="Assets/Equations/vkelem.png"/>
+</p> 
 
+Now with *u* as the output vector, the propagation equation can be written as a sequential multiplication up to *k - 1*    
+since *k = 0 . . . n* with *n* the number of the layers in the Net, with the vector at *k = 0* being the input vector and the vector at *k = n* being the output vector:     
 
+<p align="center">
+    <img src="Assets/Equations/output.png"/>
+</p> 
+      
 
+## Genetic Algorithm *(GA)*
 
-        
-**Neural Net class snippets**    
-    
-Let us have a look at how the processing of the Net is performed and how the inputs "flow" through the Net.    
-Considering implemented the following function handling the multiplication of a vector with a matrix and returning the result vector:
-```C#
-private float[] ActivationVector_Matrix(float[] vector, float[][] matrix, int vectorLength, int matrixColumns)
-```
-The processing function consequently takes the following form:
-```C#
-    public float[] Process(float[] inputs)
-    {
-        //Calculate the fist activation vector I_H0
-        float[] firstLayer = ActivationVector_Matrix(inputs, dna.weights.i_h0Weights, dna.topology.inputCount, dna.topology.neuronsPerHiddenLayer);
+A genetic algorithm is a metaheuristic inspired by the process of natural selection. GAs are commonly used to generate high-quality solutions to optimization and search problems by relying on biologically inspired operators.    
+The GA is based on three main steps:      
 
-        //Calculate the second activation vector H0_H1
-        float[] current = ActivationVector_Matrix(firstLayer, dna.weights.intraNetWeights[0], dna.topology.neuronsPerHiddenLayer, dna.topology.neuronsPerHiddenLayer);
+**1) Selection**     
+**2) Crossover**     
+**3) Mutation**    
 
-        //Iterate through all of the remaining NeuralNet hidden layers Hi-1_Hi
-        for (int i = 1; i < dna.topology.hiddenLayerCount - 1; i++)
-        {
-            current = ActivationVector_Matrix(current, dna.weights.intraNetWeights[i], dna.topology.neuronsPerHiddenLayer, dna.topology.neuronsPerHiddenLayer);
-        }
-
-        //Calculate the output vector Hn_O
-        float[] output = ActivationVector_Matrix(current, dna.weights.hn_oWeights, dna.topology.neuronsPerHiddenLayer, dna.topology.outputCount);
-
-        return output;
-    }
-```
 ## Future updates      
 
 
