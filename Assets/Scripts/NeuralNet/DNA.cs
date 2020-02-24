@@ -108,6 +108,9 @@ public class DNA
         this.weights = new DnaWeights(this.topology, weights.i_h0Weights, weights.intraNetWeights, weights.hn_oWeights);
     }
 
+    /// <summary>
+    /// Each element of each weights matrix will mutate with a mutationRate probability
+    /// </summary>
     public void Mutate(float mutationRate)
     {
         for (int i = 0; i < topology.inputCount; i++)
@@ -148,7 +151,12 @@ public class DNA
         }
     }
 
-    public DNA Crossover(DNA partnerDna)
+    /// <summary>
+    /// Implements the actual mixing of the DNA of two individuals. The equality parameters determines how much the partner individual impacts the child DNA.
+    /// <para>E.g setting the equality to 3 means that the partner is going to be responsible for 1 piece of DNA each 3, so its 1/3 responsible for trasmitting the DNA</para>
+    /// <para>Return: the crossovered DNA</para>
+    /// </summary>
+    public DNA Crossover(DNA partnerDna, int equality)
     {
         DNA childDna = new DNA(this.topology, this.weights);
 
@@ -156,7 +164,7 @@ public class DNA
         {
             for (int j = 0; j < topology.neuronsPerHiddenLayer; j++)
             {
-                if ((i + j) % 3 == 0)
+                if ((i + j) % equality == 0)
                 {
                     childDna.weights.i_h0Weights[i][j] = partnerDna.weights.i_h0Weights[i][j];
                 }
@@ -169,7 +177,7 @@ public class DNA
             {
                 for (int k = 0; k < topology.neuronsPerHiddenLayer; k++)
                 {
-                    if ((j + k) % 3 == 0)
+                    if ((j + k) % equality == 0)
                     {
                         childDna.weights.intraNetWeights[i][j][k] = partnerDna.weights.intraNetWeights[i][j][k];
                     }
@@ -181,7 +189,7 @@ public class DNA
         {
             for (int j = 0; j < topology.outputCount; j++)
             {
-                if ((i + j) % 3 == 0)
+                if ((i + j) % equality == 0)
                 {
                     childDna.weights.hn_oWeights[i][j] = partnerDna.weights.hn_oWeights[i][j];
                 }

@@ -62,6 +62,7 @@ public class CarIndividual : MonoBehaviour
     private bool netInitialized = false;
     private float angleStride;
     private Vector3 lastPosition;
+    private Rigidbody rigidbody;
 
     [HideInInspector] public NeuralNet neuralNet;
     [HideInInspector]
@@ -73,6 +74,7 @@ public class CarIndividual : MonoBehaviour
     private void Start()
     {
         lastPosition = transform.position;
+        rigidbody = GetComponent<Rigidbody>();
 
         foreach (Wheel w in wheels)
         {
@@ -174,15 +176,10 @@ public class CarIndividual : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag.Equals("TrackCheckpoint"))
+        if (other.tag.Equals("TrackCheckpoint") && manager != null)
         {
             StopSimulating(throttle > 0);
         }
-    }
-
-    private void UpdateFitness()
-    {
-        fitness = (6F * (float)Math.Exp(3F * (stats.averageThrottle - 1F)) * (0.2F * stats.distance)) * Time.deltaTime;
     }
 
     private void UpdateStats()
@@ -199,10 +196,13 @@ public class CarIndividual : MonoBehaviour
     public void StopSimulating(bool sendStats)
     {
         if (endedSimulation) return;
-
         endedSimulation = true;
         throttle = 0;
         steering = 0;
+        if (rigidbody != null)
+        {
+            rigidbody.velocity = Vector3.zero;
+        }
         manager?.HasEndedSimulation(sendStats ? this : null);
     }
 }
