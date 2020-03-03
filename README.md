@@ -105,4 +105,4 @@ The next goal is trying to **include non complete adjacent layers graphs** in th
 ## References Source code
 *[NeuralNet.cs](/Assets/Scripts/NeuralNet/NeuralNet.cs)*    
 *[DNA.cs](/Assets/Scripts/NeuralNet/DNA.cs)*     
-*[GeneticTrackTrainingManager.cs](/Assets/Scripts/Managers/GeneticTrackTrainingManager.cs)*
+*[TrainingManager.cs](/Assets/Scripts/Managers/TrainingManager.cs)*
