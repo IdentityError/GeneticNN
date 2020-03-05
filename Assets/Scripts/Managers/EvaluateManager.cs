@@ -16,10 +16,10 @@ public class EvaluateManager : Manager
         StartSimulation();
 
         fitnessTxt.text = "Fitness: " + fittestData.GetFitness();
-        topologyTxt.text = "<b>Topology</b>\nInput count: " + fittestData.GetDNA().topology.inputCount +
+        topologyTxt.text = "<b>Topology</b>\nInput count: " + DNA.INPUT_COUNT +
                             "\nHidden layers: " + fittestData.GetDNA().topology.hiddenLayerCount +
                             "\nNeurons per hidden layer: " + fittestData.GetDNA().topology.neuronsPerHiddenLayer +
-                            "\nOutput count: " + fittestData.GetDNA().topology.outputCount;
+                            "\nOutput count: " + DNA.OUTPUT_COUNT;
     }
 
     private void Update()

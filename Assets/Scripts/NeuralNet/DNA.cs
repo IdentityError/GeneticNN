@@ -3,18 +3,17 @@
 [System.Serializable]
 public class DNA
 {
+    public const int INPUT_COUNT = 5;
+    public const int OUTPUT_COUNT = 2;
+
     [System.Serializable]
     public struct DnaTopology
     {
-        public int inputCount;
-        public int outputCount;
         public int hiddenLayerCount;
         public int neuronsPerHiddenLayer;
 
-        public DnaTopology(int inputCount, int outputCount, int hiddenLayerCount, int neuronsPerHiddenLayer)
+        public DnaTopology(int hiddenLayerCount, int neuronsPerHiddenLayer)
         {
-            this.inputCount = inputCount;
-            this.outputCount = outputCount;
             this.hiddenLayerCount = hiddenLayerCount;
             this.neuronsPerHiddenLayer = neuronsPerHiddenLayer;
         }
@@ -30,8 +29,8 @@ public class DNA
         public DnaWeights(DnaTopology topology, float[][] i_h0Weights, float[][][] intraNetWeights, float[][] hn_oWeights)
         {
             //Weights matrix for the first layer I_H0
-            this.i_h0Weights = new float[topology.inputCount][];
-            for (int i = 0; i < topology.inputCount; i++)
+            this.i_h0Weights = new float[INPUT_COUNT][];
+            for (int i = 0; i < INPUT_COUNT; i++)
             {
                 this.i_h0Weights[i] = new float[topology.neuronsPerHiddenLayer];
                 for (int j = 0; j < topology.neuronsPerHiddenLayer; j++)
@@ -73,8 +72,8 @@ public class DNA
             this.hn_oWeights = new float[topology.neuronsPerHiddenLayer][];
             for (int i = 0; i < topology.neuronsPerHiddenLayer; i++)
             {
-                this.hn_oWeights[i] = new float[topology.outputCount];
-                for (int j = 0; j < topology.outputCount; j++)
+                this.hn_oWeights[i] = new float[OUTPUT_COUNT];
+                for (int j = 0; j < OUTPUT_COUNT; j++)
                 {
                     if (hn_oWeights == null)
                     {
@@ -94,26 +93,29 @@ public class DNA
     public DnaWeights weights;
 
     /// <summary>
-    ///  Initialize a DNA with a random set of weights
+    ///  Initialize a DNA with a certain topology and a random set of weights
     ///</summary>
     public DNA(DnaTopology topology)
     {
-        this.topology = new DnaTopology(topology.inputCount, topology.outputCount, topology.hiddenLayerCount, topology.neuronsPerHiddenLayer);
+        this.topology = new DnaTopology(topology.hiddenLayerCount, topology.neuronsPerHiddenLayer);
         this.weights = new DnaWeights(this.topology, null, null, null);
     }
 
+    /// <summary>
+    ///   Initialize a well specified DNA
+    /// </summary>
     public DNA(DnaTopology topology, DnaWeights weights)
     {
-        this.topology = new DnaTopology(topology.inputCount, topology.outputCount, topology.hiddenLayerCount, topology.neuronsPerHiddenLayer);
+        this.topology = new DnaTopology(topology.hiddenLayerCount, topology.neuronsPerHiddenLayer);
         this.weights = new DnaWeights(this.topology, weights.i_h0Weights, weights.intraNetWeights, weights.hn_oWeights);
     }
 
     /// <summary>
-    /// Each element of each weights matrix will mutate with a mutationRate probability
+    ///   Each element of each weights matrix will mutate with a mutationRate probability
     /// </summary>
     public void Mutate(float mutationRate)
     {
-        for (int i = 0; i < topology.inputCount; i++)
+        for (int i = 0; i < INPUT_COUNT; i++)
         {
             for (int j = 0; j < topology.neuronsPerHiddenLayer; j++)
             {
@@ -141,7 +143,7 @@ public class DNA
 
         for (int i = 0; i < topology.neuronsPerHiddenLayer; i++)
         {
-            for (int j = 0; j < topology.outputCount; j++)
+            for (int j = 0; j < OUTPUT_COUNT; j++)
             {
                 if (Random.Range(0F, 1F) < mutationRate)
                 {
@@ -152,15 +154,19 @@ public class DNA
     }
 
     /// <summary>
-    /// Implements the actual mixing of the DNA of two individuals. The equality parameters determines how much the partner individual impacts the child DNA.
-    /// <para>E.g setting the equality to 3 means that the partner is going to be responsible for 1 piece of DNA each 3, so its 1/3 responsible for trasmitting the DNA</para>
-    /// <para>Return: the crossovered DNA</para>
+    ///   Implements the actual mixing of the DNA of two individuals. The equality parameters
+    ///   determines how the DNA of the child is built from the the parents DNA
+    ///   <para>
+    ///     E.g setting the equality to 3 means that the partner is going to be responsible for 1
+    ///     piece of DNA each 3, so its 1/3 responsible for trasmitting the DNA
+    ///   </para>
+    ///   <para> Return: the crossovered DNA </para>
     /// </summary>
     public DNA Crossover(DNA partnerDna, int equality)
     {
         DNA childDna = new DNA(this.topology, this.weights);
 
-        for (int i = 0; i < topology.inputCount; i++)
+        for (int i = 0; i < INPUT_COUNT; i++)
         {
             for (int j = 0; j < topology.neuronsPerHiddenLayer; j++)
             {
@@ -187,7 +193,7 @@ public class DNA
 
         for (int i = 0; i < topology.neuronsPerHiddenLayer; i++)
         {
-            for (int j = 0; j < topology.outputCount; j++)
+            for (int j = 0; j < OUTPUT_COUNT; j++)
             {
                 if ((i + j) % equality == 0)
                 {

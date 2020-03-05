@@ -38,7 +38,7 @@ public class CarIndividual : MonoBehaviour
     public float steeringPower;
 
     [Header("Neural Net")]
-    public DNA.DnaTopology topology;
+    public DNA.DnaTopology predefinedTopology;
 
     [Header("Senses")]
     [Tooltip("Length of the raycasted senses")]
@@ -86,10 +86,10 @@ public class CarIndividual : MonoBehaviour
     public void InitializeNeuralNet(DNA dna)
     {
         neuralNet = new NeuralNet(dna);
-        directionsCount = neuralNet.dna.topology.inputCount - 1;
+        directionsCount = DNA.INPUT_COUNT - 1;
         sensesDirections = new Vector3[directionsCount];
-        neuralNetInput = new float[neuralNet.dna.topology.inputCount];
-        angleStride = (180F / (directionsCount + 1));
+        neuralNetInput = new float[DNA.INPUT_COUNT];
+        angleStride = 180F / (directionsCount + 1);
         netInitialized = true;
     }
 
@@ -107,8 +107,8 @@ public class CarIndividual : MonoBehaviour
 
     private void ManageWheels()
     {
-        steering = neuralNetOutput[0];//Input.GetAxis("Horizontal"); //TODO NN
-        throttle = neuralNetOutput[1];//Input.GetAxis("Vertical");
+        steering = neuralNetOutput[0];  //Input.GetAxis("Horizontal");
+        throttle = neuralNetOutput[1];  //Input.GetAxis("Vertical");
 
         if (steering > 0)
         {
@@ -155,7 +155,7 @@ public class CarIndividual : MonoBehaviour
             {
                 float inversedNormalizedDistance = (hits[i].distance / length);
                 neuralNetInput[i] = inversedNormalizedDistance;
-                Debug.DrawRay(transform.position, hits[i].point - transform.position, Color.cyan);
+                Debug.DrawRay(transform.position, hits[i].point - transform.position, Color.green);
             }
             else
             {
@@ -163,7 +163,7 @@ public class CarIndividual : MonoBehaviour
                 Debug.DrawRay(transform.position, sensesDirections[i] * length, Color.cyan);
             }
         }
-        neuralNetInput[neuralNet.dna.topology.inputCount - 1] = throttle;
+        neuralNetInput[DNA.INPUT_COUNT - 1] = throttle;
     }
 
     private void OnCollisionEnter(Collision collision)

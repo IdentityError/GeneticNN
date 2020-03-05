@@ -1,10 +1,11 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
-using System;
 
 public class TrainingManager : Manager
 {
     public enum TrainingAmbient { TRACK, OPEN_AREA }
+
     [Header("Training")]
     public TrainingAmbient ambient;
     public int populationNumber;
@@ -25,9 +26,13 @@ public class TrainingManager : Manager
     protected float currentGenerationMaxFitness = 0F;
     protected float maxFitness = 0F;
 
+    private UINetBuilder uiBuilder;
+    private DNA.DnaTopology simulationTopology;
+
     protected void Start()
     {
         population = new CarIndividual[populationNumber];
+        uiBuilder = FindObjectOfType<UINetBuilder>();
         SaveObject saveObj = SaveManager.GetInstance().LoadPersistentData(SaveManager.FITTEST_DATA);
         if (saveObj != null)
         {
@@ -36,18 +41,23 @@ public class TrainingManager : Manager
             if (trainFittest)
             {
                 StartNewSimulation(CreatePopulationFromSeedDNA(seedData.GetDNA()));
+                simulationTopology = seedData.GetDNA().topology;
+                uiBuilder.DraweNetUI(seedData.GetDNA().topology);
             }
             else
             {
+                simulationTopology = carIndividualPrefab.GetComponent<CarIndividual>().predefinedTopology;
                 StartNewSimulation(null);
             }
         }
         else
         {
+            simulationTopology = carIndividualPrefab.GetComponent<CarIndividual>().predefinedTopology;
             Debug.Log("Unable to load fittest, starting clear simulation");
             savedMaxFitnessTxt.text = "0";
             StartNewSimulation(null);
         }
+        uiBuilder.DraweNetUI(simulationTopology);
     }
 
     protected void Update()
@@ -67,16 +77,17 @@ public class TrainingManager : Manager
                 currentGenerationMaxFitness = car.fitness;
             }
         }
-        currentMaxFitnessTxt.text = "Current generation max fitness: " + currentGenerationMaxFitness;
+        currentMaxFitnessTxt.text = "Current generation max <i>raw</i> fitness: " + currentGenerationMaxFitness;
     }
 
     public void CalculateFitness(CarIndividual individual)
     {
-        switch(ambient)
+        switch (ambient)
         {
             case TrainingAmbient.TRACK:
                 individual.fitness = 6F * (float)Math.Exp(1.5F * (individual.stats.averageThrottle - 1F)) * (1F * individual.stats.distance) * Time.deltaTime;
                 break;
+
             case TrainingAmbient.OPEN_AREA:
                 individual.fitness = 6F * 2F * individual.stats.time * (1F * individual.stats.distance) * Time.deltaTime;
                 break;
@@ -143,6 +154,8 @@ public class TrainingManager : Manager
 
         currentAlive = populationNumber;
         generationCount++;
+
+        generationTxt.text = generationCount + "° generation";
 
         for (int i = 0; i < populationNumber; i++)
         {
@@ -249,5 +262,4 @@ public class TrainingManager : Manager
         }
         return newPopulation;
     }
-
 }

@@ -19,7 +19,7 @@ public class Manager : MonoBehaviour
         DNA individualDna;
         if (dna == null)
         {
-            individualDna = new DNA(car.topology);
+            individualDna = new DNA(car.predefinedTopology);
         }
         else
         {

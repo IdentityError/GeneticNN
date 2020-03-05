@@ -35,7 +35,7 @@
     public float[] Process(float[] inputs)
     {
         //Calculate the fist activation vector I_H0
-        float[] firstLayer = ActivationVector_Matrix(inputs, dna.weights.i_h0Weights, dna.topology.inputCount, dna.topology.neuronsPerHiddenLayer);
+        float[] firstLayer = ActivationVector_Matrix(inputs, dna.weights.i_h0Weights, DNA.INPUT_COUNT, dna.topology.neuronsPerHiddenLayer);
 
         //Calculate the second activation vector H0_H1
         float[] current = ActivationVector_Matrix(firstLayer, dna.weights.intraNetWeights[0], dna.topology.neuronsPerHiddenLayer, dna.topology.neuronsPerHiddenLayer);
@@ -47,7 +47,7 @@
         }
 
         //Calculate the output vector Hn_O
-        float[] output = ActivationVector_Matrix(current, dna.weights.hn_oWeights, dna.topology.neuronsPerHiddenLayer, dna.topology.outputCount);
+        float[] output = ActivationVector_Matrix(current, dna.weights.hn_oWeights, dna.topology.neuronsPerHiddenLayer, DNA.OUTPUT_COUNT);
 
         return output;
     }
