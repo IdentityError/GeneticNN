@@ -45,18 +45,6 @@ public class UINetBuilder : MonoBehaviour
         return currentNeuron;
     }
 
-    private void DrawWeightUI(Image neuronA, Image neuronB)
-    {
-        Image linkRef = Instantiate(linkImage);
-        linkRef.transform.SetParent(transform);
-        Vector3 differenceVector = neuronB.rectTransform.position - neuronA.rectTransform.position;
-        linkRef.rectTransform.sizeDelta = new Vector2(differenceVector.magnitude, 1.25F);
-        linkRef.rectTransform.pivot = new Vector2(0, 0.5f);
-        linkRef.rectTransform.position = neuronA.rectTransform.position;
-        float angle = Mathf.Atan2(differenceVector.y, differenceVector.x) * TMath.RadToDeg;
-        linkRef.rectTransform.localRotation = Quaternion.Euler(0, 0, angle);
-    }
-
     private void DrawNeurons(DNA.DnaTopology topology)
     {
         float startX = (rectTransform.rect.width / 2F) - (((topology.hiddenLayerCount + 1) / 2F) * horizontalStride);
@@ -92,7 +80,7 @@ public class UINetBuilder : MonoBehaviour
         {
             for (int j = 0; j < topology.neuronsPerHiddenLayer; j++)
             {
-                DrawWeightUI(inputLayer[i], hiddenLayers[0][j]);
+                TUIUtils.GetInstance().DrawSpriteLine(inputLayer[i].rectTransform.position, hiddenLayers[0][j].rectTransform.position, 1.25F, linkImage, transform);
             }
         }
 
@@ -102,7 +90,7 @@ public class UINetBuilder : MonoBehaviour
             {
                 for (int k = 0; k < topology.neuronsPerHiddenLayer; k++)
                 {
-                    DrawWeightUI(hiddenLayers[i - 1][j], hiddenLayers[i][k]);
+                    TUIUtils.GetInstance().DrawSpriteLine(hiddenLayers[i - 1][j].rectTransform.position, hiddenLayers[i][k].rectTransform.position, 1.25F, linkImage, transform);
                 }
             }
         }
@@ -111,7 +99,7 @@ public class UINetBuilder : MonoBehaviour
         {
             for (int j = 0; j < DNA.OUTPUT_COUNT; j++)
             {
-                DrawWeightUI(hiddenLayers[topology.hiddenLayerCount - 1][i], outputLayer[j]);
+                TUIUtils.GetInstance().DrawSpriteLine(hiddenLayers[topology.hiddenLayerCount - 1][i].rectTransform.position, outputLayer[j].rectTransform.position, 1.25F, linkImage, transform);
             }
         }
     }
