@@ -1,26 +1,27 @@
 ﻿using System;
 using System.Collections;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TUIUtils
+public class TUtilsUI
 {
-    private static TUIUtils instance = null;
+    private static TUtilsUI instance = null;
 
     /// <summary>
     ///   Returns: the SharedUtilities singleton instance
     /// </summary>
-    public static TUIUtils GetInstance()
+    public static TUtilsUI GetInstance()
     {
         if (instance == null)
         {
-            instance = new TUIUtils();
+            instance = new TUtilsUI();
         }
 
         return instance;
     }
 
-    private TUIUtils()
+    private TUtilsUI()
     {
     }
 
@@ -58,14 +59,14 @@ public class TUIUtils
     ///   </para>
     ///   Returns: the IEnumerator's reference
     /// </summary>
-    public IEnumerator FillImage<T>(MonoBehaviour context, Image image, float duration, Action<T> funcToCall, T funcParameters)
+    public IEnumerator FillImage<T>(MonoBehaviour context, Image image, float duration, Action<T> funcToCall, T funcParameter)
     {
-        IEnumerator coroutine = FillImage_C<T>(image, duration, funcToCall, funcParameters);
+        IEnumerator coroutine = FillImage_C<T>(image, duration, funcToCall, funcParameter);
         context.StartCoroutine(coroutine);
         return coroutine;
     }
 
-    private IEnumerator FillImage_C<T>(Image image, float duration, Action<T> funcToCall, T funcParameters)
+    private IEnumerator FillImage_C<T>(Image image, float duration, Action<T> funcToCall, T funcParameter)
     {
         image.fillAmount = 0f;
         float stride = Time.fixedDeltaTime / duration;
@@ -77,7 +78,7 @@ public class TUIUtils
         image.fillAmount = 1f;
         if (funcToCall != null)
         {
-            funcToCall(funcParameters);
+            funcToCall(funcParameter);
         }
     }
 
@@ -115,14 +116,14 @@ public class TUIUtils
     ///   </para>
     ///   Returns: the IEnumerator's reference
     /// </summary>
-    public IEnumerator UnfillImage<T>(MonoBehaviour context, Image image, float duration, Action<T> funcToCall, T funcParameters)
+    public IEnumerator UnfillImage<T>(MonoBehaviour context, Image image, float duration, Action<T> funcToCall, T funcParameter)
     {
-        IEnumerator coroutine = UnfillImage_C<T>(image, duration, funcToCall, funcParameters);
+        IEnumerator coroutine = UnfillImage_C<T>(image, duration, funcToCall, funcParameter);
         context.StartCoroutine(coroutine);
         return coroutine;
     }
 
-    private IEnumerator UnfillImage_C<T>(Image image, float duration, Action<T> funcToCall, T funcParameters)
+    private IEnumerator UnfillImage_C<T>(Image image, float duration, Action<T> funcToCall, T funcParameter)
     {
         image.fillAmount = 1f;
         float stride = Time.fixedDeltaTime / duration;
@@ -134,7 +135,7 @@ public class TUIUtils
         image.fillAmount = 0f;
         if (funcToCall != null)
         {
-            funcToCall(funcParameters);
+            funcToCall(funcParameter);
         }
     }
 
@@ -184,5 +185,30 @@ public class TUIUtils
         linkRef.rectTransform.position = from;
         float angle = Mathf.Atan2(differenceVector.y, differenceVector.x) * Mathf.Rad2Deg;
         linkRef.rectTransform.localRotation = Quaternion.Euler(0, 0, angle);
+    }
+
+    /// <summary>
+    ///   Return: formatted string "h:m:s" calculated from seconds
+    /// </summary>
+    public string GetTimeStringFromSeconds(float _seconds)
+    {
+        int hours = 0;
+        int minutes = 0;
+        while (_seconds / 3600 >= 1)
+        {
+            hours++;
+            _seconds -= 3600;
+        }
+        while (_seconds / 60 >= 1)
+        {
+            minutes++;
+            _seconds -= 60;
+        }
+        return new StringBuilder().Append(hours.ToString())
+                                  .Append("h : ")
+                                  .Append(minutes.ToString())
+                                  .Append("m : ")
+                                  .Append(_seconds.ToString("0.0"))
+                                  .Append("s").ToString();
     }
 }

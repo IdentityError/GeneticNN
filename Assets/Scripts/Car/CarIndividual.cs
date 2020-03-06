@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CarIndividual : MonoBehaviour
 {
@@ -160,7 +159,7 @@ public class CarIndividual : MonoBehaviour
             else
             {
                 neuralNetInput[i] = 1F;
-                Debug.DrawRay(transform.position, sensesDirections[i] * length, Color.cyan);
+                Debug.DrawRay(transform.position, sensesDirections[i] * length, Color.blue);
             }
         }
         neuralNetInput[DNA.INPUT_COUNT - 1] = throttle;

@@ -2,17 +2,17 @@
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 
-public class SaveManager
+public class TSaveManager
 {
-    private static SaveManager instance = null;
+    private static TSaveManager instance = null;
 
     /// <summary>
     ///   Returns: the SaveManager singleton instance
     /// </summary>
-    public static SaveManager GetInstance()
+    public static TSaveManager GetInstance()
     {
         if (instance == null)
-            instance = new SaveManager();
+            instance = new TSaveManager();
         return instance;
     }
 

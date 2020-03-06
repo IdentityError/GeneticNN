@@ -1,28 +1,26 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
-public class SharedUtilities
+public class TUtilsProvider
 {
-    private static SharedUtilities instance = null;
+    private static TUtilsProvider instance = null;
 
     /// <summary>
     ///   Returns: the SharedUtilities singleton instance
     /// </summary>
-    public static SharedUtilities GetInstance()
+    public static TUtilsProvider GetInstance()
     {
         if (instance == null)
         {
-            instance = new SharedUtilities();
+            instance = new TUtilsProvider();
         }
 
         return instance;
     }
 
-    private SharedUtilities()
+    private TUtilsProvider()
     {
     }
 
@@ -42,44 +40,49 @@ public class SharedUtilities
     }
 
     /// <summary>
-    ///   <para> Type: UTILS </para>
-    ///   Returns: first matching Type component in children with tag
+    ///   Returns: first matching Type component in a child that has the specified tag
     /// </summary>
-    public Type GetFirstComponentInChildrenWithTag<Type>(GameObject parent, string tag)
+    public Type GetFirstComponentInChildrenWithTag<Type>(GameObject parent, string tag, bool inactive)
     {
-        Transform[] transforms = parent.GetComponentsInChildren<Transform>(true);
+        Transform[] transforms = parent.GetComponentsInChildren<Transform>(inactive);
         for (int i = 1; i < transforms.Length; i++)
         {
             if (transforms[i].tag == tag)
             {
-                return transforms[i].gameObject.GetComponent<Type>();
+                Type component = transforms[i].gameObject.GetComponent<Type>();
+                if (component != null)
+                {
+                    return component;
+                }
             }
         }
         return default(Type);
     }
 
     /// <summary>
-    ///   <para> Type: UTILS </para>
-    ///   Returns: first matching Type component in parent with tag
+    ///   Returns: first matching Type component in a parent that has the specified tag
     /// </summary>
-    public Type GetFirstComponentInParentWithTag<Type>(GameObject parent, string tag)
+    public Type GetFirstComponentInParentsWithTag<Type>(GameObject parent, string tag, bool inactive)
     {
-        Transform[] transforms = parent.GetComponentsInParent<Transform>(true);
+        Transform[] transforms = parent.GetComponentsInParent<Transform>(inactive);
         for (int i = 1; i < transforms.Length; i++)
         {
             if (transforms[i].tag == tag)
             {
-                return transforms[i].gameObject.GetComponent<Type>();
+                Type component = transforms[i].gameObject.GetComponent<Type>();
+                if (component != null)
+                {
+                    return component;
+                }
             }
         }
         return default(Type);
     }
 
     /// <summary>
-    ///   <para> Type: UTILS </para>
-    ///   Returns: first child GameObject with a matching Type component
+    ///   Returns: first child GameObject that has a matching type component
     /// </summary>
-    public GameObject GetFirstChildrenWithComponent<Type>(GameObject parent)
+    public GameObject GetFirstChildWithComponent<Type>(GameObject parent)
     {
         Type parentComponent = parent.GetComponent<Type>(), childComponent;
         foreach (Transform transform in parent.transform)
@@ -94,13 +97,12 @@ public class SharedUtilities
     }
 
     /// <summary>
-    ///   <para> Type: UTILS </para>
     ///   Returns: list of all children GameObjects with the specified tag, parent excluded
     /// </summary>
-    public List<GameObject> GetGameObjectsInChildrenWithTag(GameObject parent, string tag)
+    public List<GameObject> GetGameObjectsInChildrenWithTag(GameObject parent, string tag, bool inactive)
     {
         List<GameObject> objs = new List<GameObject>();
-        Transform[] transforms = parent.GetComponentsInChildren<Transform>(true);
+        Transform[] transforms = parent.GetComponentsInChildren<Transform>(inactive);
         for (int i = 1; i < transforms.Length; i++)
         {
             if (transforms[i].tag == tag)
@@ -112,8 +114,24 @@ public class SharedUtilities
     }
 
     /// <summary>
-    ///   <para> Type: UTILS </para>
-    ///   Toggle the visibility of a GameObject and all of his childrens
+    ///   Returns: list of all parents GameObjects with the specified tag
+    /// </summary>
+    public List<GameObject> GetGameObjectsInParentsWithTag(GameObject parent, string tag, bool inactive)
+    {
+        List<GameObject> objs = new List<GameObject>();
+        Transform[] transforms = parent.GetComponentsInParent<Transform>(inactive);
+        for (int i = 0; i < transforms.Length; i++)
+        {
+            if (transforms[i].tag == tag)
+            {
+                objs.Add(transforms[i].gameObject);
+            }
+        }
+        return objs;
+    }
+
+    /// <summary>
+    ///   Toggle the visibility of a GameObject and all of his children
     /// </summary>
     public void MakeGameObjectVisible(GameObject obj, bool state)
     {
@@ -129,28 +147,5 @@ public class SharedUtilities
                 renderer.enabled = state;
             }
         }
-    }
-
-    /// <summary>
-    ///   <para> Type: UTILS </para>
-    ///   Return: formatted string H:M:S calculated from seconds passed
-    /// </summary>
-    public string GetTimeStringFromSeconds(float _seconds)
-    {
-        int hours = 0;
-        int minutes = 0;
-        float seconds = 0;
-        while (_seconds / 3600 >= 1)
-        {
-            hours++;
-            _seconds -= 3600;
-        }
-        while (_seconds / 60 >= 1)
-        {
-            minutes++;
-            _seconds -= 60;
-        }
-        seconds = _seconds;
-        return hours.ToString() + "h " + minutes.ToString() + "m " + seconds.ToString("0.0") + "s";
     }
 }

@@ -33,7 +33,7 @@ public class TrainingManager : Manager
     {
         population = new CarIndividual[populationNumber];
         uiBuilder = FindObjectOfType<UINetBuilder>();
-        SaveObject saveObj = SaveManager.GetInstance().LoadPersistentData(SaveManager.FITTEST_DATA);
+        SaveObject saveObj = TSaveManager.GetInstance().LoadPersistentData(TSaveManager.FITTEST_DATA);
         if (saveObj != null)
         {
             CarIndividualData seedData = saveObj.GetData<CarIndividualData>();
@@ -104,20 +104,20 @@ public class TrainingManager : Manager
 
             if (saveFittest)
             {
-                SaveObject saveObj = SaveManager.GetInstance().LoadPersistentData(SaveManager.FITTEST_DATA);
+                SaveObject saveObj = TSaveManager.GetInstance().LoadPersistentData(TSaveManager.FITTEST_DATA);
                 if (saveObj != null)
                 {
                     CarIndividualData currentFittest = saveObj.GetData<CarIndividualData>();
                     if (currentFittest.GetFitness() < individual.fitness)
                     {
-                        SaveManager.GetInstance().SavePersistentData<CarIndividualData>(new CarIndividualData(individual.neuralNet.dna, individual.fitness), SaveManager.FITTEST_DATA);
+                        TSaveManager.GetInstance().SavePersistentData<CarIndividualData>(new CarIndividualData(individual.neuralNet.dna, individual.fitness), TSaveManager.FITTEST_DATA);
                         Debug.Log("Overridden the fittest data, fitness: " + individual.fitness);
                         savedMaxFitnessTxt.text = "Saved max fitness: " + individual.fitness;
                     }
                 }
                 else
                 {
-                    SaveManager.GetInstance().SavePersistentData<CarIndividualData>(new CarIndividualData(individual.neuralNet.dna, individual.fitness), SaveManager.FITTEST_DATA);
+                    TSaveManager.GetInstance().SavePersistentData<CarIndividualData>(new CarIndividualData(individual.neuralNet.dna, individual.fitness), TSaveManager.FITTEST_DATA);
                     Debug.Log("Overridden the fittest data, fitness: " + individual.fitness);
                     savedMaxFitnessTxt.text = "Saved max fitness: " + individual.fitness;
                 }
