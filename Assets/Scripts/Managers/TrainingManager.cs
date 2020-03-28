@@ -8,64 +8,64 @@ public class TrainingManager : Manager
     [Header("Training")]
     public int populationNumber;
     [Range(0F, 1F)]
-    public float mutationRate;
-    public bool saveFittest;
-    public bool trainFittest;
-    [Header("Track")]
-    public GameObject track;
+    [SerializeField] private float mutationRate;
+    [SerializeField] private bool saveFittest;
+    [SerializeField] private bool trainFittest;
 
     protected int generationCount = 0;
     protected CarIndividual[] population = null;
-    private List<CarIndividual> completedTrackIndividuals = new List<CarIndividual>();
+    [SerializeField] private List<CarIndividual> completedTrackIndividuals = new List<CarIndividual>();
     protected int currentAlive;
 
     private DNA.DnaTopology simulationTopology;
 
-    private float currentTrackLength;
-    private GameObject finishLine;
-
-    private UIManager uiManager;
-    private SimulationStats currentBestSimulation = null;
+    private TrackBest currentBestSimulation = new TrackBest();
+    private CarIndividualData chosenOne = null;
 
     protected void Start()
     {
-        uiManager = FindObjectOfType<UIManager>();
-        finishLine = TUtilsProvider.GetInstance().GetFirstGameObjectInChildrenWithTag(track, "FinishLine", false);
         population = new CarIndividual[populationNumber];
 
-        if (trainFittest)
+        SaveObject saveObject = TSaveManager.GetInstance().LoadPersistentData(TSaveManager.TRACKS_STATS);
+        if (saveObject != null)
         {
-            SaveObject saveObj = TSaveManager.GetInstance().LoadPersistentData(TSaveManager.TRACKS_STATS);
-            if (saveObj != null)
+            TracksStats stats = saveObject.GetData<TracksStats>();
+            TrackBest best = stats.Get(track.name);
+            if (best != null)
             {
-                TracksStats stats = saveObj.GetData<TracksStats>();
-                TrackBest best = stats.Get(track.name);
-                if (best != null)
-                {
-                    currentBestSimulation = best.stats;
-                    DNA bestDna = best.individualData.GetDNA();
-                    StartNewSimulation(CreatePopulationFromSeedDNA(bestDna));
-                    simulationTopology = bestDna.topology;
-                    uiManager.DrawNetUI(bestDna.topology);
-                    uiManager.AppendToLog("Retrieved the best on this track, training it...");
-                    uiManager.UpdateSavedBestStats(best);
-                }
-                else
-                {
-                    uiManager.AppendToLog("Unable to find the best on this track, starting a clear training session...");
-                    simulationTopology = carIndividualPrefab.GetComponent<CarIndividual>().predefinedTopology;
-                    StartNewSimulation(null);
-                }
+                currentBestSimulation = best;
+                uiManager.UpdateSavedBestStats(best);
             }
             else
             {
-                uiManager.AppendToLog("Unable to find Track Stats, starting a clear training session...");
+                uiManager.AppendToLog("Unable to find the best stats for this track");
+            }
+        }
+        else
+        {
+            uiManager.AppendToLog("Unable to find Tracks Stats");
+        }
+
+        if (trainFittest)
+        {
+            saveObject = TSaveManager.GetInstance().LoadPersistentData(TSaveManager.CHOSEN_ONE);
+            if (saveObject != null)
+            {
+                chosenOne = saveObject.GetData<CarIndividualData>();
+                DNA bestDna = chosenOne.GetDNA();
+                StartNewSimulation(CreatePopulationFromSeedDNA(bestDna));
+                simulationTopology = bestDna.topology;
+            }
+            else
+            {
+                uiManager.AppendToLog("Unable to find the chosen one, starting a clear training session...");
                 simulationTopology = carIndividualPrefab.GetComponent<CarIndividual>().predefinedTopology;
                 StartNewSimulation(null);
             }
         }
         else
         {
+            uiManager.AppendToLog("Starting a clear training session...");
             simulationTopology = carIndividualPrefab.GetComponent<CarIndividual>().predefinedTopology;
             StartNewSimulation(null);
         }
@@ -73,44 +73,37 @@ public class TrainingManager : Manager
         uiManager.UpdateTrackLength(CalculateTrackLength());
     }
 
-    private float CalculateTrackLength()
-    {
-        float length = 0;
-        foreach (Transform child in track.transform)
-        {
-            if (child.tag.Equals("TrackPart"))
-            {
-                length += child.localScale.z * 30;
-            }
-        }
-        length -= TMath.Abs((finishLine.transform.localPosition - startPoint.localPosition).magnitude);
-        return length;
-    }
-
     protected void Update()
     {
         Time.timeScale = timeScale;
-        if (Input.GetKeyDown(KeyCode.R))
+    }
+
+    public void SaveCurrentBest()
+    {
+        if (completedTrackIndividuals.Count > 0)
         {
-            foreach (CarIndividual car in population)
-            {
-                car.StopSimulating(false);
-            }
+            TSaveManager.GetInstance().SavePersistentData(completedTrackIndividuals[0].GetIndividualData(), TSaveManager.CHOSEN_ONE);
+            uiManager.AppendToLog("Saved a new chosen one: " + completedTrackIndividuals[0].name);
+        }
+        else
+        {
+            uiManager.AppendToLog("No individual has completed the track yet!");
         }
     }
 
     public void CalculateFitness(CarIndividual individual)
     {
-        individual.fitness = 6F * (float)Math.Exp(1.5F * (individual.stats.averageThrottle - 1F)) * (1F * individual.stats.distance) * Time.deltaTime;
+        individual.fitness += (2F * individual.stats.averageThrottle + Vector3.Distance(individual.transform.position, individual.lastPosition)) * Time.deltaTime;
+        //individual.fitness = 6F * (float)Math.Exp(1.5F * (individual.stats.averageThrottle - 1F)) * (2F * individual.stats.distance) * Time.deltaTime;
     }
 
-    public void HasEndedSimulation(CarIndividual individual)
+    public override void HasCompletedSimulation(CarIndividual individual)
     {
         if (individual != null)
         {
-            if (individual.stats.BetterThan(currentBestSimulation))
+            if (individual.stats.BetterThan(currentBestSimulation.stats))
             {
-                currentBestSimulation = individual.stats;
+                currentBestSimulation.stats = individual.stats;
                 TrackBest trackBest = new TrackBest(individual.stats, individual.GetIndividualData());
                 if (saveFittest)
                 {
@@ -137,15 +130,6 @@ public class TrainingManager : Manager
         if (individual != null)
         {
             completedTrackIndividuals.Add(individual);
-        }
-
-        if (currentAlive > 0)
-        {
-            currentAlive--;
-        }
-        if (currentAlive == 0)
-        {
-            EndAndRestartNewSimulation();
         }
     }
 
@@ -183,11 +167,32 @@ public class TrainingManager : Manager
         }
     }
 
-    protected void EndAndRestartNewSimulation()
+    public void EndAndRestartNewSimulation()
     {
+        for (int i = 0; i < populationNumber; i++)
+        {
+            population[i].CompletedTrack(false);
+        }
+
+        completedTrackIndividuals.Clear();
         currentAlive = 0;
         CarIndividual[] newPopulation = CrossoverPopulation();
         StartNewSimulation(newPopulation);
+    }
+
+    private CarIndividual GetFittest()
+    {
+        float maxFitness = 0;
+        CarIndividual best = null;
+        for (int i = 0; i < populationNumber; i++)
+        {
+            if (population[i].fitness > maxFitness)
+            {
+                maxFitness = population[i].fitness;
+                best = population[i];
+            }
+        }
+        return best;
     }
 
     protected CarIndividual[] CrossoverPopulation()
@@ -212,19 +217,6 @@ public class TrainingManager : Manager
     protected CarIndividualData[] PickFittestTwo()
     {
         CarIndividualData[] returnOut = new CarIndividualData[2];
-        int inserted = 0;
-        if (completedTrackIndividuals.Count > 0)
-        {
-            returnOut[0] = new CarIndividualData(completedTrackIndividuals[0].neuralNet.dna, completedTrackIndividuals[0].fitness);
-            inserted = 1;
-        }
-        if (completedTrackIndividuals.Count > 1)
-        {
-            returnOut[1] = new CarIndividualData(completedTrackIndividuals[1].neuralNet.dna, completedTrackIndividuals[1].fitness);
-            uiManager.AppendToLog("Parents selected as the two that completed the track");
-            return returnOut;
-        }
-
         CarIndividual firstCar = null;
         float firstFitness = 0F;
         foreach (CarIndividual car in population)
@@ -235,40 +227,30 @@ public class TrainingManager : Manager
                 firstFitness = car.fitness;
             }
         }
-        if (inserted > 0)
+        float secondFitness = 0F;
+        CarIndividual secondCar = null;
+        foreach (CarIndividual car in population)
         {
-            uiManager.AppendToLog("Parent one completed the track, the second selected as the one with highest fitness");
-            returnOut[1] = new CarIndividualData(firstCar.neuralNet.dna, firstCar.fitness);
-            return returnOut;
-        }
-        else
-        {
-            float secondFitness = 0F;
-            CarIndividual secondCar = null;
-            foreach (CarIndividual car in population)
+            if (car.fitness > secondFitness)
             {
-                if (car.fitness > secondFitness)
+                if (populationNumber > 1)
                 {
-                    if (populationNumber > 1)
-                    {
-                        if (car != firstCar)
-                        {
-                            secondCar = car;
-                            secondFitness = car.fitness;
-                        }
-                    }
-                    else
+                    if (car != firstCar)
                     {
                         secondCar = car;
                         secondFitness = car.fitness;
                     }
                 }
+                else
+                {
+                    secondCar = car;
+                    secondFitness = car.fitness;
+                }
             }
-            uiManager.AppendToLog("No parents completed the track, selected the best two");
-            returnOut[0] = new CarIndividualData(firstCar.neuralNet.dna, firstFitness);
-            returnOut[1] = new CarIndividualData(secondCar.neuralNet.dna, secondFitness);
-            return returnOut;
         }
+        returnOut[0] = new CarIndividualData(firstCar.neuralNet.dna, firstFitness);
+        returnOut[1] = new CarIndividualData(secondCar.neuralNet.dna, secondFitness);
+        return returnOut;
     }
 
     protected void NormalizePopulationBreedingProbabilities()

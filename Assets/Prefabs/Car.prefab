@@ -44,9 +44,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   restLength: 0.4
-  springTravel: 0.15
-  springStiffness: 170000
-  damperStiffness: 4500
+  springTravel: 0.2
+  springStiffness: 160000
+  damperStiffness: 5000
   wheelRadius: 0.4
   type: 3
   steerTime: 6
@@ -99,8 +99,8 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6791551976333570425}
   serializedVersion: 2
-  m_Mass: 1500
-  m_Drag: 4
+  m_Mass: 1800
+  m_Drag: 3.5
   m_AngularDrag: 3
   m_UseGravity: 1
   m_IsKinematic: 0
@@ -127,13 +127,13 @@ MonoBehaviour:
   manualControl: 0
   wheelBase: 2.5
   rearTrack: 1.75
-  turnRadius: 11.5
-  motorPower: 28000
-  steeringPower: 3300
+  turnRadius: 11
+  motorPower: 36500
+  steeringPower: 4500
   predefinedTopology:
-    hiddenLayerCount: 3
-    neuronsPerHiddenLayer: 10
-  length: 8
+    hiddenLayerCount: 5
+    neuronsPerHiddenLayer: 7
+  length: 10
   steering: 0
   throttle: 0
   stats:
@@ -141,6 +141,7 @@ MonoBehaviour:
     time: 0
     distance: 0
     trackID: 
+  lastPosition: {x: 0, y: 0, z: 0}
   manager: {fileID: 0}
   fitness: 0
   breedingProbability: 0
@@ -188,9 +189,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   restLength: 0.4
-  springTravel: 0.15
-  springStiffness: 170000
-  damperStiffness: 4500
+  springTravel: 0.2
+  springStiffness: 160000
+  damperStiffness: 5000
   wheelRadius: 0.4
   type: 2
   steerTime: 6
@@ -242,9 +243,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   restLength: 0.4
-  springTravel: 0.15
-  springStiffness: 170000
-  damperStiffness: 4500
+  springTravel: 0.2
+  springStiffness: 160000
+  damperStiffness: 5000
   wheelRadius: 0.4
   type: 0
   steerTime: 6
@@ -296,9 +297,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   restLength: 0.4
-  springTravel: 0.15
-  springStiffness: 170000
-  damperStiffness: 4500
+  springTravel: 0.2
+  springStiffness: 160000
+  damperStiffness: 5000
   wheelRadius: 0.4
   type: 1
   steerTime: 6

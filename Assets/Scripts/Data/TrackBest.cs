@@ -8,6 +8,12 @@ public class TrackBest
     public SimulationStats stats;
     public CarIndividualData individualData;
 
+    public TrackBest()
+    {
+        stats = null;
+        individualData = null;
+    }
+
     public TrackBest(SimulationStats stats, CarIndividualData individualData)
     {
         this.stats = stats;
@@ -16,6 +22,11 @@ public class TrackBest
 
     public bool BetterThan(TrackBest other)
     {
+        if (other is null)
+        {
+            return true;
+        }
+
         if (stats.trackID != other.stats.trackID)
         {
             return false;

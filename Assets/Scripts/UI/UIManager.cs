@@ -20,14 +20,6 @@ public class UIManager : MonoBehaviour
         scroll = gameObject.GetComponentInChildren<ScrollRect>();
     }
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            ClearLog();
-        }
-    }
-
     public void DrawNetUI(DNA.DnaTopology topology)
     {
         uiNetBuilder?.DrawNetUI(topology);
@@ -35,28 +27,49 @@ public class UIManager : MonoBehaviour
 
     public void UpdateGenerationCount(int count)
     {
-        generationTxt.text = count.ToString() + "° generation";
+        if (generationTxt != null)
+        {
+            generationTxt.text = count.ToString() + "° generation";
+        }
     }
 
     public void UpdateTrackLength(float length)
     {
-        trackLengthText.text = "Stimated average track length: " + length.ToString("0.0");
+        if (trackLengthText != null)
+        {
+            trackLengthText.text = "Stimated average track length: " + length.ToString("0.0");
+        }
     }
 
     public void UpdateSavedBestStats(TrackBest best)
     {
-        savedBestTrackStats.text = "Current track best stats\n\nFitness: " + best.individualData.GetFitness() + "\n" + best.stats.ToString();
+        if (savedBestTrackStats != null)
+        {
+            savedBestTrackStats.text = "Current track best stats\n\nFitness: " + best.individualData.GetFitness() + "\n" + best.stats.ToString();
+        }
     }
 
     public void AppendToLog(string text)
     {
-        logText.text += "- " + text + "\n";
-        scroll.velocity = new Vector2(0f, 200f);
+        if (logText != null)
+        {
+            logText.text += "- " + text + "\n";
+        }
+        if (scroll != null)
+        {
+            scroll.velocity = new Vector2(0f, 200f);
+        }
     }
 
     public void ClearLog()
     {
-        logText.text = "";
-        scroll.velocity = new Vector2(0f, -5000f);
+        if (logText != null)
+        {
+            logText.text = "";
+        }
+        if (scroll != null)
+        {
+            scroll.velocity = new Vector2(0f, -5000f);
+        }
     }
 }

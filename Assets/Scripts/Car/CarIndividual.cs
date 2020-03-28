@@ -41,7 +41,7 @@ public class CarIndividual : MonoBehaviour
     private bool endedSimulation = false;
     private bool netInitialized = false;
     private float angleStride;
-    private Vector3 lastPosition;
+    [HideInInspector] public Vector3 lastPosition;
     private Rigidbody rigidbody;
 
     [HideInInspector] public NeuralNet neuralNet;
@@ -61,7 +61,10 @@ public class CarIndividual : MonoBehaviour
             w.motorPower = this.motorPower;
             w.steeringPower = this.steeringPower;
         }
-        stats.trackID = manager.track.name;
+        if (manager != null)
+        {
+            stats.trackID = manager.track.name;
+        }
     }
 
     public void InitializeNeuralNet(DNA dna)
@@ -84,8 +87,8 @@ public class CarIndividual : MonoBehaviour
                 neuralNetOutput = neuralNet.Process(neuralNetInput);
             }
             ManageWheels();
-            UpdateStats();
             manager?.CalculateFitness(this);
+            UpdateStats();
         }
     }
 
@@ -161,7 +164,7 @@ public class CarIndividual : MonoBehaviour
     {
         if (!endedSimulation)
         {
-            StopSimulating(false);
+            StopSimulation();
         }
     }
 
@@ -169,7 +172,7 @@ public class CarIndividual : MonoBehaviour
     {
         if (other.tag.Equals("FinishLine") && manager != null)
         {
-            StopSimulating(transform.position.z < other.transform.position.z);
+            CompletedTrack(transform.position.z < other.transform.position.z);
         }
     }
 
@@ -184,17 +187,22 @@ public class CarIndividual : MonoBehaviour
         stats.averageThrottle = currentThrottleSum / updateCycles;
     }
 
-    public void StopSimulating(bool sendStats)
+    public void CompletedTrack(bool sendStats)
     {
         if (endedSimulation) return;
         endedSimulation = true;
         throttle = 0;
         steering = 0;
-        if (rigidbody != null)
-        {
-            rigidbody.velocity = Vector3.zero;
-        }
-        manager?.HasEndedSimulation(sendStats ? this : null);
+        manager?.HasCompletedSimulation(sendStats ? this : null);
+    }
+
+    public void StopSimulation()
+    {
+        if (endedSimulation) return;
+        endedSimulation = true;
+        throttle = 0;
+        steering = 0;
+        manager?.HasCompletedSimulation(null);
     }
 
     public CarIndividualData GetIndividualData()

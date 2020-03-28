@@ -103,11 +103,17 @@ public static class TMath
         return Math.Sign(j - i) + Math.Sign(k - j) + Math.Sign(i - k);
     }
 
+    /// <summary>
+    ///   Reutrn: the absolute value of a floating point number
+    /// </summary>
     public static float Abs(float value)
     {
         return value > 0 ? value : -value;
     }
 
+    /// <summary>
+    ///   Reutrn: the absolute value of an int number
+    /// </summary>
     public static int Abs(int value)
     {
         return value > 0 ? value : -value;

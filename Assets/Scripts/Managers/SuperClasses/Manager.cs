@@ -6,6 +6,16 @@ public class Manager : MonoBehaviour
     public Transform startPoint;
     public GameObject carIndividualPrefab;
     public float timeScale = 1F;
+    protected GameObject finishLine;
+    public GameObject track;
+
+    protected UIManager uiManager;
+
+    private void Awake()
+    {
+        uiManager = FindObjectOfType<UIManager>();
+        finishLine = TUtilsProvider.GetInstance().GetFirstGameObjectInChildrenWithTag(track, "FinishLine", false);
+    }
 
     /// <summary>
     ///   Instantiate and initialize the Neural Net of an individual, if null is passed as dna, it
@@ -27,5 +37,23 @@ public class Manager : MonoBehaviour
         }
         car.InitializeNeuralNet(individualDna);
         return car;
+    }
+
+    protected float CalculateTrackLength()
+    {
+        float length = 0;
+        foreach (Transform child in track.transform)
+        {
+            if (child.tag.Equals("TrackPart"))
+            {
+                length += child.localScale.z * 30;
+            }
+        }
+        length -= TMath.Abs((finishLine.transform.localPosition - startPoint.localPosition).magnitude);
+        return length;
+    }
+
+    public virtual void HasCompletedSimulation(CarIndividual individual)
+    {
     }
 }

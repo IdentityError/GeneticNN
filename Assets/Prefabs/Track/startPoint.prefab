@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6493452348307126168}
   m_Layer: 0
   m_Name: startPoint
-  m_TagString: TrackCheckpoint
+  m_TagString: StartPoint
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

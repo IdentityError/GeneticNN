@@ -46,4 +46,19 @@ public class TracksStats
         }
         return null;
     }
+
+    public TrackBest GetFittestTrackBest()
+    {
+        float max = 0;
+        TrackBest current = null;
+        for (int i = 0; i < tracksStats.Count; i++)
+        {
+            if (tracksStats[i].individualData.GetFitness() > max)
+            {
+                current = tracksStats[i];
+                max = tracksStats[i].individualData.GetFitness();
+            }
+        }
+        return current;
+    }
 }

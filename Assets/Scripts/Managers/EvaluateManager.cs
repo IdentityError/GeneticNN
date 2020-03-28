@@ -3,23 +3,17 @@ using UnityEngine.UI;
 
 public class EvaluateManager : Manager
 {
-    [Header("UI")]
-    public Text fitnessTxt;
-    public Text topologyTxt;
-
     private CarIndividualData fittestData;
     private CarIndividual fittest = null;
 
     private void Start()
     {
-        fittestData = TSaveManager.GetInstance().LoadPersistentData(TSaveManager.TRACKS_STATS).GetData<CarIndividualData>();
+        fittestData = TSaveManager.GetInstance().LoadPersistentData(TSaveManager.CHOSEN_ONE).GetData<CarIndividualData>();
         StartSimulation();
 
-        fitnessTxt.text = "Fitness: " + fittestData.GetFitness();
-        topologyTxt.text = "<b>Topology</b>\nInput count: " + DNA.INPUT_COUNT +
-                            "\nHidden layers: " + fittestData.GetDNA().topology.hiddenLayerCount +
-                            "\nNeurons per hidden layer: " + fittestData.GetDNA().topology.neuronsPerHiddenLayer +
-                            "\nOutput count: " + DNA.OUTPUT_COUNT;
+        uiManager?.UpdateTrackLength(CalculateTrackLength());
+        uiManager?.DrawNetUI(fittestData.GetDNA().topology);
+        uiManager?.AppendToLog("Evaluating the current chosen one");
     }
 
     private void Update()
