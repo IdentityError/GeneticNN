@@ -99,8 +99,8 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6791551976333570425}
   serializedVersion: 2
-  m_Mass: 1500
-  m_Drag: 5
+  m_Mass: 1800
+  m_Drag: 4
   m_AngularDrag: 3
   m_UseGravity: 1
   m_IsKinematic: 0
@@ -124,11 +124,11 @@ MonoBehaviour:
   - {fileID: 6791551977793162675}
   - {fileID: 6791551976658705091}
   - {fileID: 6791551976215878552}
-  wheelBase: 2.25
+  wheelBase: 2.5
   rearTrack: 1.45
   turnRadius: 12
   motorPower: 20000
-  steeringPower: 2500
+  steeringPower: 2550
   predefinedTopology:
     hiddenLayerCount: 3
     neuronsPerHiddenLayer: 10

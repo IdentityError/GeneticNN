@@ -24,7 +24,6 @@
             }
             output[i] = TMath.Tanh(sum);
         }
-
         return output;
     }
 
