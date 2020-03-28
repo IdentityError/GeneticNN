@@ -12,7 +12,7 @@ public class EvaluateManager : Manager
 
     private void Start()
     {
-        fittestData = TSaveManager.GetInstance().LoadPersistentData(TSaveManager.FITTEST_DATA).GetData<CarIndividualData>();
+        fittestData = TSaveManager.GetInstance().LoadPersistentData(TSaveManager.TRACKS_STATS).GetData<CarIndividualData>();
         StartSimulation();
 
         fitnessTxt.text = "Fitness: " + fittestData.GetFitness();

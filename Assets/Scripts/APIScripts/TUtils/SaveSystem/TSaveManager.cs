@@ -17,7 +17,7 @@ public class TSaveManager
     }
 
     //Can write here the static file names to use in the game
-    public static readonly string FITTEST_DATA = Application.persistentDataPath + "/fittest.data";
+    public static readonly string TRACKS_STATS = Application.persistentDataPath + "/tracks_stats.data";
     //I.E
     //public static readonly string PLAYER_DATA = Application.persistentDataPath + "/player_data.data";
     //Calling the methods will look like this:

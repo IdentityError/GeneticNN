@@ -2,28 +2,9 @@
 
 public class CarIndividual : MonoBehaviour
 {
-    [System.Serializable]
-    public struct SimulationStats
-    {
-        public float averageThrottle;
-        public float time;
-        public float distance;
-
-        public SimulationStats(float averageThrottle, float time, float distance)
-        {
-            this.averageThrottle = averageThrottle;
-            this.time = time;
-            this.distance = distance;
-        }
-
-        public override string ToString()
-        {
-            return "Average throttle: " + averageThrottle + "\nTime: " + time + "\nDistance: " + distance;
-        }
-    }
-
     [Header("Specifications")]
     public Wheel[] wheels;
+    public bool manualControl;
 
     [Tooltip("Length from rear to front axes")]
     public float wheelBase;
@@ -80,6 +61,7 @@ public class CarIndividual : MonoBehaviour
             w.motorPower = this.motorPower;
             w.steeringPower = this.steeringPower;
         }
+        stats.trackID = manager.track.name;
     }
 
     public void InitializeNeuralNet(DNA dna)
@@ -96,8 +78,11 @@ public class CarIndividual : MonoBehaviour
     {
         if (!endedSimulation && netInitialized)
         {
-            Sense();
-            neuralNetOutput = neuralNet.Process(neuralNetInput);
+            if (!manualControl)
+            {
+                Sense();
+                neuralNetOutput = neuralNet.Process(neuralNetInput);
+            }
             ManageWheels();
             UpdateStats();
             manager?.CalculateFitness(this);
@@ -106,9 +91,16 @@ public class CarIndividual : MonoBehaviour
 
     private void ManageWheels()
     {
-        steering = neuralNetOutput[0];  //Input.GetAxis("Horizontal");
-        throttle = neuralNetOutput[1];  //Input.GetAxis("Vertical");
-
+        if (manualControl)
+        {
+            steering = Input.GetAxis("Horizontal");
+            throttle = Input.GetAxis("Vertical");
+        }
+        else
+        {
+            steering = neuralNetOutput[0];  //Input.GetAxis("Horizontal");
+            throttle = neuralNetOutput[1];  //Input.GetAxis("Vertical");
+        }
         if (steering > 0)
         {
             ackermanAngleLeft = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius + (rearTrack / 2))) * steering;
@@ -175,9 +167,9 @@ public class CarIndividual : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag.Equals("TrackCheckpoint") && manager != null)
+        if (other.tag.Equals("FinishLine") && manager != null)
         {
-            StopSimulating(throttle > 0);
+            StopSimulating(transform.position.z < other.transform.position.z);
         }
     }
 
@@ -203,5 +195,10 @@ public class CarIndividual : MonoBehaviour
             rigidbody.velocity = Vector3.zero;
         }
         manager?.HasEndedSimulation(sendStats ? this : null);
+    }
+
+    public CarIndividualData GetIndividualData()
+    {
+        return new CarIndividualData(neuralNet.dna, fitness);
     }
 }

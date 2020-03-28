@@ -102,4 +102,14 @@ public static class TMath
     {
         return Math.Sign(j - i) + Math.Sign(k - j) + Math.Sign(i - k);
     }
+
+    public static float Abs(float value)
+    {
+        return value > 0 ? value : -value;
+    }
+
+    public static int Abs(int value)
+    {
+        return value > 0 ? value : -value;
+    }
 }

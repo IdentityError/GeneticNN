@@ -35,12 +35,14 @@ public class Wheel : MonoBehaviour
     private Vector3 wheelVelocity;
     private float forwardForce;
     private float rightForce;
+    private Vector3 applicationOffset;
 
     private void Start()
     {
         rigidbody = transform.root.GetComponent<Rigidbody>();
         minLength = restLength - springTravel;
         maxLength = restLength + springTravel;
+        applicationOffset = new Vector3(0F, 0.8F * wheelRadius, 0F);
     }
 
     private void Update()
@@ -69,7 +71,7 @@ public class Wheel : MonoBehaviour
 
             suspensionForce = (springForce + damperForce) * transform.up;
 
-            rigidbody.AddForceAtPosition(suspensionForce + (forwardForce * transform.forward) + (rightForce * -transform.right), hit.point);
+            rigidbody.AddForceAtPosition(suspensionForce + (forwardForce * transform.forward) + (rightForce * -transform.right), hit.point + applicationOffset);
         }
     }
 }

@@ -5,6 +5,11 @@ TagManager:
   serializedVersion: 2
   tags:
   - TrackCheckpoint
+  - straight
+  - curve
+  - TrackPart
+  - FinishLine
+  - StartPoint
   layers:
   - Default
   - TransparentFX

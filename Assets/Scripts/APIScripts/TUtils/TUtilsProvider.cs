@@ -131,6 +131,38 @@ public class TUtilsProvider
     }
 
     /// <summary>
+    ///   Returns: first occurence of a parent with the selected tag
+    /// </summary>
+    public GameObject GetFirstGameObjectInParentWithTag(GameObject parent, string tag, bool inactive)
+    {
+        Transform[] transforms = parent.GetComponentsInParent<Transform>(inactive);
+        for (int i = 0; i < transforms.Length; i++)
+        {
+            if (transforms[i].tag == tag)
+            {
+                return transforms[i].gameObject;
+            }
+        }
+        return null;
+    }
+
+    /// <summary>
+    ///   Returns: first occurence of a child with the selected tag
+    /// </summary>
+    public GameObject GetFirstGameObjectInChildrenWithTag(GameObject parent, string tag, bool inactive)
+    {
+        Transform[] transforms = parent.GetComponentsInChildren<Transform>(inactive);
+        for (int i = 0; i < transforms.Length; i++)
+        {
+            if (transforms[i].tag == tag)
+            {
+                return transforms[i].gameObject;
+            }
+        }
+        return null;
+    }
+
+    /// <summary>
     ///   Toggle the visibility of a GameObject and all of his children
     /// </summary>
     public void MakeGameObjectVisible(GameObject obj, bool state)

@@ -19,7 +19,7 @@ public class UINetBuilder : MonoBehaviour
         rectTransform = GetComponent<RectTransform>();
     }
 
-    public void DraweNetUI(DNA.DnaTopology topology)
+    public void DrawNetUI(DNA.DnaTopology topology)
     {
         verticalStride = (rectTransform.rect.height - 100F) / topology.neuronsPerHiddenLayer;
         horizontalStride = (rectTransform.rect.width - 50F) / (topology.hiddenLayerCount + 2);
