@@ -28,9 +28,9 @@ public class TSaveManager
     ///   Save a generic type of data in the application persisten data path.
     ///   <para> Returns: a SaveObject instance, null on error </para>
     /// </summary>
-    public SaveObject SavePersistentData<T>(T data, string path)
+    public TSaveObject SavePersistentData<T>(T data, string path)
     {
-        SaveObject saveObject = new SaveObject(data);
+        TSaveObject saveObject = new TSaveObject(data);
         BinaryFormatter formatter = new BinaryFormatter();
         FileStream stream = new FileStream(path, FileMode.Create);
         formatter.Serialize(stream, data);
@@ -42,7 +42,7 @@ public class TSaveManager
     ///   Load a SaveObject that contains the type of data in the selected path.
     ///   <para> Returns: a SaveObject instance, null on error </para>
     /// </summary>
-    public SaveObject LoadPersistentData(string path)
+    public TSaveObject LoadPersistentData(string path)
     {
         if (File.Exists(path))
         {
@@ -51,7 +51,7 @@ public class TSaveManager
             if (stream.Length == 0)
                 return null;
             object data = formatter.Deserialize(stream);
-            SaveObject saveObject = new SaveObject(data);
+            TSaveObject saveObject = new TSaveObject(data);
             stream.Close();
             return saveObject;
         }

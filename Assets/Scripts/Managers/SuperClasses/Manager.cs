@@ -14,7 +14,7 @@ public class Manager : MonoBehaviour
     private void Awake()
     {
         uiManager = FindObjectOfType<UIManager>();
-        finishLine = TUtilsProvider.GetInstance().GetFirstGameObjectInChildrenWithTag(track, "FinishLine", false);
+        finishLine = TUtilsProvider.GetFirstGameObjectInChildrenWithTag(track, "FinishLine", false);
     }
 
     /// <summary>
@@ -35,7 +35,7 @@ public class Manager : MonoBehaviour
         {
             individualDna = new DNA(dna.topology, dna.weights);
         }
-        car.InitializeNeuralNet(individualDna);
+        car.SetDNA(individualDna);
         return car;
     }
 

@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿using Assets.Scripts.Interfaces;
+using Assets.Scripts.Managers;
+using UnityEngine;
 
-public class CarIndividual : MonoBehaviour
+public class CarIndividual : MonoBehaviour, IIndividual
 {
     [Header("Specifications")]
     public Wheel[] wheels;
@@ -16,9 +18,6 @@ public class CarIndividual : MonoBehaviour
     public float turnRadius;
     public float motorPower;
     public float steeringPower;
-
-    [Header("Neural Net")]
-    public DNA.DnaTopology predefinedTopology;
 
     [Header("Senses")]
     [Tooltip("Length of the raycasted senses")]
@@ -48,6 +47,8 @@ public class CarIndividual : MonoBehaviour
     [HideInInspector]
     public TrainingManager manager;
 
+    private PopulationManager populationManager;
+
     public float fitness;
     public float breedingProbability;
 
@@ -65,16 +66,6 @@ public class CarIndividual : MonoBehaviour
         {
             stats.trackID = manager.track.name;
         }
-    }
-
-    public void InitializeNeuralNet(DNA dna)
-    {
-        neuralNet = new NeuralNet(dna);
-        directionsCount = DNA.INPUT_COUNT - 1;
-        sensesDirections = new Vector3[directionsCount];
-        neuralNetInput = new float[DNA.INPUT_COUNT];
-        angleStride = 180F / (directionsCount + 1);
-        netInitialized = true;
     }
 
     private void Update()
@@ -208,5 +199,25 @@ public class CarIndividual : MonoBehaviour
     public CarIndividualData GetIndividualData()
     {
         return new CarIndividualData(neuralNet.dna, fitness);
+    }
+
+    public void SetPopulationManager(PopulationManager populationManager)
+    {
+        this.populationManager = populationManager;
+    }
+
+    public DNA GetDNA()
+    {
+        return this.neuralNet.dna;
+    }
+
+    public void SetDNA(DNA dna)
+    {
+        neuralNet = new NeuralNet(dna);
+        directionsCount = DNA.INPUT_COUNT - 1;
+        sensesDirections = new Vector3[directionsCount];
+        neuralNetInput = new float[DNA.INPUT_COUNT];
+        angleStride = 180F / (directionsCount + 1);
+        netInitialized = true;
     }
 }

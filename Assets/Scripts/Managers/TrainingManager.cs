@@ -24,7 +24,7 @@ public class TrainingManager : Manager
     {
         population = new CarIndividual[populationNumber];
 
-        SaveObject saveObject = TSaveManager.GetInstance().LoadPersistentData(TSaveManager.TRACKS_STATS);
+        TSaveObject saveObject = TSaveManager.GetInstance().LoadPersistentData(TSaveManager.TRACKS_STATS);
         if (saveObject != null)
         {
             TracksStats stats = saveObject.GetData<TracksStats>();
@@ -106,7 +106,7 @@ public class TrainingManager : Manager
                 if (saveFittest)
                 {
                     uiManager.AppendToLog("New best on this track, overriding it...");
-                    SaveObject saveObj = TSaveManager.GetInstance().LoadPersistentData(TSaveManager.TRACKS_STATS);
+                    TSaveObject saveObj = TSaveManager.GetInstance().LoadPersistentData(TSaveManager.TRACKS_STATS);
                     if (saveObj != null)
                     {
                         TracksStats tracksStats = saveObj.GetData<TracksStats>();
@@ -203,7 +203,7 @@ public class TrainingManager : Manager
         for (int i = 0; i < populationNumber; i++)
         {
             DNA childDna = parents[0].GetDNA().Crossover(parents[1].GetDNA(), 3);
-            childDna.Mutate(mutationRate);
+            childDna.Mutate(0, mutationRate);
 
             CarIndividual child = InstantiateAndInitializeIndividual(childDna, "Car" + i);
             child.gameObject.SetActive(false);
@@ -282,7 +282,7 @@ public class TrainingManager : Manager
         for (int i = 0; i < populationNumber; i++)
         {
             DNA individualDna = new DNA(seedDna.topology, seedDna.weights);
-            individualDna.Mutate(mutationRate);
+            individualDna.Mutate(0, mutationRate);
             newPopulation[i] = InstantiateAndInitializeIndividual(individualDna, "Car" + i);
         }
         return newPopulation;

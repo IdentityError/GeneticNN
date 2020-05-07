@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Assets.Scripts.Stores;
+using UnityEngine;
 
 [System.Serializable]
 public class DNA
@@ -6,8 +7,10 @@ public class DNA
     public const int INPUT_COUNT = 5;
     public const int OUTPUT_COUNT = 2;
 
+    public float fitness = 0F;
+
     [System.Serializable]
-    public struct DnaTopology
+    public class DnaTopology
     {
         public int hiddenLayerCount;
         public int neuronsPerHiddenLayer;
@@ -102,7 +105,7 @@ public class DNA
     }
 
     /// <summary>
-    ///   Initialize a well specified DNA
+    ///   Initialize a specified DNA
     /// </summary>
     public DNA(DnaTopology topology, DnaWeights weights)
     {
@@ -113,7 +116,7 @@ public class DNA
     /// <summary>
     ///   Each element of each weights matrix will mutate with a mutationRate probability
     /// </summary>
-    public void Mutate(float mutationRate)
+    public void Mutate(Paradigms.MutationParadigm mutationParadigm, float mutationRate)
     {
         for (int i = 0; i < INPUT_COUNT; i++)
         {

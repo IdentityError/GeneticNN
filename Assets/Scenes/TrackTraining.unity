@@ -506,6 +506,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c40de25734575d540858da25ea76e7b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  trainingManager: {fileID: 0}
+  UIManager: {fileID: 0}
 --- !u!114 &1109427367 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4514718876575507270, guid: 1a35ae9d94187dd4b80b70e89813f56d,
@@ -995,6 +997,11 @@ PrefabInstance:
       propertyPath: logText
       value: 
       objectReference: {fileID: 780355437}
+    - target: {fileID: 6509384907937938681, guid: 248a5abe86581114a854f87eda3b903f,
+        type: 3}
+      propertyPath: trainer.mutationParadigm
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6509384907937938682, guid: 248a5abe86581114a854f87eda3b903f,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1052,3 +1059,32 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 248a5abe86581114a854f87eda3b903f, type: 3}
+--- !u!1 &6509384906705858485 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6509384907937938680, guid: 248a5abe86581114a854f87eda3b903f,
+    type: 3}
+  m_PrefabInstance: {fileID: 6509384906705858484}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6509384906705858486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6509384906705858485}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a05c13aecf02694eb9c02f46aad1cfd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  populationNumber: 0
+  timeScale: 1
+  individualPrefab: {fileID: 0}
+  track: {fileID: 0}
+  trainerProvider:
+    trainingParadigm: 1
+    gaTrainer:
+      mutationParadigm: 0
+      mutationPercentage: 0
+    bpaTrainer:
+      learningRate: 0

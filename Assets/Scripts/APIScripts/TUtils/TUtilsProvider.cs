@@ -5,35 +5,16 @@ using UnityEngine.SceneManagement;
 
 public class TUtilsProvider
 {
-    private static TUtilsProvider instance = null;
-
-    /// <summary>
-    ///   Returns: the SharedUtilities singleton instance
-    /// </summary>
-    public static TUtilsProvider GetInstance()
-    {
-        if (instance == null)
-        {
-            instance = new TUtilsProvider();
-        }
-
-        return instance;
-    }
-
-    private TUtilsProvider()
-    {
-    }
-
     /// <summary>
     ///   <para> Type: UTILS </para>
     ///   Start a scene with a specified delay
     /// </summary>
-    public void StartSceneWithDelay(MonoBehaviour context, int index, float delay)
+    public static void StartSceneWithDelay(MonoBehaviour context, int index, float delay)
     {
         context.StartCoroutine(StartSceneWithDelay_C(index, delay));
     }
 
-    private IEnumerator StartSceneWithDelay_C(int index, float delay)
+    private static IEnumerator StartSceneWithDelay_C(int index, float delay)
     {
         yield return new WaitForSeconds(delay);
         SceneManager.LoadScene(index);
@@ -42,7 +23,7 @@ public class TUtilsProvider
     /// <summary>
     ///   Returns: first matching Type component in a child that has the specified tag
     /// </summary>
-    public Type GetFirstComponentInChildrenWithTag<Type>(GameObject parent, string tag, bool inactive)
+    public static Type GetFirstComponentInChildrenWithTag<Type>(GameObject parent, string tag, bool inactive)
     {
         Transform[] transforms = parent.GetComponentsInChildren<Transform>(inactive);
         for (int i = 1; i < transforms.Length; i++)
@@ -62,7 +43,7 @@ public class TUtilsProvider
     /// <summary>
     ///   Returns: first matching Type component in a parent that has the specified tag
     /// </summary>
-    public Type GetFirstComponentInParentsWithTag<Type>(GameObject parent, string tag, bool inactive)
+    public static Type GetFirstComponentInParentsWithTag<Type>(GameObject parent, string tag, bool inactive)
     {
         Transform[] transforms = parent.GetComponentsInParent<Transform>(inactive);
         for (int i = 1; i < transforms.Length; i++)
@@ -82,7 +63,7 @@ public class TUtilsProvider
     /// <summary>
     ///   Returns: first child GameObject that has a matching type component
     /// </summary>
-    public GameObject GetFirstChildWithComponent<Type>(GameObject parent)
+    public static GameObject GetFirstChildWithComponent<Type>(GameObject parent)
     {
         Type parentComponent = parent.GetComponent<Type>(), childComponent;
         foreach (Transform transform in parent.transform)
@@ -99,7 +80,7 @@ public class TUtilsProvider
     /// <summary>
     ///   Returns: list of all children GameObjects with the specified tag, parent excluded
     /// </summary>
-    public List<GameObject> GetGameObjectsInChildrenWithTag(GameObject parent, string tag, bool inactive)
+    public static List<GameObject> GetGameObjectsInChildrenWithTag(GameObject parent, string tag, bool inactive)
     {
         List<GameObject> objs = new List<GameObject>();
         Transform[] transforms = parent.GetComponentsInChildren<Transform>(inactive);
@@ -116,7 +97,7 @@ public class TUtilsProvider
     /// <summary>
     ///   Returns: list of all parents GameObjects with the specified tag
     /// </summary>
-    public List<GameObject> GetGameObjectsInParentsWithTag(GameObject parent, string tag, bool inactive)
+    public static List<GameObject> GetGameObjectsInParentsWithTag(GameObject parent, string tag, bool inactive)
     {
         List<GameObject> objs = new List<GameObject>();
         Transform[] transforms = parent.GetComponentsInParent<Transform>(inactive);
@@ -133,7 +114,7 @@ public class TUtilsProvider
     /// <summary>
     ///   Returns: first occurence of a parent with the selected tag
     /// </summary>
-    public GameObject GetFirstGameObjectInParentWithTag(GameObject parent, string tag, bool inactive)
+    public static GameObject GetFirstGameObjectInParentWithTag(GameObject parent, string tag, bool inactive)
     {
         Transform[] transforms = parent.GetComponentsInParent<Transform>(inactive);
         for (int i = 0; i < transforms.Length; i++)
@@ -149,7 +130,7 @@ public class TUtilsProvider
     /// <summary>
     ///   Returns: first occurence of a child with the selected tag
     /// </summary>
-    public GameObject GetFirstGameObjectInChildrenWithTag(GameObject parent, string tag, bool inactive)
+    public static GameObject GetFirstGameObjectInChildrenWithTag(GameObject parent, string tag, bool inactive)
     {
         Transform[] transforms = parent.GetComponentsInChildren<Transform>(inactive);
         for (int i = 0; i < transforms.Length; i++)
@@ -165,7 +146,7 @@ public class TUtilsProvider
     /// <summary>
     ///   Toggle the visibility of a GameObject and all of his children
     /// </summary>
-    public void MakeGameObjectVisible(GameObject obj, bool state)
+    public static void MakeGameObjectVisible(GameObject obj, bool state)
     {
         if (obj == null) return;
         Transform[] transforms = obj.GetComponentsInChildren<Transform>();
