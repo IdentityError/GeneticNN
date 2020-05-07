@@ -2,7 +2,7 @@
 {
     public interface IDNAHolder
     {
-        DNA GetDNA();
+        DNA ProvideDNA();
 
         void SetDNA(DNA dna);
     }

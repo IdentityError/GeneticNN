@@ -506,8 +506,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c40de25734575d540858da25ea76e7b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  trainingManager: {fileID: 0}
-  UIManager: {fileID: 0}
 --- !u!114 &1109427367 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4514718876575507270, guid: 1a35ae9d94187dd4b80b70e89813f56d,
@@ -687,6 +685,18 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 543053043}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2111517136
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2111517135}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f09e8ba90547f3141a3894b29eb515b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &3695772664775952726
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -766,6 +776,24 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 34299e5407c9d2c4e8da6481916355fd, type: 3}
+--- !u!1 &3695772664775952727 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3695772663629603462, guid: 34299e5407c9d2c4e8da6481916355fd,
+    type: 3}
+  m_PrefabInstance: {fileID: 3695772664775952726}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3695772664775952728
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3695772664775952727}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f09e8ba90547f3141a3894b29eb515b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &4514718875470276577
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1057,7 +1085,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 6509384907937938681, guid: 248a5abe86581114a854f87eda3b903f, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 248a5abe86581114a854f87eda3b903f, type: 3}
 --- !u!1 &6509384906705858485 stripped
 GameObject:
@@ -1077,14 +1106,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a05c13aecf02694eb9c02f46aad1cfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  populationNumber: 0
+  populationNumber: 10
   timeScale: 1
-  individualPrefab: {fileID: 0}
-  track: {fileID: 0}
+  individualPrefab: {fileID: 6791551976333570425, guid: dda260aae5911af48a27564e8179e873,
+    type: 3}
+  track: {fileID: 2111517136}
   trainerProvider:
-    trainingParadigm: 1
+    trainingParadigm: 0
     gaTrainer:
-      mutationParadigm: 0
-      mutationPercentage: 0
+      predefinedTopology:
+        hiddenLayerCount: 2
+        neuronsPerHiddenLayer: 12
+      mutationParadigm: 1
+      mutationPercentage: 0.018
     bpaTrainer:
+      predefinedTopology:
+        hiddenLayerCount: 0
+        neuronsPerHiddenLayer: 0
       learningRate: 0

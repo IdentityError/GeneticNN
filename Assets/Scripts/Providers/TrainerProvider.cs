@@ -1,6 +1,5 @@
 ﻿using Assets.Scripts.Stores;
 using Assets.Scripts.Trainers;
-using UnityEngine;
 
 namespace Assets.Scripts.Providers
 {
@@ -9,8 +8,8 @@ namespace Assets.Scripts.Providers
     {
         public Paradigms.TrainingParadigm trainingParadigm;
 
-        public GATrainer gaTrainer;
-        public BPATrainer bpaTrainer;
+        public GATrainer gaTrainer = new GATrainer();
+        public BPATrainer bpaTrainer = new BPATrainer();
 
         public Trainer ProvideTrainer()
         {

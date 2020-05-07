@@ -30,7 +30,6 @@ public class CarIndividual : MonoBehaviour, IIndividual
 
     private int updateCycles = 0;
     private float currentThrottleSum = 0F;
-
     private float ackermanAngleRight;
     private float ackermanAngleLeft;
     private int directionsCount;
@@ -41,16 +40,11 @@ public class CarIndividual : MonoBehaviour, IIndividual
     private bool netInitialized = false;
     private float angleStride;
     [HideInInspector] public Vector3 lastPosition;
-    private Rigidbody rigidbody;
+    private new Rigidbody rigidbody;
 
     [HideInInspector] public NeuralNet neuralNet;
-    [HideInInspector]
-    public TrainingManager manager;
 
     private PopulationManager populationManager;
-
-    public float fitness;
-    public float breedingProbability;
 
     private void Start()
     {
@@ -62,9 +56,10 @@ public class CarIndividual : MonoBehaviour, IIndividual
             w.motorPower = this.motorPower;
             w.steeringPower = this.steeringPower;
         }
-        if (manager != null)
+
+        if (populationManager != null)
         {
-            stats.trackID = manager.track.name;
+            stats.trackID = populationManager.GetTrack().name;
         }
     }
 
@@ -75,11 +70,26 @@ public class CarIndividual : MonoBehaviour, IIndividual
             if (!manualControl)
             {
                 Sense();
-                neuralNetOutput = neuralNet.Process(neuralNetInput);
+                neuralNetOutput = neuralNet.FeedForward(neuralNetInput);
             }
             ManageWheels();
-            manager?.CalculateFitness(this);
             UpdateStats();
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (!endedSimulation)
+        {
+            EndIndividualSimulation();
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag.Equals("FinishLine"))
+        {
+            EndIndividualSimulation();
         }
     }
 
@@ -151,22 +161,6 @@ public class CarIndividual : MonoBehaviour, IIndividual
         neuralNetInput[DNA.INPUT_COUNT - 1] = throttle;
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (!endedSimulation)
-        {
-            StopSimulation();
-        }
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.tag.Equals("FinishLine") && manager != null)
-        {
-            CompletedTrack(transform.position.z < other.transform.position.z);
-        }
-    }
-
     private void UpdateStats()
     {
         stats.distance += Vector3.Distance(transform.position, lastPosition);
@@ -178,35 +172,28 @@ public class CarIndividual : MonoBehaviour, IIndividual
         stats.averageThrottle = currentThrottleSum / updateCycles;
     }
 
-    public void CompletedTrack(bool sendStats)
+    public void EndIndividualSimulation()
     {
         if (endedSimulation) return;
         endedSimulation = true;
         throttle = 0;
         steering = 0;
-        manager?.HasCompletedSimulation(sendStats ? this : null);
-    }
-
-    public void StopSimulation()
-    {
-        if (endedSimulation) return;
-        endedSimulation = true;
-        throttle = 0;
-        steering = 0;
-        manager?.HasCompletedSimulation(null);
+        populationManager?.IndividualEndedSimulation(this);
     }
 
     public CarIndividualData GetIndividualData()
     {
-        return new CarIndividualData(neuralNet.dna, fitness);
+        return new CarIndividualData(neuralNet.dna, neuralNet.dna.fitness);
     }
+
+    #region Interface
 
     public void SetPopulationManager(PopulationManager populationManager)
     {
         this.populationManager = populationManager;
     }
 
-    public DNA GetDNA()
+    public DNA ProvideDNA()
     {
         return this.neuralNet.dna;
     }
@@ -220,4 +207,11 @@ public class CarIndividual : MonoBehaviour, IIndividual
         angleStride = 180F / (directionsCount + 1);
         netInitialized = true;
     }
+
+    public SimulationStats ProvideStats()
+    {
+        return stats;
+    }
+
+    #endregion Interface
 }

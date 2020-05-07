@@ -8,6 +8,7 @@ public class DNA
     public const int OUTPUT_COUNT = 2;
 
     public float fitness = 0F;
+    public float pickProbability = 0F;
 
     [System.Serializable]
     public class DnaTopology
@@ -19,6 +20,11 @@ public class DNA
         {
             this.hiddenLayerCount = hiddenLayerCount;
             this.neuronsPerHiddenLayer = neuronsPerHiddenLayer;
+        }
+
+        public bool IsZero()
+        {
+            return hiddenLayerCount == 0 || neuronsPerHiddenLayer == 0;
         }
     }
 
@@ -117,6 +123,30 @@ public class DNA
     ///   Each element of each weights matrix will mutate with a mutationRate probability
     /// </summary>
     public void Mutate(Paradigms.MutationParadigm mutationParadigm, float mutationRate)
+    {
+        switch (mutationParadigm)
+        {
+            case Paradigms.MutationParadigm.WEIGHTS:
+                MutateWeights(mutationRate);
+                break;
+
+            case Paradigms.MutationParadigm.TOPOLOGY:
+                MutateTopology(mutationRate);
+                break;
+
+            case Paradigms.MutationParadigm.HYBRID:
+                MutateWeights(mutationRate / 2);
+                MutateTopology(mutationRate / 2);
+                break;
+        }
+    }
+
+    private void MutateTopology(float mutationRate)
+    {
+        //TODO implement
+    }
+
+    private void MutateWeights(float mutationRate)
     {
         for (int i = 0; i < INPUT_COUNT; i++)
         {

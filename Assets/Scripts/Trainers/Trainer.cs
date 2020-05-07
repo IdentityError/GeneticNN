@@ -4,11 +4,17 @@ namespace Assets.Scripts.Trainers
 {
     public abstract class Trainer
     {
-        protected DNA[] nnPopulation;
+        protected DNA[] dnaPopulation;
 
-        public DNA.DnaTopology predefinedTopology
+        [SerializeField] private DNA.DnaTopology predefinedTopology = null;
+
+        public DNA.DnaTopology GetPredefinedTopology()
         {
-            get => predefinedTopology;
+            if(predefinedTopology == null)
+            {
+                predefinedTopology = new DNA.DnaTopology(1, 1);
+            }
+            return predefinedTopology;
         }
 
         /// <summary>
@@ -18,7 +24,7 @@ namespace Assets.Scripts.Trainers
         /// <returns> </returns>
         public DNA[] Train(DNA[] nnPopulation)
         {
-            this.nnPopulation = nnPopulation;
+            this.dnaPopulation = nnPopulation;
             this.Train();
             return nnPopulation;
         }

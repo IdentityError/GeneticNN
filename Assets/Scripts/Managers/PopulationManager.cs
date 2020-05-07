@@ -18,9 +18,19 @@ namespace Assets.Scripts.Managers
 
         private IIndividual[] population;
         private int generationCount = 0;
+        private int currentSimulating;
+        private UIManager uiManager;
 
         private void Start()
         {
+            if(trainerProvider.ProvideTrainer().GetPredefinedTopology().IsZero())
+            {
+                throw new System.Exception("Predefined Topology not set!");
+            }
+
+            uiManager = FindObjectOfType<UIManager>();
+            uiManager?.DrawNetUI(trainerProvider.ProvideTrainer().GetPredefinedTopology());
+
             population = new IIndividual[populationNumber];
             InitializeAncestors();
         }
@@ -30,15 +40,14 @@ namespace Assets.Scripts.Managers
             Time.timeScale = this.timeScale;
         }
 
-        public void AdvanceGeneration()
+        public int GetGenerationCount()
         {
-            DNA[] newDNAPopulation = trainerProvider.ProvideTrainer().Train(BuildDNAPopulation());
-            EvolveGeneration(newDNAPopulation);
-            generationCount++;
+            return generationCount;
         }
 
-        private void EvolveGeneration(DNA[] newDNAPopulation)
+        private void AdvanceGeneration()
         {
+            DNA[] newDNAPopulation = trainerProvider.ProvideTrainer().Train(BuildDNAPopulation());
             for (int i = 0; i < populationNumber; i++)
             {
                 if (population[i] != null)
@@ -51,20 +60,17 @@ namespace Assets.Scripts.Managers
             {
                 population[i] = InstantiateIndividual(newDNAPopulation[i], i.ToString());
             }
+            generationCount++;
         }
 
         private void InitializeAncestors()
         {
             for (int i = 0; i < populationNumber; i++)
             {
-                population[i] = InstantiateIndividual(new DNA(trainerProvider.ProvideTrainer().predefinedTopology), i.ToString());
+                population[i] = InstantiateIndividual(new DNA(trainerProvider.ProvideTrainer().GetPredefinedTopology()), i.ToString());
             }
             generationCount++;
-        }
-
-        public int GetGenerationCount()
-        {
-            return generationCount;
+            currentSimulating = populationNumber;
         }
 
         private DNA[] BuildDNAPopulation()
@@ -72,7 +78,7 @@ namespace Assets.Scripts.Managers
             DNA[] dnaPopulation = new DNA[populationNumber];
             for (int i = 0; i < populationNumber; i++)
             {
-                dnaPopulation[i] = population[i].GetDNA();
+                dnaPopulation[i] = population[i].ProvideDNA();
             }
             return dnaPopulation;
         }
@@ -91,8 +97,45 @@ namespace Assets.Scripts.Managers
             return individual;
         }
 
-        private void CalculatePopulationFitness()
+        private float CalculateIndividualFitness(SimulationStats stats)
         {
+            //TODO implement
+            return 0F;
+        }
+
+        public void IndividualEndedSimulation(IIndividual subject)
+        {
+            subject.ProvideDNA().fitness = CalculateIndividualFitness(subject.ProvideStats());
+            currentSimulating--;
+            if (currentSimulating <= 0)
+            {
+                SimulationEnded();
+            }
+        }
+
+        private void SimulationEnded()
+        {
+            NormalizePopulationPickProbability();
+            AdvanceGeneration();
+        }
+
+        private void NormalizePopulationPickProbability()
+        {
+            float fitnessSum = 0;
+            foreach (IIndividual individual in population)
+            {
+                fitnessSum += individual.ProvideDNA().fitness;
+            }
+
+            foreach (IIndividual individual in population)
+            {
+                individual.ProvideDNA().pickProbability = individual.ProvideDNA().fitness / fitnessSum;
+            }
+        }
+
+        public Track GetTrack()
+        {
+            return track;
         }
     }
 }

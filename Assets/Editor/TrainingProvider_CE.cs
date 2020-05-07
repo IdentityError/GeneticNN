@@ -1,8 +1,7 @@
-﻿using Assets.Scripts.Stores;
-using Assets.Scripts.Providers;
+﻿using Assets.Scripts.Providers;
+using Assets.Scripts.Stores;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 [CustomPropertyDrawer(typeof(TrainerProvider))]
 public class TrainingProvider_CE : PropertyDrawer
@@ -39,10 +38,10 @@ public class TrainingProvider_CE : PropertyDrawer
         switch ((Paradigms.TrainingParadigm)trainingParadigmProp.intValue)
         {
             case Paradigms.TrainingParadigm.GENETIC:
-                return 2 * EditorGUIUtility.singleLineHeight + (gaTrainerProp.isExpanded ? EditorGUIUtility.singleLineHeight * 4 : 0);
+                return 3 * EditorGUIUtility.singleLineHeight + (gaTrainerProp.isExpanded ? EditorGUIUtility.singleLineHeight * 6 : 0);
 
             case Paradigms.TrainingParadigm.BPA:
-                return 2 * EditorGUIUtility.singleLineHeight + (bpaTrainerProp.isExpanded ? EditorGUIUtility.singleLineHeight * 1 : 0);
+                return 3 * EditorGUIUtility.singleLineHeight + (bpaTrainerProp.isExpanded ? EditorGUIUtility.singleLineHeight * 3 : 0);
         }
         return base.GetPropertyHeight(property, label);
     }

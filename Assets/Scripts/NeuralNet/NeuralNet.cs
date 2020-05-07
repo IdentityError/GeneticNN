@@ -31,7 +31,7 @@
     ///   Execute a process through the NeuralNet
     ///   <para> Return: the output vector (outputCount) </para>
     /// </summary>
-    public float[] Process(float[] inputs)
+    public float[] FeedForward(float[] inputs)
     {
         //Calculate the fist activation vector I_H0
         float[] firstLayer = ActivationVector_Matrix(inputs, dna.weights.i_h0Weights, DNA.INPUT_COUNT, dna.topology.neuronsPerHiddenLayer);

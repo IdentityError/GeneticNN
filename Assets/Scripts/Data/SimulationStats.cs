@@ -28,6 +28,6 @@ public class SimulationStats
         {
             return true;
         }
-        return this.time < other.time;
+        return this.time < other.time && this.averageThrottle > other.averageThrottle;
     }
 }
