@@ -5,14 +5,15 @@ namespace Assets.Scripts.Trainers
     public abstract class Trainer
     {
         protected DNA[] dnaPopulation;
+        protected int populationNumber;
 
         [SerializeField] private DNA.DnaTopology predefinedTopology = null;
 
         public DNA.DnaTopology GetPredefinedTopology()
         {
-            if(predefinedTopology == null)
+            if (predefinedTopology == null)
             {
-                predefinedTopology = new DNA.DnaTopology(1, 1);
+                predefinedTopology = new DNA.DnaTopology(1, new int[] { 1 });
             }
             return predefinedTopology;
         }
@@ -20,13 +21,15 @@ namespace Assets.Scripts.Trainers
         /// <summary>
         ///   Train and return a new population in place
         /// </summary>
-        /// <param name="nnPopulation"> </param>
         /// <returns> </returns>
-        public DNA[] Train(DNA[] nnPopulation)
+        public DNA[] Train(DNA[] dnaPopulation)
         {
-            this.dnaPopulation = nnPopulation;
+            populationNumber = dnaPopulation.Length;
+            this.dnaPopulation = new DNA[populationNumber];
+            dnaPopulation.CopyTo(this.dnaPopulation, 0);
+            this.dnaPopulation = dnaPopulation;
             this.Train();
-            return nnPopulation;
+            return this.dnaPopulation;
         }
 
         protected abstract void Train();

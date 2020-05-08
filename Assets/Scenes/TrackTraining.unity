@@ -438,7 +438,6 @@ GameObject:
   - component: {fileID: 860209644}
   - component: {fileID: 860209643}
   - component: {fileID: 860209642}
-  - component: {fileID: 860209645}
   m_Layer: 0
   m_Name: EventSystem
   m_TagString: Untagged
@@ -494,18 +493,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &860209645
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 860209641}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c40de25734575d540858da25ea76e7b8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1109427367 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4514718876575507270, guid: 1a35ae9d94187dd4b80b70e89813f56d,
@@ -675,8 +662,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4103f8628bfaa0a429260a2f515c8ed6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 20
-  sensitivity: 60
+  speed: 25
+  sensitivity: 70
   xRotation: 0
   yRotation: 0
 --- !u!1 &2111517135 stripped
@@ -916,6 +903,31 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4514718875247420194, guid: 1a35ae9d94187dd4b80b70e89813f56d,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 900
+      objectReference: {fileID: 0}
+    - target: {fileID: 4514718875247420194, guid: 1a35ae9d94187dd4b80b70e89813f56d,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -450
+      objectReference: {fileID: 0}
+    - target: {fileID: 4514718875247420194, guid: 1a35ae9d94187dd4b80b70e89813f56d,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1300
+      objectReference: {fileID: 0}
+    - target: {fileID: 4514718875247420194, guid: 1a35ae9d94187dd4b80b70e89813f56d,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -650
+      objectReference: {fileID: 0}
+    - target: {fileID: 4514718875459923201, guid: 1a35ae9d94187dd4b80b70e89813f56d,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 120
+      objectReference: {fileID: 0}
     - target: {fileID: 4514718876120270878, guid: 1a35ae9d94187dd4b80b70e89813f56d,
         type: 3}
       propertyPath: m_AnchorMax.x
@@ -1115,12 +1127,12 @@ MonoBehaviour:
     trainingParadigm: 0
     gaTrainer:
       predefinedTopology:
-        hiddenLayerCount: 2
-        neuronsPerHiddenLayer: 12
+        hiddenLayerCount: 4
+        neuronsAtLayer: 070000000b0000000700000005000000
       mutationParadigm: 1
       mutationPercentage: 0.018
     bpaTrainer:
       predefinedTopology:
         hiddenLayerCount: 0
-        neuronsPerHiddenLayer: 0
+        neuronsAtLayer: 
       learningRate: 0

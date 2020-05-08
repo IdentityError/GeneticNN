@@ -34,14 +34,15 @@ public class TrainingProvider_CE : PropertyDrawer
     {
         gaTrainerProp = property.FindPropertyRelative("gaTrainer");
         bpaTrainerProp = property.FindPropertyRelative("bpaTrainer");
+
         trainingParadigmProp = property.FindPropertyRelative("trainingParadigm");
         switch ((Paradigms.TrainingParadigm)trainingParadigmProp.intValue)
         {
             case Paradigms.TrainingParadigm.GENETIC:
-                return 3 * EditorGUIUtility.singleLineHeight + (gaTrainerProp.isExpanded ? EditorGUIUtility.singleLineHeight * 6 : 0);
+                return 2 * EditorGUIUtility.singleLineHeight + (gaTrainerProp.isExpanded ? EditorGUI.GetPropertyHeight(gaTrainerProp) : 0);
 
             case Paradigms.TrainingParadigm.BPA:
-                return 3 * EditorGUIUtility.singleLineHeight + (bpaTrainerProp.isExpanded ? EditorGUIUtility.singleLineHeight * 3 : 0);
+                return 2 * EditorGUIUtility.singleLineHeight + (bpaTrainerProp.isExpanded ? EditorGUI.GetPropertyHeight(bpaTrainerProp) : 0);
         }
         return base.GetPropertyHeight(property, label);
     }

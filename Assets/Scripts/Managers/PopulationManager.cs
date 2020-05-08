@@ -23,9 +23,9 @@ namespace Assets.Scripts.Managers
 
         private void Start()
         {
-            if(trainerProvider.ProvideTrainer().GetPredefinedTopology().IsZero())
+            if (trainerProvider.ProvideTrainer().GetPredefinedTopology().IsValid())
             {
-                throw new System.Exception("Predefined Topology not set!");
+                throw new System.Exception("Predefined Topology wrongly set!");
             }
 
             uiManager = FindObjectOfType<UIManager>();

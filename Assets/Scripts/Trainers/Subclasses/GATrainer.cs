@@ -1,5 +1,4 @@
 ﻿using Assets.Scripts.Stores;
-using System;
 using UnityEngine;
 
 namespace Assets.Scripts.Trainers
@@ -15,13 +14,20 @@ namespace Assets.Scripts.Trainers
 
         protected override void Train()
         {
-            (DNA, DNA) parents = Selection();
-            DNA childDNA = Crossover(parents.Item1, parents.Item2);
-            Mutation(childDNA);
+            DNA[] newDnaPopulation = new DNA[populationNumber];
+            for (int i = 0; i < populationNumber; i++)
+            {
+                (DNA, DNA) parents = Selection();
+                DNA childDNA = Crossover(parents.Item1, parents.Item2);
+                Mutation(childDNA);
+                newDnaPopulation[i] = childDNA;
+            }
+            dnaPopulation = newDnaPopulation;
         }
 
         private (DNA, DNA) Selection()
         {
+            //TODO dont pick already selected parents?
             return (PickRandom(), PickRandom());
         }
 

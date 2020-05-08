@@ -3,11 +3,11 @@ using UnityEngine.UI;
 
 public class UINetBuilder : MonoBehaviour
 {
-    private float verticalStride;
+    private float[] verticalStride;
     private float horizontalStride;
     [SerializeField] private Image neuronImage = null;
     [SerializeField] private Image linkImage = null;
-    [SerializeField] private Vector2 predefinedOffset;
+    [SerializeField] private Vector2 predefinedOffset = Vector2.zero;
     private RectTransform rectTransform;
 
     private Image[] inputLayer;
@@ -21,13 +21,18 @@ public class UINetBuilder : MonoBehaviour
 
     public void DrawNetUI(DNA.DnaTopology topology)
     {
-        verticalStride = (rectTransform.rect.height - 100F) / topology.neuronsPerHiddenLayer;
-        horizontalStride = (rectTransform.rect.width - 50F) / (topology.hiddenLayerCount + 2);
+        verticalStride = new float[topology.hiddenLayerCount];
+        for (int i = 0; i < topology.hiddenLayerCount; i++)
+        {
+            verticalStride[i] = (rectTransform.rect.height - 140F) / topology.neuronsAtLayer[i];
+        }
+
+        horizontalStride = (rectTransform.rect.width - 60F) / (topology.hiddenLayerCount + 2);
         inputLayer = new Image[DNA.INPUT_COUNT];
         hiddenLayers = new Image[topology.hiddenLayerCount][];
         for (int i = 0; i < topology.hiddenLayerCount; i++)
         {
-            hiddenLayers[i] = new Image[topology.neuronsPerHiddenLayer];
+            hiddenLayers[i] = new Image[topology.neuronsAtLayer[i]];
         }
         outputLayer = new Image[DNA.OUTPUT_COUNT];
 
@@ -45,30 +50,32 @@ public class UINetBuilder : MonoBehaviour
 
     private void DrawNeurons(DNA.DnaTopology topology)
     {
+        float currentStride = ((rectTransform.rect.height - 140F) / DNA.INPUT_COUNT);
         float startX = (rectTransform.rect.width / 2F) - (((topology.hiddenLayerCount + 1) / 2F) * horizontalStride);
-        float startY = (rectTransform.rect.height / 2F) - ((DNA.INPUT_COUNT / 2F) * verticalStride);
-        float offset = verticalStride / 2;
+        float startY = (rectTransform.rect.height / 2F) - ((DNA.INPUT_COUNT / 2F) * currentStride);
+        float offset = currentStride / 2;
         for (int i = 0; i < DNA.INPUT_COUNT; i++)
         {
-            inputLayer[i] = DrawNeuronUI(startX, startY + offset + (i * verticalStride));
+            inputLayer[i] = DrawNeuronUI(startX, startY + offset + (i * currentStride));
         }
-
-        startY = (rectTransform.rect.height / 2F) - ((topology.neuronsPerHiddenLayer / 2F) * verticalStride) + offset;
 
         for (int i = 0; i < topology.hiddenLayerCount; i++)
         {
-            for (int j = 0; j < topology.neuronsPerHiddenLayer; j++)
+            startY = (rectTransform.rect.height / 2F) - ((topology.neuronsAtLayer[i] / 2F) * verticalStride[i]);
+            offset = verticalStride[i] / 2;
+            for (int j = 0; j < topology.neuronsAtLayer[i]; j++)
             {
-                hiddenLayers[i][j] = DrawNeuronUI((startX + horizontalStride * (i + 1)), startY + (j * verticalStride));
+                hiddenLayers[i][j] = DrawNeuronUI((startX + horizontalStride * (i + 1)), startY + offset + (j * verticalStride[i]));
             }
         }
 
-        startY = (rectTransform.rect.height / 2F) - ((DNA.OUTPUT_COUNT / 2F) * verticalStride) + offset;
+        currentStride = ((rectTransform.rect.height - 140F) / DNA.OUTPUT_COUNT);
+        startY = (rectTransform.rect.height / 2F) - ((DNA.OUTPUT_COUNT / 2F) * currentStride);
         startX += (topology.hiddenLayerCount + 1) * horizontalStride;
-
+        offset = currentStride / 2;
         for (int i = 0; i < DNA.OUTPUT_COUNT; i++)
         {
-            outputLayer[i] = DrawNeuronUI(startX, startY + (i * verticalStride));
+            outputLayer[i] = DrawNeuronUI(startX, startY + offset + (i * currentStride));
         }
     }
 
@@ -76,24 +83,24 @@ public class UINetBuilder : MonoBehaviour
     {
         for (int i = 0; i < DNA.INPUT_COUNT; i++)
         {
-            for (int j = 0; j < topology.neuronsPerHiddenLayer; j++)
+            for (int j = 0; j < topology.neuronsAtLayer[0]; j++)
             {
                 TUtilsUI.GetInstance().DrawSpriteLine(inputLayer[i].rectTransform.position, hiddenLayers[0][j].rectTransform.position, 1.25F, linkImage, transform);
             }
         }
 
-        for (int i = 1; i < topology.hiddenLayerCount; i++)
+        for (int i = 0; i < topology.hiddenLayerCount - 1; i++)
         {
-            for (int j = 0; j < topology.neuronsPerHiddenLayer; j++)
+            for (int j = 0; j < topology.neuronsAtLayer[i]; j++)
             {
-                for (int k = 0; k < topology.neuronsPerHiddenLayer; k++)
+                for (int k = 0; k < topology.neuronsAtLayer[i + 1]; k++)
                 {
-                    TUtilsUI.GetInstance().DrawSpriteLine(hiddenLayers[i - 1][j].rectTransform.position, hiddenLayers[i][k].rectTransform.position, 1.25F, linkImage, transform);
+                    TUtilsUI.GetInstance().DrawSpriteLine(hiddenLayers[i][j].rectTransform.position, hiddenLayers[i + 1][k].rectTransform.position, 1.25F, linkImage, transform);
                 }
             }
         }
 
-        for (int i = 0; i < topology.neuronsPerHiddenLayer; i++)
+        for (int i = 0; i < topology.neuronsAtLayer[topology.hiddenLayerCount - 1]; i++)
         {
             for (int j = 0; j < DNA.OUTPUT_COUNT; j++)
             {
