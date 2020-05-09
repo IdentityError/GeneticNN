@@ -6,11 +6,21 @@ namespace Assets.Scripts.Trainers
     [System.Serializable]
     public class GATrainer : Trainer
     {
+        [Header("Paradigms")]
+        [Tooltip("Defines the NeuralNet mutation paradigm:" +
+        "\n1. WEIGHTS: only weights will be affected" +
+        "\n2. TOPOLOGY: only the topology will be affected" +
+        "\n3. HYBRID: both topology and weights will be affected")]
         [SerializeField] private Paradigms.MutationParadigm mutationParadigm;
+        [Tooltip("Defines the weights fill paradigm (Crossover and Mutation):" +
+        "\n1. COPY: weights will be copied from another existing neuron" +
+        "\n2. RANDOM: weights will be initialized as random" +
+        "\n3. HYBRID: weights will be a linear combination of the weights of another neuron and random ones")]
+        [SerializeField] private Paradigms.MissingWeightsFillParadigm weightsFillParadigm;
         [Space(5)]
         [Header("Parameters")]
         [Range(0, 1)]
-        [SerializeField] private float mutationPercentage;
+        [SerializeField] private float mutationRate;
 
         protected override void Train()
         {
@@ -22,23 +32,33 @@ namespace Assets.Scripts.Trainers
                 Mutation(childDNA);
                 newDnaPopulation[i] = childDNA;
             }
-            dnaPopulation = newDnaPopulation;
+            newDnaPopulation.CopyTo(dnaPopulation, 0);
         }
 
         private (DNA, DNA) Selection()
         {
-            //TODO dont pick already selected parents?
-            return (PickRandom(), PickRandom());
+            NormalizePopulationPickProbability();
+            //Pick first parent and temporarily set its fitness to 0 and renormalize the probabilities so it won't be picked as second parent
+            DNA first = PickRandom();
+            float firstFitness = first.fitness;
+            first.fitness = 0;
+            NormalizePopulationPickProbability();
+
+            //Picks second parent and reset the first parent fitness so it can be picked on the next iteration
+            DNA second = PickRandom();
+            first.fitness = firstFitness;
+
+            return (first, second);
         }
 
         private DNA Crossover(DNA parent, DNA parent1)
         {
-            return parent.Crossover(parent1, 2);
+            return parent.Crossover(parent1, weightsFillParadigm, 2);
         }
 
         private void Mutation(DNA childDNA)
         {
-            childDNA.Mutate(mutationParadigm, mutationPercentage);
+            childDNA.Mutate(mutationParadigm, weightsFillParadigm, mutationRate);
         }
 
         private DNA PickRandom()
@@ -50,6 +70,19 @@ namespace Assets.Scripts.Trainers
                 seed -= dnaPopulation[++index].pickProbability;
             }
             return dnaPopulation[index];
+        }
+
+        private void NormalizePopulationPickProbability()
+        {
+            float fitnessSum = 0F;
+            foreach (DNA individual in dnaPopulation)
+            {
+                fitnessSum += individual.fitness;
+            }
+            foreach (DNA individual in dnaPopulation)
+            {
+                individual.pickProbability = individual.fitness / fitnessSum;
+            }
         }
     }
 }

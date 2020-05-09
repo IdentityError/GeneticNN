@@ -7,15 +7,19 @@ namespace Assets.Scripts.Trainers
         protected DNA[] dnaPopulation;
         protected int populationNumber;
 
-        [SerializeField] private DNA.DnaTopology predefinedTopology = null;
+        [Space(5)]
+        [Header("Predefined Topology")]
+        [SerializeField] private int inputCount;
+        [SerializeField] private int outputCount;
+        [SerializeField] private int[] hiddenLayers = null;
 
         public DNA.DnaTopology GetPredefinedTopology()
         {
-            if (predefinedTopology == null)
-            {
-                predefinedTopology = new DNA.DnaTopology(1, new int[] { 1 });
-            }
-            return predefinedTopology;
+            int[] temp = new int[hiddenLayers.Length + 2];
+            hiddenLayers.CopyTo(temp, 1);
+            temp[0] = inputCount;
+            temp[temp.Length - 1] = outputCount;
+            return new DNA.DnaTopology(temp);
         }
 
         /// <summary>
@@ -27,7 +31,6 @@ namespace Assets.Scripts.Trainers
             populationNumber = dnaPopulation.Length;
             this.dnaPopulation = new DNA[populationNumber];
             dnaPopulation.CopyTo(this.dnaPopulation, 0);
-            this.dnaPopulation = dnaPopulation;
             this.Train();
             return this.dnaPopulation;
         }

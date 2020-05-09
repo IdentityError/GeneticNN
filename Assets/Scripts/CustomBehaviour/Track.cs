@@ -17,8 +17,8 @@ namespace Assets.Scripts.CustomBehaviour
 
         private void Awake()
         {
-            finishLine = TUtilsProvider.GetFirstGameObjectInChildrenWithTag(gameObject, "FinishLine", true);
-            startPoint = TUtilsProvider.GetFirstComponentInChildrenWithTag<Transform>(gameObject, "StartPoint", true);
+            finishLine = TUnityUtilsProvider.GetFirstGameObjectInChildrenWithTag(gameObject, "FinishLine", true);
+            startPoint = TUnityUtilsProvider.GetFirstComponentInChildrenWithTag<Transform>(gameObject, "StartPoint", true);
             trackLength = CalculateTrackLength();
         }
 

@@ -1,138 +1,108 @@
 ﻿using Assets.Scripts.Stores;
+using UnityEngine;
 
 [System.Serializable]
 public class DNA
 {
-    public const int INPUT_COUNT = 5;
-    public const int OUTPUT_COUNT = 2;
-
     public float fitness = 0F;
     public float pickProbability = 0F;
 
     [System.Serializable]
     public class DnaTopology
     {
-        public int hiddenLayerCount;
-        public int[] neuronsAtLayer;
+        public int layerCount;
+        [HideInInspector] public int[] neuronsAtLayer;
 
-        public DnaTopology(int hiddenLayerCount, int[] neuronsPerHiddenLayer)
+        private int linkNumber;
+
+        /// <summary>
+        ///   Get the total link number in this DNA
+        /// </summary>
+        public int GetLinkNumber()
         {
-            if (neuronsPerHiddenLayer.Length != hiddenLayerCount)
+            return linkNumber;
+        }
+
+        public int InputCount
+        {
+            get
             {
-                throw new System.Exception("Hidden layers neuron vector has different length than the hidden layer count!");
+                return neuronsAtLayer[0];
             }
-            this.hiddenLayerCount = hiddenLayerCount;
-            this.neuronsAtLayer = new int[hiddenLayerCount];
-            neuronsPerHiddenLayer.CopyTo(this.neuronsAtLayer, 0);
+        }
+
+        public int OutputCount
+        {
+            get
+            {
+                return neuronsAtLayer[layerCount - 1];
+            }
+        }
+
+        public DnaTopology(int[] neuronsAtLayer)
+        {
+            layerCount = neuronsAtLayer.Length;
+
+            this.neuronsAtLayer = new int[layerCount];
+            neuronsAtLayer.CopyTo(this.neuronsAtLayer, 0);
+
+            linkNumber = 0;
+            for (int i = 0; i < layerCount - 1; i++)
+            {
+                linkNumber += neuronsAtLayer[i] * neuronsAtLayer[i + 1];
+            }
         }
 
         public bool IsValid()
         {
-            if (hiddenLayerCount == 0) return true;
-            if (neuronsAtLayer.Length == 0) return true;
-            for (int i = 0; i < hiddenLayerCount; i++)
+            if (layerCount < 3) return false;
+            if (neuronsAtLayer.Length == 0) return false;
+            for (int i = 1; i < layerCount - 1; i++)
             {
-                if (neuronsAtLayer[i] == 0) return true;
+                if (neuronsAtLayer[i] == 0) return false;
             }
-            return false;
+            return true;
         }
-    }
 
-    [System.Serializable]
-    public class DnaWeights
-    {
-        public float[][] i_h0Weights;
-        public float[][][] intraNetWeights;
-        public float[][] hn_oWeights;
-
-        public DnaWeights(DnaTopology topology, float[][] i_h0Weights, float[][][] intraNetWeights, float[][] hn_oWeights)
+        public override string ToString()
         {
-            //Weights matrix for the first layer I_H0
-            this.i_h0Weights = new float[INPUT_COUNT][];
-            for (int i = 0; i < INPUT_COUNT; i++)
+            string code = "";
+            for (int i = 0; i < layerCount; i++)
             {
-                this.i_h0Weights[i] = new float[topology.neuronsAtLayer[0]];
-                for (int j = 0; j < topology.neuronsAtLayer[0]; j++)
+                code += "(" + neuronsAtLayer[i] + ")";
+                if (i < layerCount - 1)
                 {
-                    if (i_h0Weights == null)
-                    {
-                        this.i_h0Weights[i][j] = UnityEngine.Random.Range(-1F, 1F);
-                    }
-                    else
-                    {
-                        this.i_h0Weights[i][j] = i_h0Weights[i][j];
-                    }
+                    code += "->";
                 }
             }
-
-            //Weights matrices for all the hidden layers, 3D array required: intraNetWeights[layerNumber][neuron][neuron]
-            this.intraNetWeights = new float[topology.hiddenLayerCount - 1][][];
-            for (int i = 0; i < topology.hiddenLayerCount - 1; i++)
-            {
-                this.intraNetWeights[i] = new float[topology.neuronsAtLayer[i]][];
-                for (int j = 0; j < topology.neuronsAtLayer[i]; j++)
-                {
-                    this.intraNetWeights[i][j] = new float[topology.neuronsAtLayer[i + 1]];
-                    for (int k = 0; k < topology.neuronsAtLayer[i + 1]; k++)
-                    {
-                        if (intraNetWeights == null)
-                        {
-                            this.intraNetWeights[i][j][k] = UnityEngine.Random.Range(-1F, 1F);
-                        }
-                        else
-                        {
-                            this.intraNetWeights[i][j][k] = intraNetWeights[i][j][k];
-                        }
-                    }
-                }
-            }
-
-            //Weights matrix for last layer and output Hn_O
-            this.hn_oWeights = new float[topology.neuronsAtLayer[topology.hiddenLayerCount - 1]][];
-            for (int i = 0; i < topology.neuronsAtLayer[topology.hiddenLayerCount - 1]; i++)
-            {
-                this.hn_oWeights[i] = new float[OUTPUT_COUNT];
-                for (int j = 0; j < OUTPUT_COUNT; j++)
-                {
-                    if (hn_oWeights == null)
-                    {
-                        this.hn_oWeights[i][j] = UnityEngine.Random.Range(-1F, 1F);
-                    }
-                    else
-                    {
-                        this.hn_oWeights[i][j] = hn_oWeights[i][j];
-                    }
-                }
-            }
+            return code;
         }
     }
 
     public DnaTopology topology;
 
-    public DnaWeights weights;
+    public float[][][] weights;
 
     /// <summary>
     ///  Initialize a DNA with a certain topology and a random set of weights
     ///</summary>
-    public DNA(DnaTopology topology)
+    public DNA(DnaTopology topology) : this(topology, null)
     {
-        this.topology = new DnaTopology(topology.hiddenLayerCount, topology.neuronsAtLayer);
-        this.weights = new DnaWeights(this.topology, null, null, null);
     }
 
     /// <summary>
     ///   Initialize a specified DNA
     /// </summary>
-    public DNA(DnaTopology topology, DnaWeights weights)
+    public DNA(DnaTopology topology, float[][][] weights)
     {
-        this.topology = new DnaTopology(topology.hiddenLayerCount, topology.neuronsAtLayer);
-        this.weights = new DnaWeights(this.topology, weights.i_h0Weights, weights.intraNetWeights, weights.hn_oWeights);
+        this.topology = new DnaTopology(topology.neuronsAtLayer);
+        InitializeWeights(weights);
     }
 
     /// <summary>
     ///   Each element of each weights matrix will mutate with a mutationRate probability
     /// </summary>
-    public void Mutate(Paradigms.MutationParadigm mutationParadigm, float mutationRate)
+    public void Mutate(Paradigms.MutationParadigm mutationParadigm, Paradigms.MissingWeightsFillParadigm missingWeightsFillParadigm, float mutationRate)
     {
         switch (mutationParadigm)
         {
@@ -141,59 +111,112 @@ public class DNA
                 break;
 
             case Paradigms.MutationParadigm.TOPOLOGY:
-                MutateTopology(mutationRate);
+                MutateTopology(missingWeightsFillParadigm, mutationRate);
                 break;
 
             case Paradigms.MutationParadigm.HYBRID:
+                MutateTopology(missingWeightsFillParadigm, mutationRate / 2);
                 MutateWeights(mutationRate / 2);
-                MutateTopology(mutationRate / 2);
                 break;
         }
     }
 
-    private void MutateTopology(float mutationRate)
+    private void MutateTopology(Paradigms.MissingWeightsFillParadigm missingWeightsFillParadigm, float mutationRate)
     {
-        //TODO implement
+        bool mutated = false;
+        int mutationsNumber = UnityEngine.Random.Range(1, 1);
+        for (int i = 0; i < mutationsNumber; i++)
+        {
+            if (UnityEngine.Random.Range(0F, 1F) < mutationRate)
+            {
+                mutated = true;
+                //Select a random mutation type
+                Paradigms.TopologyMutationType type = (Paradigms.TopologyMutationType)UnityEngine.Random.Range(0, 2);
+
+                //Select a random hidden layer to mutate
+                int layer = UnityEngine.Random.Range(1, topology.layerCount - 1);
+                //TODO change bound values
+                //Select a random number of neurons
+                int neuronsNumber = UnityEngine.Random.Range(2, 14);
+                switch (type)
+                {
+                    case Paradigms.TopologyMutationType.HIDDEN_LAYER:
+                        bool add = Random.Range(0F, 1F) > 0.5F;
+                        if (add)
+                        {
+                            //Adding a new layer at position <layer> of <neuronsNumber> neurons
+                            topology.layerCount++;
+                            int[] temp1 = new int[topology.layerCount];
+                            TUtilsProvider.CopyArrayWithHolesAt(topology.neuronsAtLayer, temp1, new int[] { layer });
+                            topology.neuronsAtLayer = new int[topology.layerCount];
+                            temp1.CopyTo(topology.neuronsAtLayer, 0);
+                            topology.neuronsAtLayer[layer] = neuronsNumber;
+                        }
+                        else
+                        {
+                            //Removing a layer at position <layer>
+                            this.topology.layerCount--;
+
+                            int[] temp1 = new int[this.topology.layerCount];
+                            TUtilsProvider.CopyArrayWithExceptsAt(this.topology.neuronsAtLayer, temp1, new int[] { layer });
+                            this.topology.neuronsAtLayer = new int[this.topology.layerCount];
+                            temp1.CopyTo(this.topology.neuronsAtLayer, 0);
+                        }
+                        break;
+
+                    case Paradigms.TopologyMutationType.NEURONS_NUMBER_CHANGE:
+                        this.topology.neuronsAtLayer[layer] = neuronsNumber;
+                        break;
+                }
+            }
+            if (mutated)
+            {
+                //After the mutations, readapt the weights matrices dimensions
+                ReadaptWeightsMatricesToTopology(missingWeightsFillParadigm);
+            }
+        }
     }
 
     private void MutateWeights(float mutationRate)
     {
-        for (int i = 0; i < INPUT_COUNT; i++)
-        {
-            for (int j = 0; j < topology.neuronsAtLayer[0]; j++)
-            {
-                if (UnityEngine.Random.Range(0F, 1F) < mutationRate)
-                {
-                    //Debug.Log("MUTATED");
-                    this.weights.i_h0Weights[i][j] = UnityEngine.Random.Range(-1F, 1F);
-                }
-            }
-        }
+        int mutationsNumber = UnityEngine.Random.Range(1, topology.layerCount);
 
-        for (int i = 0; i < topology.hiddenLayerCount - 1; i++)
+        for (int i = 0; i < mutationsNumber; i++)
         {
-            for (int j = 0; j < topology.neuronsAtLayer[i]; j++)
+            if (UnityEngine.Random.Range(0F, 1F) < mutationRate)
             {
-                for (int k = 0; k < topology.neuronsAtLayer[i + 1]; k++)
+                int layer = UnityEngine.Random.Range(0, this.topology.layerCount - 1);
+                int row, col;
+                //Selected the input weight matrix
+                if (layer == 0)
                 {
-                    if (UnityEngine.Random.Range(0F, 1F) < mutationRate)
-                    {
-                        this.weights.intraNetWeights[i][j][k] = UnityEngine.Random.Range(-1F, 1F);
-                    }
+                    Debug.Log("Mutating the input matrix");
+                    row = UnityEngine.Random.Range(0, topology.InputCount);
+                    col = UnityEngine.Random.Range(0, this.topology.neuronsAtLayer[1]);
                 }
-            }
-        }
+                //Selected the output weight matrix
+                else if (layer == (this.topology.layerCount - 2))
+                {
+                    Debug.Log("Mutating the output matrix");
+                    row = UnityEngine.Random.Range(0, this.topology.neuronsAtLayer[layer]);
+                    col = UnityEngine.Random.Range(0, topology.OutputCount);
+                }
+                //Selected a hidden weight matrix
+                else
+                {
+                    Debug.Log("Mutating the matrix");
+                    row = UnityEngine.Random.Range(0, this.topology.neuronsAtLayer[layer]);
+                    col = UnityEngine.Random.Range(0, this.topology.neuronsAtLayer[layer + 1]);
+                }
 
-        for (int i = 0; i < topology.neuronsAtLayer[topology.hiddenLayerCount]; i++)
-        {
-            for (int j = 0; j < OUTPUT_COUNT; j++)
-            {
-                if (UnityEngine.Random.Range(0F, 1F) < mutationRate)
-                {
-                    this.weights.hn_oWeights[i][j] = UnityEngine.Random.Range(-1F, 1F);
-                }
+                this.weights[layer][row][col] = UnityEngine.Random.Range(0F, 1F);
             }
         }
+    }
+
+    private void ReadaptWeightsMatricesToTopology(Paradigms.MissingWeightsFillParadigm missingWeightsFillParadigm)
+    {
+        //TODO implement the rebuilding of the weights matrices
     }
 
     /// <summary>
@@ -205,45 +228,89 @@ public class DNA
     ///   </para>
     ///   <para> Return: the crossovered DNA </para>
     /// </summary>
-    public DNA Crossover(DNA partnerDna, int equality)
+    public DNA Crossover(DNA partnerDna, Paradigms.MissingWeightsFillParadigm missingWeightsFillParadigm, int equality)
     {
-        DNA childDna = new DNA(this.topology, this.weights);
+        //TODO implement topology crossover?
+        //Copy the DNA from the fitness with higher fitness
+        DNA childDna = this.fitness > partnerDna.fitness ? new DNA(this.topology, this.weights) : new DNA(partnerDna.topology, partnerDna.weights);
 
-        for (int i = 0; i < INPUT_COUNT; i++)
-        {
-            for (int j = 0; j < topology.neuronsAtLayer[0]; j++)
-            {
-                if ((i + j) % equality == 0)
-                {
-                    childDna.weights.i_h0Weights[i][j] = partnerDna.weights.i_h0Weights[i][j];
-                }
-            }
-        }
+        //Debug.Log(childDna.topology.ToString());
 
-        for (int i = 0; i < topology.hiddenLayerCount - 1; i++)
+        for (int i = 0; i < childDna.topology.layerCount - 2; i++)
         {
-            for (int j = 0; j < topology.neuronsAtLayer[i]; j++)
+            for (int j = 0; j < childDna.topology.neuronsAtLayer[i]; j++)
             {
-                for (int k = 0; k < topology.neuronsAtLayer[i + 1]; k++)
+                for (int k = 0; k < childDna.topology.neuronsAtLayer[i + 1]; k++)
                 {
                     if ((j + k) % equality == 0)
                     {
-                        childDna.weights.intraNetWeights[i][j][k] = partnerDna.weights.intraNetWeights[i][j][k];
+                        if (partnerDna.HasLinkAt(i, j, k))
+                        {
+                            childDna.weights[i][j][k] = partnerDna.weights[i][j][k];
+                        }
+                        else
+                        {
+                            switch (missingWeightsFillParadigm)
+                            {
+                                case Paradigms.MissingWeightsFillParadigm.RANDOM:
+                                    childDna.weights[i][j][k] = UnityEngine.Random.Range(0F, 1F);
+                                    break;
+
+                                case Paradigms.MissingWeightsFillParadigm.COPY:
+                                    childDna.weights[i][j][k] = UnityEngine.Random.Range(0F, 1F);
+                                    break;
+
+                                case Paradigms.MissingWeightsFillParadigm.HYBRID:
+                                    childDna.weights[i][j][k] = UnityEngine.Random.Range(0F, 1F);
+                                    break;
+                            }
+                        }
                     }
                 }
             }
         }
 
-        for (int i = 0; i < topology.neuronsAtLayer[topology.hiddenLayerCount]; i++)
+        return childDna;
+    }
+
+    /// <summary>
+    ///   Get the topological distance between two DNA
+    /// </summary>
+    public float TopologicalDistance(DNA from)
+    {
+        //TODO implement
+        return 0;
+    }
+
+    private void InitializeWeights(float[][][] weights)
+    {
+        this.weights = new float[topology.layerCount - 1][][];
+
+        for (int i = 0; i < topology.layerCount - 1; i++)
         {
-            for (int j = 0; j < OUTPUT_COUNT; j++)
+            this.weights[i] = new float[topology.neuronsAtLayer[i]][];
+            for (int j = 0; j < topology.neuronsAtLayer[i]; j++)
             {
-                if ((i + j) % equality == 0)
+                this.weights[i][j] = new float[topology.neuronsAtLayer[i + 1]];
+                for (int k = 0; k < topology.neuronsAtLayer[i + 1]; k++)
                 {
-                    childDna.weights.hn_oWeights[i][j] = partnerDna.weights.hn_oWeights[i][j];
+                    if (weights == null)
+                    {
+                        this.weights[i][j][k] = UnityEngine.Random.Range(-1F, 1F);
+                    }
+                    else
+                    {
+                        this.weights[i][j][k] = weights[i][j][k];
+                    }
                 }
             }
         }
-        return childDna;
+    }
+
+    public bool HasLinkAt(int layer, int row, int col)
+    {
+        return (layer > 0 && layer < weights.Length) &&
+               (row > 0 && row < weights[layer].Length) &&
+               (col > 0 && col < weights[layer][row].Length);
     }
 }

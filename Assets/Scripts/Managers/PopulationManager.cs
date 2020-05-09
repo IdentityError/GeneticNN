@@ -23,7 +23,7 @@ namespace Assets.Scripts.Managers
 
         private void Start()
         {
-            if (trainerProvider.ProvideTrainer().GetPredefinedTopology().IsValid())
+            if (!trainerProvider.ProvideTrainer().GetPredefinedTopology().IsValid())
             {
                 throw new System.Exception("Predefined Topology wrongly set!");
             }
@@ -100,12 +100,13 @@ namespace Assets.Scripts.Managers
         private float CalculateIndividualFitness(SimulationStats stats)
         {
             //TODO implement
-            return 0F;
+            return Random.Range(2F, 20F);
         }
 
         public void IndividualEndedSimulation(IIndividual subject)
         {
             subject.ProvideDNA().fitness = CalculateIndividualFitness(subject.ProvideStats());
+            Debug.Log("provided:" + subject.ProvideDNA().fitness);
             currentSimulating--;
             if (currentSimulating <= 0)
             {
@@ -115,22 +116,7 @@ namespace Assets.Scripts.Managers
 
         private void SimulationEnded()
         {
-            NormalizePopulationPickProbability();
             AdvanceGeneration();
-        }
-
-        private void NormalizePopulationPickProbability()
-        {
-            float fitnessSum = 0;
-            foreach (IIndividual individual in population)
-            {
-                fitnessSum += individual.ProvideDNA().fitness;
-            }
-
-            foreach (IIndividual individual in population)
-            {
-                individual.ProvideDNA().pickProbability = individual.ProvideDNA().fitness / fitnessSum;
-            }
         }
 
         public Track GetTrack()

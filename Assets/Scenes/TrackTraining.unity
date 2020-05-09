@@ -397,7 +397,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 8.69e-43, y: 0, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 0, y: 1.7993e-41, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
@@ -1118,7 +1118,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a05c13aecf02694eb9c02f46aad1cfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  populationNumber: 10
+  populationNumber: 3
   timeScale: 1
   individualPrefab: {fileID: 6791551976333570425, guid: dda260aae5911af48a27564e8179e873,
     type: 3}
@@ -1126,13 +1126,14 @@ MonoBehaviour:
   trainerProvider:
     trainingParadigm: 0
     gaTrainer:
-      predefinedTopology:
-        hiddenLayerCount: 4
-        neuronsAtLayer: 070000000b0000000700000005000000
+      inputCount: 5
+      outputCount: 2
+      hiddenLayers: 080000000c0000000600000004000000
       mutationParadigm: 1
-      mutationPercentage: 0.018
+      weightsFillParadigm: 1
+      mutationRate: 0.25
     bpaTrainer:
-      predefinedTopology:
-        hiddenLayerCount: 0
-        neuronsAtLayer: 
+      inputCount: 0
+      outputCount: 0
+      hiddenLayers: 
       learningRate: 0

@@ -158,7 +158,7 @@ public class CarIndividual : MonoBehaviour, IIndividual
                 Debug.DrawRay(transform.position, sensesDirections[i] * length, Color.blue);
             }
         }
-        neuralNetInput[DNA.INPUT_COUNT - 1] = throttle;
+        neuralNetInput[neuralNet.dna.topology.InputCount - 1] = throttle;
     }
 
     private void UpdateStats()
@@ -201,9 +201,9 @@ public class CarIndividual : MonoBehaviour, IIndividual
     public void SetDNA(DNA dna)
     {
         neuralNet = new NeuralNet(dna);
-        directionsCount = DNA.INPUT_COUNT - 1;
+        directionsCount = dna.topology.InputCount - 1;
         sensesDirections = new Vector3[directionsCount];
-        neuralNetInput = new float[DNA.INPUT_COUNT];
+        neuralNetInput = new float[dna.topology.InputCount];
         angleStride = 180F / (directionsCount + 1);
         netInitialized = true;
     }
