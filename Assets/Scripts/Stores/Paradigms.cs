@@ -8,6 +8,6 @@
 
         public enum MissingWeightsFillParadigm { COPY, RANDOM, HYBRID }
 
-        public enum TopologyMutationType { HIDDEN_LAYER, NEURONS_NUMBER_CHANGE }
+        public enum TopologyMutationType { HIDDEN_LAYER_ADD, NEURONS_NUMBER_CHANGE, HIDDEN_LAYER_REMOVE }
     }
 }

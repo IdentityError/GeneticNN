@@ -42,16 +42,20 @@ public class TUtilsProvider
 
         int elementToCopy = 0;
         int exIndex = 0;
-        for (int i = 0; i < from.Length; i++)
+
+        for (int i = 0; i < to.Length; i++)
         {
-            if (i != indexesExcepts[exIndex])
+            if (exIndex > indexesExcepts.Length - 1)
+            {
+                to.SetValue(from.GetValue(elementToCopy++), i);
+            }
+            else if (i != indexesExcepts[exIndex])
             {
                 to.SetValue(from.GetValue(elementToCopy++), i);
             }
             else
             {
-                if (exIndex < indexesExcepts.Length - 1)
-                    exIndex++;
+                exIndex++;
             }
         }
     }

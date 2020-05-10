@@ -61,6 +61,7 @@ namespace Assets.Scripts.Managers
                 population[i] = InstantiateIndividual(newDNAPopulation[i], i.ToString());
             }
             generationCount++;
+            uiManager?.DrawNetUI(population[0].ProvideDNA().topology);
         }
 
         private void InitializeAncestors()
@@ -106,7 +107,6 @@ namespace Assets.Scripts.Managers
         public void IndividualEndedSimulation(IIndividual subject)
         {
             subject.ProvideDNA().fitness = CalculateIndividualFitness(subject.ProvideStats());
-            Debug.Log("provided:" + subject.ProvideDNA().fitness);
             currentSimulating--;
             if (currentSimulating <= 0)
             {

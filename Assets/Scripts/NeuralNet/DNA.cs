@@ -10,7 +10,7 @@ public class DNA
     [System.Serializable]
     public class DnaTopology
     {
-        public int layerCount;
+        [HideInInspector] public int layerCount;
         [HideInInspector] public int[] neuronsAtLayer;
 
         private int linkNumber;
@@ -45,12 +45,7 @@ public class DNA
 
             this.neuronsAtLayer = new int[layerCount];
             neuronsAtLayer.CopyTo(this.neuronsAtLayer, 0);
-
-            linkNumber = 0;
-            for (int i = 0; i < layerCount - 1; i++)
-            {
-                linkNumber += neuronsAtLayer[i] * neuronsAtLayer[i + 1];
-            }
+            CalculateLinkNumber();
         }
 
         public bool IsValid()
@@ -66,7 +61,7 @@ public class DNA
 
         public override string ToString()
         {
-            string code = "";
+            string code = "Links Number: " + linkNumber + "\n";
             for (int i = 0; i < layerCount; i++)
             {
                 code += "(" + neuronsAtLayer[i] + ")";
@@ -76,6 +71,15 @@ public class DNA
                 }
             }
             return code;
+        }
+
+        public void CalculateLinkNumber()
+        {
+            linkNumber = 0;
+            for (int i = 0; i < layerCount - 1; i++)
+            {
+                linkNumber += neuronsAtLayer[i] * neuronsAtLayer[i + 1];
+            }
         }
     }
 
@@ -124,44 +128,43 @@ public class DNA
     private void MutateTopology(Paradigms.MissingWeightsFillParadigm missingWeightsFillParadigm, float mutationRate)
     {
         bool mutated = false;
-        int mutationsNumber = UnityEngine.Random.Range(1, 1);
+        int mutationsNumber = UnityEngine.Random.Range(1, 8);
+        mutationsNumber = 1;
         for (int i = 0; i < mutationsNumber; i++)
         {
             if (UnityEngine.Random.Range(0F, 1F) < mutationRate)
             {
                 mutated = true;
                 //Select a random mutation type
-                Paradigms.TopologyMutationType type = (Paradigms.TopologyMutationType)UnityEngine.Random.Range(0, 2);
+                Paradigms.TopologyMutationType type = GetTopologyMutationType();
 
                 //Select a random hidden layer to mutate
                 int layer = UnityEngine.Random.Range(1, topology.layerCount - 1);
+
                 //TODO change bound values
                 //Select a random number of neurons
                 int neuronsNumber = UnityEngine.Random.Range(2, 14);
+
+                int[] temp;
                 switch (type)
                 {
-                    case Paradigms.TopologyMutationType.HIDDEN_LAYER:
-                        bool add = Random.Range(0F, 1F) > 0.5F;
-                        if (add)
-                        {
-                            //Adding a new layer at position <layer> of <neuronsNumber> neurons
-                            topology.layerCount++;
-                            int[] temp1 = new int[topology.layerCount];
-                            TUtilsProvider.CopyArrayWithHolesAt(topology.neuronsAtLayer, temp1, new int[] { layer });
-                            topology.neuronsAtLayer = new int[topology.layerCount];
-                            temp1.CopyTo(topology.neuronsAtLayer, 0);
-                            topology.neuronsAtLayer[layer] = neuronsNumber;
-                        }
-                        else
-                        {
-                            //Removing a layer at position <layer>
-                            this.topology.layerCount--;
+                    case Paradigms.TopologyMutationType.HIDDEN_LAYER_ADD:
+                        //Adding a new layer at position <layer> of <neuronsNumber> neurons
+                        topology.layerCount++;
+                        temp = new int[topology.layerCount];
+                        TUtilsProvider.CopyArrayWithHolesAt(topology.neuronsAtLayer, temp, new int[] { layer });
+                        topology.neuronsAtLayer = new int[topology.layerCount];
+                        temp.CopyTo(topology.neuronsAtLayer, 0);
+                        topology.neuronsAtLayer[layer] = neuronsNumber;
+                        break;
 
-                            int[] temp1 = new int[this.topology.layerCount];
-                            TUtilsProvider.CopyArrayWithExceptsAt(this.topology.neuronsAtLayer, temp1, new int[] { layer });
-                            this.topology.neuronsAtLayer = new int[this.topology.layerCount];
-                            temp1.CopyTo(this.topology.neuronsAtLayer, 0);
-                        }
+                    case Paradigms.TopologyMutationType.HIDDEN_LAYER_REMOVE:
+                        //Removing a layer at position <layer>
+                        this.topology.layerCount--;
+                        temp = new int[this.topology.layerCount];
+                        TUtilsProvider.CopyArrayWithExceptsAt(this.topology.neuronsAtLayer, temp, new int[] { layer });
+                        this.topology.neuronsAtLayer = new int[this.topology.layerCount];
+                        temp.CopyTo(this.topology.neuronsAtLayer, 0);
                         break;
 
                     case Paradigms.TopologyMutationType.NEURONS_NUMBER_CHANGE:
@@ -169,11 +172,12 @@ public class DNA
                         break;
                 }
             }
-            if (mutated)
-            {
-                //After the mutations, readapt the weights matrices dimensions
-                ReadaptWeightsMatricesToTopology(missingWeightsFillParadigm);
-            }
+        }
+        if (mutated)
+        {
+            this.topology.CalculateLinkNumber();
+            //After the mutations, readapt the weights matrices dimensions
+            ReadaptWeightsToTopology(missingWeightsFillParadigm);
         }
     }
 
@@ -214,9 +218,44 @@ public class DNA
         }
     }
 
-    private void ReadaptWeightsMatricesToTopology(Paradigms.MissingWeightsFillParadigm missingWeightsFillParadigm)
+    private void ReadaptWeightsToTopology(Paradigms.MissingWeightsFillParadigm missingWeightsFillParadigm)
     {
-        //TODO implement the rebuilding of the weights matrices
+        //Build a new weights matrix array with correct dimensions
+        float[][][] newWeights = new float[topology.layerCount - 1][][];
+
+        for (int i = 0; i < topology.layerCount - 1; i++)
+        {
+            newWeights[i] = new float[topology.neuronsAtLayer[i]][];
+            for (int j = 0; j < topology.neuronsAtLayer[i]; j++)
+            {
+                newWeights[i][j] = new float[topology.neuronsAtLayer[i + 1]];
+                for (int k = 0; k < topology.neuronsAtLayer[i + 1]; k++)
+                {
+                    //If the link was already present, copy it
+                    if (HasLinkAt(i, j, k))
+                    {
+                        newWeights[i][j][k] = this.weights[i][j][k];
+                    }
+                    else
+                    {
+                        switch (missingWeightsFillParadigm)
+                        {
+                            case Paradigms.MissingWeightsFillParadigm.RANDOM:
+                                newWeights[i][j][k] = UnityEngine.Random.Range(-1F, 1F);
+                                break;
+
+                            case Paradigms.MissingWeightsFillParadigm.COPY:
+                                break;
+
+                            case Paradigms.MissingWeightsFillParadigm.HYBRID:
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+
+        this.weights = newWeights;
     }
 
     /// <summary>
@@ -278,8 +317,21 @@ public class DNA
     /// </summary>
     public float TopologicalDistance(DNA from)
     {
-        //TODO implement
-        return 0;
+        float distance = 0;
+        int bound = from.topology.layerCount < this.topology.layerCount ? from.topology.layerCount : this.topology.layerCount;
+        for (int i = 0; i < bound; i++)
+        {
+            distance += TMath.Abs(from.topology.neuronsAtLayer[i] - this.topology.neuronsAtLayer[i]);
+        }
+        for (int i = bound; i < from.topology.layerCount; i++)
+        {
+            distance += from.topology.neuronsAtLayer[i];
+        }
+        for (int i = bound; i < this.topology.layerCount; i++)
+        {
+            distance += this.topology.neuronsAtLayer[i];
+        }
+        return distance;
     }
 
     private void InitializeWeights(float[][][] weights)
@@ -307,10 +359,22 @@ public class DNA
         }
     }
 
-    public bool HasLinkAt(int layer, int row, int col)
+    private bool HasLinkAt(int layer, int row, int col)
     {
-        return (layer > 0 && layer < weights.Length) &&
-               (row > 0 && row < weights[layer].Length) &&
-               (col > 0 && col < weights[layer][row].Length);
+        return (layer >= 0 && layer < weights.Length) &&
+               (row >= 0 && row < weights[layer].Length) &&
+               (col >= 0 && col < weights[layer][row].Length);
+    }
+
+    private Paradigms.TopologyMutationType GetTopologyMutationType()
+    {
+        Paradigms.TopologyMutationType[] paradigms = new Paradigms.TopologyMutationType[3];
+        paradigms[0] = Paradigms.TopologyMutationType.HIDDEN_LAYER_ADD;
+        paradigms[1] = Paradigms.TopologyMutationType.NEURONS_NUMBER_CHANGE;
+        if (this.topology.layerCount > 3)
+        {
+            paradigms[2] = Paradigms.TopologyMutationType.HIDDEN_LAYER_REMOVE;
+        }
+        return paradigms[UnityEngine.Random.Range(0, 3)];
     }
 }

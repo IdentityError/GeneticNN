@@ -19,7 +19,8 @@ namespace Assets.Scripts.Trainers
             hiddenLayers.CopyTo(temp, 1);
             temp[0] = inputCount;
             temp[temp.Length - 1] = outputCount;
-            return new DNA.DnaTopology(temp);
+            DNA.DnaTopology top = new DNA.DnaTopology(temp);
+            return top;
         }
 
         /// <summary>

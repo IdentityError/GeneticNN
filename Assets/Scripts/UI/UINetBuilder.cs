@@ -19,6 +19,7 @@ public class UINetBuilder : MonoBehaviour
 
     public void DrawNetUI(DNA.DnaTopology topology)
     {
+        Clear();
         verticalStride = new float[topology.layerCount];
         for (int i = 0; i < topology.layerCount; i++)
         {
@@ -71,6 +72,14 @@ public class UINetBuilder : MonoBehaviour
                     TUtilsUI.GetInstance().DrawSpriteLine(layers[i][j].rectTransform.position, layers[i + 1][k].rectTransform.position, 1.25F, linkImage, transform);
                 }
             }
+        }
+    }
+
+    private void Clear()
+    {
+        foreach (Transform child in transform)
+        {
+            Destroy(child.gameObject);
         }
     }
 }
