@@ -45,5 +45,10 @@ namespace Assets.Scripts.CustomBehaviour
         {
             return startPoint;
         }
+
+        public string GetId()
+        {
+            return gameObject.name;
+        }
     }
 }

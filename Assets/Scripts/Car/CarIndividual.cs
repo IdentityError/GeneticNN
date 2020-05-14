@@ -1,8 +1,10 @@
 ﻿using Assets.Scripts.Interfaces;
-using Assets.Scripts.Managers;
+using Assets.Scripts.NeuralNet;
+using Assets.Scripts.TWEANN;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class CarIndividual : MonoBehaviour, IIndividual
+public class CarIndividual : MonoBehaviour, ISimulatingIndividual
 {
     [Header("Specifications")]
     public Wheel[] wheels;
@@ -34,16 +36,18 @@ public class CarIndividual : MonoBehaviour, IIndividual
     private float ackermanAngleLeft;
     private int directionsCount;
     private Vector3[] sensesDirections;
-    private float[] neuralNetInput;
-    private float[] neuralNetOutput;
+    private double[] neuralNetInput;
+    private double[] neuralNetOutput;
     private bool endedSimulation = false;
     private bool netInitialized = false;
     private float angleStride;
     [HideInInspector] public Vector3 lastPosition;
     private new Rigidbody rigidbody;
 
-    [HideInInspector] public NeuralNet neuralNet;
-
+    private NeuralNetwork neuralNet;
+    private Species species;
+    private double fitness;
+    private double pickProbability;
     private PopulationManager populationManager;
 
     private void Start()
@@ -59,7 +63,7 @@ public class CarIndividual : MonoBehaviour, IIndividual
 
         if (populationManager != null)
         {
-            stats.trackID = populationManager.GetTrack().name;
+            stats.trackID = populationManager.GetTrack().GetId();
         }
     }
 
@@ -102,8 +106,8 @@ public class CarIndividual : MonoBehaviour, IIndividual
         }
         else
         {
-            steering = neuralNetOutput[0];  //Input.GetAxis("Horizontal");
-            throttle = neuralNetOutput[1];  //Input.GetAxis("Vertical");
+            steering = (float)neuralNetOutput[0];
+            throttle = (float)neuralNetOutput[1];
         }
         if (steering > 0)
         {
@@ -138,6 +142,7 @@ public class CarIndividual : MonoBehaviour, IIndividual
     private void Sense()
     {
         RaycastHit[] hits = new RaycastHit[directionsCount];
+        List<double> netInputs = new List<double>();
         for (int i = 0; i < directionsCount; i++)
         {
             float currentAngle = angleStride * (i + 1);
@@ -148,7 +153,7 @@ public class CarIndividual : MonoBehaviour, IIndividual
 
             if (Physics.Raycast(transform.position, sensesDirections[i], out hits[i], length, LayerMask.GetMask("Obstacles")))
             {
-                float inversedNormalizedDistance = (hits[i].distance / length);
+                double inversedNormalizedDistance = (hits[i].distance / length);
                 neuralNetInput[i] = inversedNormalizedDistance;
                 Debug.DrawRay(transform.position, hits[i].point - transform.position, Color.green);
             }
@@ -158,7 +163,7 @@ public class CarIndividual : MonoBehaviour, IIndividual
                 Debug.DrawRay(transform.position, sensesDirections[i] * length, Color.blue);
             }
         }
-        neuralNetInput[neuralNet.dna.topology.InputCount - 1] = throttle;
+        neuralNetInput[neuralNet.GetGenotype().InputCount - 1] = throttle;
     }
 
     private void UpdateStats()
@@ -183,7 +188,7 @@ public class CarIndividual : MonoBehaviour, IIndividual
 
     public CarIndividualData GetIndividualData()
     {
-        return new CarIndividualData(neuralNet.dna, neuralNet.dna.fitness);
+        return new CarIndividualData(neuralNet.GetGenotype(), ProvideFitness());
     }
 
     #region Interface
@@ -193,24 +198,55 @@ public class CarIndividual : MonoBehaviour, IIndividual
         this.populationManager = populationManager;
     }
 
-    public DNA ProvideDNA()
+    public NeuralNetwork ProvideNeuralNet()
     {
-        return this.neuralNet.dna;
+        return this.neuralNet;
     }
 
-    public void SetDNA(DNA dna)
+    public void SetNeuralNet(NeuralNetwork net)
     {
-        neuralNet = new NeuralNet(dna);
-        directionsCount = dna.topology.InputCount - 1;
+        neuralNet = net;
+        Genotype gen = neuralNet.GetGenotype();
+        directionsCount = gen.InputCount - 1;
         sensesDirections = new Vector3[directionsCount];
-        neuralNetInput = new float[dna.topology.InputCount];
+        neuralNetInput = new double[gen.InputCount];
         angleStride = 180F / (directionsCount + 1);
         netInitialized = true;
     }
 
-    public SimulationStats ProvideStats()
+    public SimulationStats ProvideSimulationStats()
     {
         return stats;
+    }
+
+    public double ProvideFitness()
+    {
+        return this.fitness;
+    }
+
+    public void SetFitness(double fitness)
+    {
+        this.fitness = fitness;
+    }
+
+    public double ProvidePickProbability()
+    {
+        return pickProbability;
+    }
+
+    public void SetPickProbability(double pickProbability)
+    {
+        this.pickProbability = pickProbability;
+    }
+
+    public void SetSimulationStats(SimulationStats stats)
+    {
+        this.stats = stats;
+    }
+
+    public Species ProvideSpecies()
+    {
+        return species;
     }
 
     #endregion Interface

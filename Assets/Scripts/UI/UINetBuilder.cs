@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Assets.Scripts.MachineLearning;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class UINetBuilder : MonoBehaviour
@@ -37,6 +38,35 @@ public class UINetBuilder : MonoBehaviour
         DrawNeurons(topology);
         DrawLinks(topology);
     }
+
+    //public void DrawNeuralNetUI(Genotype genotype)
+    //{
+    //    List<Tuple<int, int>> neurons = new List<Tuple<int, int>>();
+    //    neurons.Add(Tuple.Create(0, genotype.InputCount));
+    //    int number = 0;
+    //    int layer = 0;
+    //    List<Tuple<int, List<NodeGene>>> currentLayer = new List<Tuple<int, List<NodeGene>>>();
+    //    if (genotype.HiddenCount != 0)
+    //    {
+    //        foreach (NodeGene node in genotype.all)
+    //        {
+    //            if (node.GetType() == NodeType.HIDDEN)
+    //            {
+    //                foreach (LinkGene link in node.GetIncomingLinks())
+    //                {
+    //                    if (link.From().GetType() == NodeType.INPUT)
+    //                    {
+    //                        number++;
+    //                        if (!currentLayer.Contains(node))
+    //                        {
+    //                            currentLayer.Add(node);
+    //                        }
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    }
+    //}
 
     private Image DrawNeuronUI(float x, float y)
     {

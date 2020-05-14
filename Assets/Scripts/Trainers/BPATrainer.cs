@@ -4,11 +4,11 @@ using UnityEngine;
 namespace Assets.Scripts.Trainers
 {
     [System.Serializable]
-    public class BPATrainer : Trainer
+    public class BPATrainer
     {
         [SerializeField] private float learningRate;
 
-        protected override void Train()
+        protected void Train()
         {
             throw new NotImplementedException();
         }

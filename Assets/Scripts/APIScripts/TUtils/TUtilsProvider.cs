@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 public class TUtilsProvider
 {
@@ -58,5 +59,24 @@ public class TUtilsProvider
                 exIndex++;
             }
         }
+    }
+
+    public static List<Tuple<Type1, Type2>> ZipWithPredicate<Type1, Type2>(List<Type1> first, List<Type2> second, Func<Type1, Type2, bool> predicate)
+    {
+        List<Tuple<Type1, Type2>> res = new List<Tuple<Type1, Type2>>();
+        IEnumerator<Type2> num2 = second.GetEnumerator();
+        num2.MoveNext();
+        foreach (Type1 elem in first)
+        {
+            if (predicate(elem, num2.Current))
+            {
+                res.Add(Tuple.Create(elem, num2.Current));
+                if (!num2.MoveNext())
+                {
+                    break;
+                }
+            }
+        }
+        return res;
     }
 }

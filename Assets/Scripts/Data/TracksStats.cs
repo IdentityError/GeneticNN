@@ -54,7 +54,7 @@ public class TracksStats
             if (tracksStats[i].individualData.GetFitness() > max)
             {
                 current = tracksStats[i];
-                max = tracksStats[i].individualData.GetFitness();
+                max = (float)tracksStats[i].individualData.GetFitness();
             }
         }
         return current;

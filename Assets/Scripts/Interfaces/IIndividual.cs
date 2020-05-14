@@ -1,11 +1,17 @@
-﻿using Assets.Scripts.Managers;
+﻿using Assets.Scripts.TWEANN;
 
 namespace Assets.Scripts.Interfaces
 {
-    public interface IIndividual : IDNAHolder
+    public interface IIndividual : INeuralNetHolder
     {
-        void SetPopulationManager(PopulationManager populationManager);
+        double ProvideFitness();
 
-        SimulationStats ProvideStats();
+        void SetFitness(double fitness);
+
+        double ProvidePickProbability();
+
+        void SetPickProbability(double pickProbability);
+
+        Species ProvideSpecies();
     }
 }

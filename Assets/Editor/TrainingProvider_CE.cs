@@ -1,9 +1,9 @@
-﻿using Assets.Scripts.Providers;
-using Assets.Scripts.Stores;
+﻿using Assets.Scripts.Stores;
+using Assets.Scripts.TWEANN;
 using UnityEditor;
 using UnityEngine;
 
-[CustomPropertyDrawer(typeof(TrainerProvider))]
+[CustomPropertyDrawer(typeof(PopulationTrainerProvider))]
 public class TrainingProvider_CE : PropertyDrawer
 {
     private SerializedProperty gaTrainerProp, bpaTrainerProp, trainingParadigmProp;

@@ -1,21 +1,23 @@
-﻿[System.Serializable]
+﻿using Assets.Scripts.NeuralNet;
+
+[System.Serializable]
 public class CarIndividualData
 {
-    private DNA dna;
-    private float fitness;
+    private Genotype genotype;
+    private double fitness;
 
-    public CarIndividualData(DNA dna, float fitness)
+    public CarIndividualData(Genotype genotype, double fitness)
     {
-        this.dna = dna;
+        this.genotype = genotype;
         this.fitness = fitness;
     }
 
-    public DNA GetDNA()
+    public Genotype GetGenotype()
     {
-        return this.dna;
+        return this.genotype;
     }
 
-    public float GetFitness()
+    public double GetFitness()
     {
         return this.fitness;
     }

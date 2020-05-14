@@ -1,9 +1,9 @@
 ﻿using Assets.Scripts.CustomBehaviour;
 using Assets.Scripts.Interfaces;
-using Assets.Scripts.Providers;
+using Assets.Scripts.NeuralNet;
 using UnityEngine;
 
-namespace Assets.Scripts.Managers
+namespace Assets.Scripts.TWEANN
 {
     public class PopulationManager : MonoBehaviour
     {
@@ -14,24 +14,19 @@ namespace Assets.Scripts.Managers
         [SerializeField] private GameObject individualPrefab;
         [SerializeField] private Track track;
         [Header("Training")]
-        [SerializeField] private TrainerProvider trainerProvider;
+        [SerializeField] private PopulationTrainerProvider trainerProvider;
 
-        private IIndividual[] population;
+        private ISimulatingIndividual[] population;
         private int generationCount = 0;
         private int currentSimulating;
         private UIManager uiManager;
 
         private void Start()
         {
-            if (!trainerProvider.ProvideTrainer().GetPredefinedTopology().IsValid())
-            {
-                throw new System.Exception("Predefined Topology wrongly set!");
-            }
-
             uiManager = FindObjectOfType<UIManager>();
-            uiManager?.DrawNetUI(trainerProvider.ProvideTrainer().GetPredefinedTopology());
+            //uiManager?.DrawNetUI(trainerProvider.ProvideTrainer().GetPredefinedTopologyDescriptor());
 
-            population = new IIndividual[populationNumber];
+            population = new ISimulatingIndividual[populationNumber];
             InitializeAncestors();
         }
 
@@ -47,54 +42,33 @@ namespace Assets.Scripts.Managers
 
         private void AdvanceGeneration()
         {
-            DNA[] newDNAPopulation = trainerProvider.ProvideTrainer().Train(BuildDNAPopulation());
-            for (int i = 0; i < populationNumber; i++)
-            {
-                if (population[i] != null)
-                {
-                    Destroy(((MonoBehaviour)population[i]).gameObject);
-                }
-            }
-
-            for (int i = 0; i < populationNumber; i++)
-            {
-                population[i] = InstantiateIndividual(newDNAPopulation[i], i.ToString());
-            }
+            trainerProvider.ProvideTrainer().Train(population);
+            ResetPopulation();
             generationCount++;
-            uiManager?.DrawNetUI(population[0].ProvideDNA().topology);
+            //uiManager?.DrawNetUI(population[0].ProvideNeuralNet().topology);
         }
 
         private void InitializeAncestors()
         {
             for (int i = 0; i < populationNumber; i++)
             {
-                population[i] = InstantiateIndividual(new DNA(trainerProvider.ProvideTrainer().GetPredefinedTopology()), i.ToString());
+                population[i] = InstantiateIndividual(new NeuralNetwork(new Genotype(trainerProvider.ProvideTrainer().GetPredefinedTopologyDescriptor())), i.ToString());
             }
             generationCount++;
             currentSimulating = populationNumber;
         }
 
-        private DNA[] BuildDNAPopulation()
-        {
-            DNA[] dnaPopulation = new DNA[populationNumber];
-            for (int i = 0; i < populationNumber; i++)
-            {
-                dnaPopulation[i] = population[i].ProvideDNA();
-            }
-            return dnaPopulation;
-        }
-
-        private IIndividual InstantiateIndividual(DNA dna, string name)
+        private ISimulatingIndividual InstantiateIndividual(NeuralNetwork neuralNet, string name)
         {
             GameObject obj = Instantiate(individualPrefab, track.GetStartPoint().localPosition, track.GetStartPoint().rotation);
             obj.name = name;
-            IIndividual individual = obj.GetComponent<IIndividual>();
+            ISimulatingIndividual individual = obj.GetComponent<ISimulatingIndividual>();
             if (individual == null)
             {
-                throw new System.Exception("The individual prefab is not implementing the IIndividual interface");
+                throw new System.Exception("The individual prefab is not implementing the ISimulatingIndividual interface");
             }
             individual.SetPopulationManager(this);
-            individual.SetDNA(dna);
+            individual.SetNeuralNet(neuralNet);
             return individual;
         }
 
@@ -104,9 +78,9 @@ namespace Assets.Scripts.Managers
             return Random.Range(2F, 20F);
         }
 
-        public void IndividualEndedSimulation(IIndividual subject)
+        public void IndividualEndedSimulation(ISimulatingIndividual subject)
         {
-            subject.ProvideDNA().fitness = CalculateIndividualFitness(subject.ProvideStats());
+            subject.SetFitness(CalculateIndividualFitness(subject.ProvideSimulationStats()));
             currentSimulating--;
             if (currentSimulating <= 0)
             {
@@ -122,6 +96,19 @@ namespace Assets.Scripts.Managers
         public Track GetTrack()
         {
             return track;
+        }
+
+        private void ResetPopulation()
+        {
+            for (int i = 0; i < populationNumber; i++)
+            {
+                MonoBehaviour current = (MonoBehaviour)population[i];
+                current.transform.localPosition = track.GetStartPoint().position;
+                current.transform.localRotation = track.GetStartPoint().rotation;
+                population[i].SetFitness(0);
+                population[i].SetPickProbability(0);
+                population[i].SetSimulationStats(new SimulationStats(0, 0, 0, track.GetId()));
+            }
         }
     }
 }

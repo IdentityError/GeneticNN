@@ -1,23 +1,18 @@
 ﻿using Assets.Scripts.Stores;
-using Assets.Scripts.Trainers;
 
-namespace Assets.Scripts.Providers
+namespace Assets.Scripts.TWEANN
 {
     [System.Serializable]
-    public class TrainerProvider
+    public class PopulationTrainerProvider
     {
         public Paradigms.TrainingParadigm trainingParadigm;
 
-        public GATrainer gaTrainer = new GATrainer();
-        public BPATrainer bpaTrainer = new BPATrainer();
+        public TrainerNEAT gaTrainer = new TrainerNEAT();
 
-        public Trainer ProvideTrainer()
+        public PopulationTrainer ProvideTrainer()
         {
             switch (trainingParadigm)
             {
-                case Paradigms.TrainingParadigm.BPA:
-                    return bpaTrainer;
-
                 case Paradigms.TrainingParadigm.GENETIC:
                     return gaTrainer;
 

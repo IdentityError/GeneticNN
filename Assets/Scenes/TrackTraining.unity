@@ -397,7 +397,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 1.7993e-41, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 0, y: 1.9557e-41, z: 0, w: 3.984375}
   m_UseBoundingSphereOverride: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
@@ -1118,7 +1118,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a05c13aecf02694eb9c02f46aad1cfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  populationNumber: 3
+  populationNumber: 2
   timeScale: 1
   individualPrefab: {fileID: 6791551976333570425, guid: dda260aae5911af48a27564e8179e873,
     type: 3}
@@ -1126,14 +1126,31 @@ MonoBehaviour:
   trainerProvider:
     trainingParadigm: 0
     gaTrainer:
-      inputCount: 5
-      outputCount: 2
-      hiddenLayers: 080000000c0000000600000004000000
-      mutationParadigm: 1
-      weightsFillParadigm: 1
-      mutationRate: 0.25
-    bpaTrainer:
-      inputCount: 0
-      outputCount: 0
-      hiddenLayers: 
-      learningRate: 0
+      descriptor:
+        inputCount: 5
+        outputCount: 2
+        hiddenCount: 0
+        links:
+        - fromId: 1
+          toId: 6
+        - fromId: 1
+          toId: 7
+        - fromId: 2
+          toId: 6
+        - fromId: 2
+          toId: 7
+        - fromId: 3
+          toId: 6
+        - fromId: 3
+          toId: 7
+        - fromId: 4
+          toId: 6
+        - fromId: 4
+          toId: 7
+        - fromId: 5
+          toId: 6
+        - fromId: 5
+          toId: 7
+      mutationParadigm: 0
+      weightsFillParadigm: 0
+      mutationRate: 0

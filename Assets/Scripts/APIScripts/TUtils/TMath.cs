@@ -19,9 +19,9 @@ public static class TMath
     /// <summary>
     ///   Return: hyperbolic tangent
     /// </summary>
-    public static float Tanh(float x)
+    public static double Tanh(double x)
     {
-        float exp = (float)Math.Exp(2 * x);
+        double exp = (double)Math.Exp(2 * x);
         return (exp - 1) / (exp + 1);
     }
 
