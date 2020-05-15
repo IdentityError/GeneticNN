@@ -1,5 +1,4 @@
 ﻿using Assets.Scripts.CustomBehaviour;
-using Assets.Scripts.Interfaces;
 using Assets.Scripts.NeuralNet;
 using UnityEngine;
 

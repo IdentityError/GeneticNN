@@ -1,5 +1,4 @@
-﻿using Assets.Scripts.Interfaces;
-using Assets.Scripts.NeuralNet;
+﻿using Assets.Scripts.NeuralNet;
 using Assets.Scripts.TWEANN;
 using UnityEngine;
 

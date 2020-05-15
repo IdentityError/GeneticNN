@@ -20,10 +20,6 @@ public class TrainingProvider_CE : PropertyDrawer
             case Paradigms.TrainingParadigm.GENETIC:
                 EditorGUI.PropertyField(rect1, gaTrainerProp, true);
                 break;
-
-            case Paradigms.TrainingParadigm.BPA:
-                EditorGUI.PropertyField(rect1, bpaTrainerProp, true);
-                break;
         }
 
         EditorGUI.EndProperty();
@@ -40,9 +36,6 @@ public class TrainingProvider_CE : PropertyDrawer
         {
             case Paradigms.TrainingParadigm.GENETIC:
                 return 2 * EditorGUIUtility.singleLineHeight + (gaTrainerProp.isExpanded ? EditorGUI.GetPropertyHeight(gaTrainerProp) : 0);
-
-            case Paradigms.TrainingParadigm.BPA:
-                return 2 * EditorGUIUtility.singleLineHeight + (bpaTrainerProp.isExpanded ? EditorGUI.GetPropertyHeight(bpaTrainerProp) : 0);
         }
         return base.GetPropertyHeight(property, label);
     }

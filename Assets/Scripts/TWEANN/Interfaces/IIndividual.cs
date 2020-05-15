@@ -1,6 +1,6 @@
-﻿using Assets.Scripts.TWEANN;
+﻿using Assets.Scripts.Interfaces;
 
-namespace Assets.Scripts.Interfaces
+namespace Assets.Scripts.TWEANN
 {
     public interface IIndividual : INeuralNetHolder
     {
