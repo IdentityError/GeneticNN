@@ -43,8 +43,14 @@ namespace Assets.Scripts.TWEANN
         private void AdvanceGeneration()
         {
             trainerProvider.ProvideTrainer().Train(population);
+            //foreach (IIndividual ind in population)
+            //{
+            //    Debug.Log(ind.ProvideNeuralNet().GetGenotype().ToString());
+            //}
             ResetPopulation();
             generationCount++;
+            currentSimulating = populationNumber;
+            uiManager.UpdateGenerationCount(generationCount);
             //uiManager?.DrawNetUI(population[0].ProvideNeuralNet().topology);
         }
 
@@ -72,19 +78,30 @@ namespace Assets.Scripts.TWEANN
             return individual;
         }
 
-        private float CalculateIndividualFitness(SimulationStats stats)
+        private float FitnessFunction(SimulationStats stats)
         {
-            //TODO implement
-            return Random.Range(2F, 20F);
+            return (2F * stats.averageThrottle + stats.distance) * stats.time;
         }
 
         public void IndividualEndedSimulation(ISimulatingIndividual subject)
         {
-            subject.SetFitness(CalculateIndividualFitness(subject.ProvideSimulationStats()));
+            //subject.SetFitness(FitnessFunction(subject.ProvideSimulationStats()));
             currentSimulating--;
             if (currentSimulating <= 0)
             {
                 SimulationEnded();
+            }
+        }
+
+        public void ForceSimulationEnd()
+        {
+            foreach (ISimulatingIndividual individual in population)
+            {
+                if (individual.IsSimulating())
+                {
+                    individual.StopSimulating();
+                    IndividualEndedSimulation(individual);
+                }
             }
         }
 
@@ -102,12 +119,9 @@ namespace Assets.Scripts.TWEANN
         {
             for (int i = 0; i < populationNumber; i++)
             {
-                MonoBehaviour current = (MonoBehaviour)population[i];
-                current.transform.localPosition = track.GetStartPoint().position;
-                current.transform.localRotation = track.GetStartPoint().rotation;
-                population[i].SetFitness(0);
                 population[i].SetPickProbability(0);
                 population[i].SetSimulationStats(new SimulationStats(0, 0, 0, track.GetId()));
+                population[i].ResetStatus();
             }
         }
     }

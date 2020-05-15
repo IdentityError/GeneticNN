@@ -20,6 +20,11 @@ namespace Assets.Scripts.NeuralNet
         /// <returns> </returns>
         public List<double> FeedForward(List<double> inputs)
         {
+            foreach (NodeGene node in genotype.all)
+            {
+                node.ResetActivation();
+            }
+
             //Set the inputs
             foreach (var item in inputs.Zip(genotype.inputs, Tuple.Create))
             {
@@ -44,9 +49,7 @@ namespace Assets.Scripts.NeuralNet
         /// <returns> </returns>
         public double[] FeedForward(double[] inputs)
         {
-            List<double> inputsList = inputs.ToList();
-            List<double> outputsList = FeedForward(inputsList);
-            return outputsList.ToArray();
+            return FeedForward(inputs.ToList()).ToArray();
         }
 
         public Genotype GetGenotype()

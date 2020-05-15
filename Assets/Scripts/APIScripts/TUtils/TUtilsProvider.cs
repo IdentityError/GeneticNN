@@ -61,18 +61,26 @@ public class TUtilsProvider
         }
     }
 
+    /// <summary>
+    ///   For each element of the first list, zips the first predicate matching element from the
+    ///   second list
+    /// </summary>
+    /// <typeparam name="Type1"> </typeparam>
+    /// <typeparam name="Type2"> </typeparam>
+    /// <param name="first"> </param>
+    /// <param name="second"> </param>
+    /// <param name="predicate"> </param>
+    /// <returns> </returns>
     public static List<Tuple<Type1, Type2>> ZipWithPredicate<Type1, Type2>(List<Type1> first, List<Type2> second, Func<Type1, Type2, bool> predicate)
     {
         List<Tuple<Type1, Type2>> res = new List<Tuple<Type1, Type2>>();
-        IEnumerator<Type2> num2 = second.GetEnumerator();
-        num2.MoveNext();
         foreach (Type1 elem in first)
         {
-            if (predicate(elem, num2.Current))
+            foreach (Type2 elem2 in second)
             {
-                res.Add(Tuple.Create(elem, num2.Current));
-                if (!num2.MoveNext())
+                if (predicate(elem, elem2))
                 {
+                    res.Add(Tuple.Create(elem, elem2));
                     break;
                 }
             }

@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# CS0659: Il tipo esegue l'override di Object.Equals(object o) ma non esegue l'override di Object.GetHashCode()
+dotnet_diagnostic.CS0659.severity = silent

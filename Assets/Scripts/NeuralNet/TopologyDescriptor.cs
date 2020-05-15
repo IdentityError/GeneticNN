@@ -27,5 +27,12 @@ namespace Assets.Scripts.NeuralNet
         {
             get => inputCount + hiddenCount + outputCount;
         }
+
+        public TopologyDescriptor(int inputCount, int hiddenCount, int outputCount)
+        {
+            this.inputCount = inputCount;
+            this.hiddenCount = hiddenCount;
+            this.outputCount = outputCount;
+        }
     }
 }

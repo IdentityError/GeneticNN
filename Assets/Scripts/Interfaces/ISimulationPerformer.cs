@@ -9,5 +9,11 @@ namespace Assets.Scripts.Interfaces
         SimulationStats ProvideSimulationStats();
 
         void SetSimulationStats(SimulationStats stats);
+
+        void ResetStatus();
+
+        bool IsSimulating();
+
+        void StopSimulating();
     }
 }

@@ -397,7 +397,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 1.9557e-41, z: 0, w: 3.984375}
+  m_BoundingSphereOverride: {x: 0, y: 2.0481e-41, z: 0, w: 9.276846e-10}
   m_UseBoundingSphereOverride: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
@@ -438,6 +438,7 @@ GameObject:
   - component: {fileID: 860209644}
   - component: {fileID: 860209643}
   - component: {fileID: 860209642}
+  - component: {fileID: 860209645}
   m_Layer: 0
   m_Name: EventSystem
   m_TagString: Untagged
@@ -493,6 +494,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &860209645
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 860209641}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17d07b5f084e13c4b9e8989c46527142, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1109427367 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4514718876575507270, guid: 1a35ae9d94187dd4b80b70e89813f56d,
@@ -1118,8 +1131,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a05c13aecf02694eb9c02f46aad1cfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  populationNumber: 2
-  timeScale: 1
+  populationNumber: 40
+  timeScale: 2
   individualPrefab: {fileID: 6791551976333570425, guid: dda260aae5911af48a27564e8179e873,
     type: 3}
   track: {fileID: 2111517136}
@@ -1151,6 +1164,4 @@ MonoBehaviour:
           toId: 6
         - fromId: 5
           toId: 7
-      mutationParadigm: 0
-      weightsFillParadigm: 0
-      mutationRate: 0
+      mutationRate: 0.03

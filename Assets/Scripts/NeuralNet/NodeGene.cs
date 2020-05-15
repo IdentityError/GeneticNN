@@ -5,31 +5,32 @@ namespace Assets.Scripts.NeuralNet
 {
     public enum NodeType { INPUT, HIDDEN, OUTPUT }
 
-    public class NodeGene
+    public class NodeGene : IEquatable<NodeGene>
     {
         public Func<double, double> activationFunction;
         public int id;
         private List<LinkGene> incoming;
-        private bool activated = false;
+        private bool activated;
         private double activation, activationSum;
-        private NodeType position;
+        private NodeType type;
 
-        public NodeGene(int id, Func<double, double> activationFunction, List<LinkGene> incoming, NodeType position) : this(id, activationFunction)
+        public NodeGene(int id, Func<double, double> activationFunction, List<LinkGene> incoming, NodeType type) : this(id, activationFunction)
         {
             if (incoming != null)
             {
                 this.incoming = new List<LinkGene>(incoming);
             }
 
-            this.position = position;
+            this.type = type;
         }
 
-        public NodeGene(int id, Func<double, double> activationFunction, NodeType position) : this(id, activationFunction, null, position)
+        public NodeGene(int id, Func<double, double> activationFunction, NodeType type) : this(id, activationFunction, null, type)
         {
         }
 
         public NodeGene(int id, Func<double, double> activationFunction)
         {
+            this.activated = false;
             this.id = id;
             this.activationFunction = activationFunction;
             this.incoming = new List<LinkGene>();
@@ -51,14 +52,14 @@ namespace Assets.Scripts.NeuralNet
         /// <summary>
         ///   Activates the current node -&gt; calculate the activation value and activation sum
         /// </summary>
-        private void Activate()
+        public void Activate()
         {
             if (!activated)
             {
                 double sum = 0;
                 foreach (LinkGene link in incoming)
                 {
-                    sum += link.From().GetActivation() * link.weight;
+                    sum += link.From().GetActivation() * link.GetWeight();
                 }
                 activationSum = sum;
                 activation = activationFunction(activationSum);
@@ -71,13 +72,20 @@ namespace Assets.Scripts.NeuralNet
             return activated;
         }
 
+        public void ResetActivation()
+        {
+            activated = false;
+            activationSum = 0;
+            activation = 0;
+        }
+
         /// <summary>
         ///   Sets the node activation manually. Can be set only on inputs type nodes
         /// </summary>
         /// <param name="activation"> </param>
         public void SetInputValue(double activation)
         {
-            if (position == NodeType.INPUT)
+            if (type == NodeType.INPUT)
             {
                 this.activation = activation;
                 activated = true;
@@ -90,12 +98,12 @@ namespace Assets.Scripts.NeuralNet
 
         public void SetType(NodeType position)
         {
-            this.position = position;
+            this.type = position;
         }
 
-        public NodeType GetType()
+        public new NodeType GetType()
         {
-            return position;
+            return type;
         }
 
         public void AddIncomingLink(LinkGene link)
@@ -111,6 +119,16 @@ namespace Assets.Scripts.NeuralNet
         public NodeGene Copy()
         {
             return new NodeGene(id, activationFunction, new List<LinkGene>(GetIncomingLinks()), GetType());
+        }
+
+        public NodeGene CopyNoLinks()
+        {
+            return new NodeGene(id, activationFunction, GetType());
+        }
+
+        public bool Equals(NodeGene other)
+        {
+            return this.id == other.id && this.type == other.type;
         }
     }
 }

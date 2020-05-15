@@ -1,7 +1,6 @@
 ﻿using Assets.Scripts.Interfaces;
 using Assets.Scripts.NeuralNet;
 using Assets.Scripts.TWEANN;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CarIndividual : MonoBehaviour, ISimulatingIndividual
@@ -36,8 +35,8 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual
     private float ackermanAngleLeft;
     private int directionsCount;
     private Vector3[] sensesDirections;
-    private double[] neuralNetInput;
-    private double[] neuralNetOutput;
+    public double[] neuralNetInput;
+    public double[] neuralNetOutput;
     private bool endedSimulation = false;
     private bool netInitialized = false;
     private float angleStride;
@@ -46,8 +45,8 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual
 
     private NeuralNetwork neuralNet;
     private Species species;
-    private double fitness;
-    private double pickProbability;
+    [SerializeField] private double fitness;
+    public double pickProbability;
     private PopulationManager populationManager;
 
     private void Start()
@@ -142,7 +141,6 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual
     private void Sense()
     {
         RaycastHit[] hits = new RaycastHit[directionsCount];
-        List<double> netInputs = new List<double>();
         for (int i = 0; i < directionsCount; i++)
         {
             float currentAngle = angleStride * (i + 1);
@@ -175,6 +173,8 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual
         updateCycles++;
         currentThrottleSum += throttle;
         stats.averageThrottle = currentThrottleSum / updateCycles;
+        stats.averageThrottle = stats.averageThrottle < 0 ? 0 : stats.averageThrottle;
+        fitness += (2F * stats.averageThrottle + Vector3.Distance(transform.position, lastPosition)) * Time.deltaTime;
     }
 
     public void EndIndividualSimulation()
@@ -224,11 +224,6 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual
         return this.fitness;
     }
 
-    public void SetFitness(double fitness)
-    {
-        this.fitness = fitness;
-    }
-
     public double ProvidePickProbability()
     {
         return pickProbability;
@@ -247,6 +242,34 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual
     public Species ProvideSpecies()
     {
         return species;
+    }
+
+    public void ResetStatus()
+    {
+        endedSimulation = false;
+        throttle = 0;
+        steering = 0;
+        updateCycles = 0;
+        currentThrottleSum = 0;
+        fitness = 0;
+        transform.position = populationManager.GetTrack().GetStartPoint().position;
+        transform.rotation = populationManager.GetTrack().GetStartPoint().rotation;
+        lastPosition = transform.position;
+    }
+
+    public bool IsSimulating()
+    {
+        return !endedSimulation;
+    }
+
+    public void StopSimulating()
+    {
+        endedSimulation = true;
+    }
+
+    public void SetFitness(double fitness)
+    {
+        this.fitness = fitness;
     }
 
     #endregion Interface
