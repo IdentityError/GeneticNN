@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.CustomBehaviour;
 using Assets.Scripts.NeuralNet;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Scripts.TWEANN
@@ -20,12 +21,19 @@ namespace Assets.Scripts.TWEANN
         private int currentSimulating;
         private UIManager uiManager;
 
+        private Genotype fittestGenotype;
+        private double generationMaxFitness = 0;
+
+        private Biocenosis biocenosis;
+        private List<Species> topologicalSpecies;
+
         private void Start()
         {
             uiManager = FindObjectOfType<UIManager>();
             //uiManager?.DrawNetUI(trainerProvider.ProvideTrainer().GetPredefinedTopologyDescriptor());
 
             population = new ISimulatingIndividual[populationNumber];
+            biocenosis = new Biocenosis();
             InitializeAncestors();
         }
 
@@ -41,7 +49,8 @@ namespace Assets.Scripts.TWEANN
 
         private void AdvanceGeneration()
         {
-            trainerProvider.ProvideTrainer().Train(population);
+            trainerProvider.ProvideTrainer().Train(population, ref biocenosis);
+
             //foreach (IIndividual ind in population)
             //{
             //    Debug.Log(ind.ProvideNeuralNet().GetGenotype().ToString());
@@ -58,9 +67,11 @@ namespace Assets.Scripts.TWEANN
             for (int i = 0; i < populationNumber; i++)
             {
                 population[i] = InstantiateIndividual(new NeuralNetwork(new Genotype(trainerProvider.ProvideTrainer().GetPredefinedTopologyDescriptor())), i.ToString());
+                biocenosis.AddToSpeciesOrCreate(population[i]);
             }
             generationCount++;
             currentSimulating = populationNumber;
+            GlobalParams.InitializeGlobalInnovationNumber(trainerProvider.ProvideTrainer().GetPredefinedTopologyDescriptor());
         }
 
         private ISimulatingIndividual InstantiateIndividual(NeuralNetwork neuralNet, string name)
@@ -106,6 +117,16 @@ namespace Assets.Scripts.TWEANN
 
         private void SimulationEnded()
         {
+            generationMaxFitness = 0;
+            foreach (IIndividual individual in population)
+            {
+                if (individual.ProvideFitness() > generationMaxFitness)
+                {
+                    fittestGenotype = individual.ProvideNeuralNet().GetGenotype();
+                    generationMaxFitness = individual.ProvideFitness();
+                }
+            }
+            Debug.Log("Fitness: " + generationMaxFitness + "\n" + fittestGenotype.ToString());
             AdvanceGeneration();
         }
 

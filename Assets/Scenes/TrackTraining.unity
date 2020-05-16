@@ -1164,4 +1164,4 @@ MonoBehaviour:
           toId: 6
         - fromId: 5
           toId: 7
-      mutationRate: 0.03
+      mutationRate: 0.04

@@ -11,7 +11,5 @@ namespace Assets.Scripts.TWEANN
         double ProvidePickProbability();
 
         void SetPickProbability(double pickProbability);
-
-        Species ProvideSpecies();
     }
 }

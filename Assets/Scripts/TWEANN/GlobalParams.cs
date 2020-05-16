@@ -26,5 +26,10 @@ namespace Assets.Scripts.NeuralNet
         {
             generationMutations.Clear();
         }
+
+        public static void InitializeGlobalInnovationNumber(TopologyDescriptor descriptor)
+        {
+            globalInnovationNumber = descriptor.inputCount + descriptor.hiddenCount + descriptor.outputCount + 1;
+        }
     }
 }

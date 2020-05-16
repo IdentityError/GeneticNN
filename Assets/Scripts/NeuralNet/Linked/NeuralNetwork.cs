@@ -31,9 +31,8 @@ namespace Assets.Scripts.NeuralNet
                 item.Item2.SetInputValue(item.Item1);
             }
 
-            // Propagate the activation. For each node of the outputs and for each of its incoming
-            // links, calculate the activation. The GetActivation function of the node recursively
-            // call Activate on each node that is not activated
+            // Propagate the activation. For each node of the outputs and for each of its incoming links, calculate the activation. The
+            // GetActivation function of the node recursively call Activate on each node that is not activated
             List<double> outputs = new List<double>();
             foreach (NodeGene node in genotype.outputs)
             {

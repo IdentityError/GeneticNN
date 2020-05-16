@@ -27,9 +27,7 @@ public class TUtilsUI
 
     /// <summary>
     ///   <para> Type: UI </para>
-    ///   <para>
-    ///     Coroutine that fills an image in a specified time. (Image has to be set to filled image)
-    ///   </para>
+    ///   <para> Coroutine that fills an image in a specified time. (Image has to be set to filled image) </para>
     ///   Returns: the IEnumerator's reference
     /// </summary>
     public IEnumerator FillImage(MonoBehaviour context, Image image, float duration)
@@ -54,8 +52,8 @@ public class TUtilsUI
     /// <summary>
     ///   <para> Type: UI </para>
     ///   <para>
-    ///     Coroutine that fills an image in a specified time and calls a specified delegate at the
-    ///     end of the coroutine (Image has to be set to filled image)
+    ///     Coroutine that fills an image in a specified time and calls a specified delegate at the end of the coroutine (Image has to be
+    ///     set to filled image)
     ///   </para>
     ///   Returns: the IEnumerator's reference
     /// </summary>
@@ -84,9 +82,7 @@ public class TUtilsUI
 
     /// <summary>
     ///   <para> Type: UI </para>
-    ///   <para>
-    ///     Coroutine that unfills an image in a specified time. (Image has to be set to filled image)
-    ///   </para>
+    ///   <para> Coroutine that unfills an image in a specified time. (Image has to be set to filled image) </para>
     ///   Returns: the IEnumerator's reference
     /// </summary>
     public IEnumerator UnfillImage(MonoBehaviour context, Image image, float duration)
@@ -111,8 +107,8 @@ public class TUtilsUI
     /// <summary>
     ///   <para> Type: UI </para>
     ///   <para>
-    ///     Coroutine that unfills an image in a specified time and calls a specified delegate at
-    ///     the end of the coroutine (Image has to be set to filled image)
+    ///     Coroutine that unfills an image in a specified time and calls a specified delegate at the end of the coroutine (Image has to be
+    ///     set to filled image)
     ///   </para>
     ///   Returns: the IEnumerator's reference
     /// </summary>

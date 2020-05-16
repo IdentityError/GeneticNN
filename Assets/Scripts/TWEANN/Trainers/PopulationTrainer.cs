@@ -5,13 +5,13 @@ namespace Assets.Scripts.TWEANN
 {
     public abstract class PopulationTrainer
     {
-        protected class IndividualIdentifier
+        protected class IndividualDescriptor
         {
             public Genotype genotype;
             public double fitness;
             public double pickProbability;
 
-            public IndividualIdentifier(Genotype genotype, double fitness, double pickProbability)
+            public IndividualDescriptor(Genotype genotype, double fitness, double pickProbability)
             {
                 this.genotype = genotype;
                 this.fitness = fitness;
@@ -19,8 +19,9 @@ namespace Assets.Scripts.TWEANN
             }
         }
 
-        protected IndividualIdentifier[] identifierPopulation;
+        protected IndividualDescriptor[] identifierPopulation;
         protected int populationNumber;
+        protected Biocenosis newBiocenosis;
 
         [Space(5)]
         [Header("Predefined Topology")]
@@ -56,23 +57,24 @@ namespace Assets.Scripts.TWEANN
         }
 
         /// <summary>
-        ///   Train a new population in place
+        ///   Train a new population in place, the Biocenosis gets updated automatically and the new population individuals are splitted
+        ///   into the Biocenosis species based on their topologies. Even if the population is not passed by reference, <b> each element is
+        ///   modified using the interface </b>, so the population passed will be overridden with the new population
         /// </summary>
         /// <returns> </returns>
-        public virtual void Train(IIndividual[] population)
+        public virtual void Train(IIndividual[] population, ref Biocenosis genotypesSpecies)
         {
+            newBiocenosis = new Biocenosis();
             populationNumber = population.Length;
-
-            identifierPopulation = new IndividualIdentifier[populationNumber];
-
+            identifierPopulation = new IndividualDescriptor[populationNumber];
             for (int i = 0; i < populationNumber; i++)
             {
-                identifierPopulation[i] = new IndividualIdentifier(population[i].ProvideNeuralNet().GetGenotype(), population[i].ProvideFitness(), 0D);
+                identifierPopulation[i] = new IndividualDescriptor(population[i].ProvideNeuralNet().GetGenotype(), population[i].ProvideFitness(), 0D);
             }
             GlobalParams.ResetGenerationMutations();
         }
 
-        protected IndividualIdentifier PickRandom()
+        protected IndividualDescriptor PickRandom()
         {
             double seed = UnityEngine.Random.Range(0F, 1F);
             int index = -1;
@@ -96,11 +98,11 @@ namespace Assets.Scripts.TWEANN
             }
         }
 
-        protected (IndividualIdentifier, IndividualIdentifier) PickFittestTwo()
+        protected (IndividualDescriptor, IndividualDescriptor) PickFittestTwo()
         {
-            IndividualIdentifier first = null;
+            IndividualDescriptor first = null;
             double firstFitness = -1F;
-            foreach (IndividualIdentifier car in identifierPopulation)
+            foreach (IndividualDescriptor car in identifierPopulation)
             {
                 if (car.fitness > firstFitness)
                 {
@@ -109,8 +111,8 @@ namespace Assets.Scripts.TWEANN
                 }
             }
             double secondFitness = -1F;
-            IndividualIdentifier second = null;
-            foreach (IndividualIdentifier car in identifierPopulation)
+            IndividualDescriptor second = null;
+            foreach (IndividualDescriptor car in identifierPopulation)
             {
                 if (car.fitness > secondFitness)
                 {
@@ -130,6 +132,43 @@ namespace Assets.Scripts.TWEANN
                 }
             }
             return (first, second);
+        }
+
+        protected (IndividualDescriptor, IndividualDescriptor) PickFittestTwoInSpecies(Species species)
+        {
+            IIndividual first = null;
+            double firstFitness = -1F;
+            foreach (IIndividual car in species.GetIndividuals())
+            {
+                if (car.ProvideFitness() > firstFitness)
+                {
+                    first = car;
+                    firstFitness = car.ProvideFitness();
+                }
+            }
+            double secondFitness = -1F;
+            IIndividual second = null;
+            foreach (IIndividual car in species.GetIndividuals())
+            {
+                if (car.ProvideFitness() > secondFitness)
+                {
+                    if (populationNumber > 1)
+                    {
+                        if (car != first)
+                        {
+                            second = car;
+                            secondFitness = car.ProvideFitness();
+                        }
+                    }
+                    else
+                    {
+                        second = car;
+                        secondFitness = car.ProvideFitness();
+                    }
+                }
+            }
+            return (new IndividualDescriptor(first.ProvideNeuralNet().GetGenotype(), first.ProvideFitness(), first.ProvidePickProbability()),
+                    new IndividualDescriptor(second.ProvideNeuralNet().GetGenotype(), second.ProvideFitness(), second.ProvidePickProbability()));
         }
     }
 }

@@ -22,41 +22,45 @@ namespace Assets.Scripts.TWEANN
         [Range(0, 1)]
         [SerializeField] private float mutationRate;
 
-        public override void Train(IIndividual[] population)
+        public override void Train(IIndividual[] population, ref Biocenosis biocenosis)
         {
-            base.Train(population);
-            for (int i = 0; i < populationNumber; i++)
-            {
-                (IndividualIdentifier, IndividualIdentifier) parents = PickFittestTwo();
+            base.Train(population, ref biocenosis);
 
-                //Debug.Log("Parent1: " + parents.Item1.genotype.ToString() + ", parent2: " + parents.Item2.genotype.ToString());
-                Genotype childGen = Crossover(parents.Item1, parents.Item2);
-                //Debug.Log("child before mutation: " + childGen.ToString());
-                childGen.Mutate(mutationRate);
-                population[i].SetNeuralNet(new NeuralNetwork(childGen));
-                //Debug.Log("CHILD: " + population[i].ProvideNeuralNet().GetGenotype().ToString());
+            int currentIndex = 0;
+            foreach (Species current in biocenosis.GetSpeciesList())
+            {
+                for (int i = 0; i < current.GetIndividualCount(); i++, currentIndex++)
+                {
+                    (IndividualDescriptor, IndividualDescriptor) parents = PickFittestTwoInSpecies(current);
+                    Genotype childGen = Crossover(parents.Item1, parents.Item2);
+                    childGen.Mutate(mutationRate);
+                    population[currentIndex].SetNeuralNet(new NeuralNetwork(childGen));
+                    newBiocenosis.AddToSpeciesOrCreate(population[currentIndex]);
+                }
             }
+            GlobalParams.ResetGenerationMutations();
+            biocenosis = newBiocenosis;
         }
 
-        private (IndividualIdentifier, IndividualIdentifier) Selection()
+        private (IndividualDescriptor, IndividualDescriptor) Selection()
         {
             NormalizePopulationPickProbability();
             //Pick first parent and temporarily set its fitness to 0 and renormalize the probabilities so it won't be picked as second parent
-            IndividualIdentifier first = PickRandom();
+            IndividualDescriptor first = PickRandom();
             double firstFitness = first.fitness;
             first.fitness = 0;
             NormalizePopulationPickProbability();
 
             //Picks second parent and reset the first parent fitness so it can be picked on the next iteration
-            IndividualIdentifier second = PickRandom();
+            IndividualDescriptor second = PickRandom();
             first.fitness = firstFitness;
             return (first, second);
         }
 
-        private Genotype Crossover(IndividualIdentifier parent, IndividualIdentifier parent1)
+        private Genotype Crossover(IndividualDescriptor parent, IndividualDescriptor parent1)
         {
-            IndividualIdentifier fittest = parent.fitness > parent1.fitness ? parent : parent1;
-            IndividualIdentifier partner = fittest.Equals(parent) ? parent1 : parent;
+            IndividualDescriptor fittest = parent.fitness > parent1.fitness ? parent : parent1;
+            IndividualDescriptor partner = fittest.Equals(parent) ? parent1 : parent;
             Genotype newGen = fittest.genotype.Crossover(partner.genotype);
             return newGen;
         }

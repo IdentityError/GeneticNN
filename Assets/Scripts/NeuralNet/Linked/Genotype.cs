@@ -67,7 +67,7 @@ namespace Assets.Scripts.NeuralNet
             int linkN = 1;
             foreach (LinkDescriptor link in descriptor.links)
             {
-                AddLink(link, -linkN++, UnityEngine.Random.Range(-1F, 1F));
+                AddLink(link, linkN++, UnityEngine.Random.Range(-1F, 1F));
             }
         }
 
@@ -92,22 +92,7 @@ namespace Assets.Scripts.NeuralNet
             {
                 childGen.AddNode(gene.CopyNoLinks());
             }
-            //foreach (LinkGene link in links)
-            //{
-            //    childGen.AddLink(new LinkDescriptor(link.From().id, link.To().id), link.GetInnovationNumber()).SetWeight(0);
-            //}
-            ////? maybe only links are added ?
-            //// Add all nodes from the fittest
-            //foreach (NodeGene gene in all)
-            //{
-            //    childGen.AddNode(gene.CopyNoLinks());
-            //}
             List<LinkGene> remaining = new List<LinkGene>(links);
-
-            //// Order the two links list by innovation number
-            ////links.OrderBy(item => item.GetInnovationNumber());
-            ////partner.links.OrderBy(item => item.GetInnovationNumber());
-
             // Zip togheter the links that have the same innovation number
             List<Tuple<LinkGene, LinkGene>> zippedLinks = TUtilsProvider.ZipWithPredicate(links, partner.links, (item1, item2) => item1.GetInnovationNumber().Equals(item2.GetInnovationNumber()));
 
@@ -150,7 +135,7 @@ namespace Assets.Scripts.NeuralNet
                 if (UnityEngine.Random.Range(0F, 1F) < 0.5F)
                 {
                     LinkGene random = links.ElementAt(UnityEngine.Random.Range(0, links.Count));
-                    NodeGene newNode = new NodeGene(GetCurrentMaxId() + 1, TMath.Tanh, NodeType.HIDDEN);
+                    NodeGene newNode = new NodeGene(GetCurrentNodeMaxId() + 1, TMath.Tanh, NodeType.HIDDEN);
                     TopologyMutation mutation = new TopologyMutation(TopologyMutationType.SPLIT_LINK, random);
                     mutation.SetInnovationNumber(GlobalParams.GetGenerationInnovationNumber(mutation));
                     LinkGene newLink = new LinkGene(random.From(), newNode, 1F, mutation.GetInnovationNumber());
@@ -162,30 +147,48 @@ namespace Assets.Scripts.NeuralNet
                 }
                 else
                 {
-                    List<NodeGene> temp = new List<NodeGene>(all);
+                    // Create a list of all nodes except output nodes to select the random From node
+                    List<NodeGene> temp = new List<NodeGene>(inputs);
+                    temp.AddRange(hidden);
+                    // Select a random From node
                     int index = UnityEngine.Random.Range(0, temp.Count);
                     NodeGene fromRandom = temp.ElementAt(index);
-                    temp.RemoveAt(index);
-                    NodeGene toRandom = temp.ElementAt(UnityEngine.Random.Range(0, temp.Count));
 
-                    LinkGene newLink = new LinkGene(fromRandom, toRandom, UnityEngine.Random.Range(-1F, 1F));
-                    if (!links.Contains(newLink))
+                    // Create now the list of all nodes except input nodes to select the random To node, the node can only be a forward node
+                    // in respect of the From node, the net is not recurrent
+                    temp = new List<NodeGene>(outputs);
+                    temp.Remove(fromRandom);
+                    // Remove all the back nodes
+                    foreach (NodeGene gene in temp)
                     {
-                        TopologyMutation mutation = new TopologyMutation(TopologyMutationType.ADD_LINK, newLink);
-                        mutation.SetInnovationNumber(GlobalParams.GetGenerationInnovationNumber(mutation));
-                        newLink.SetInnovationNumber(mutation.GetInnovationNumber());
-                        AddLinkRaw(newLink);
-                        Debug.Log("ADDING LINK MUTATION HAPPENED");
+                        if (gene.id < fromRandom.id)
+                        {
+                            temp.Remove(gene);
+                        }
+                    }
+                    if (temp.Count > 0)
+                    {
+                        NodeGene toRandom = temp.ElementAt(UnityEngine.Random.Range(0, temp.Count));
+
+                        LinkGene newLink = new LinkGene(fromRandom, toRandom, UnityEngine.Random.Range(-1F, 1F));
+                        if (!links.Contains(newLink))
+                        {
+                            TopologyMutation mutation = new TopologyMutation(TopologyMutationType.ADD_LINK, newLink);
+                            mutation.SetInnovationNumber(GlobalParams.GetGenerationInnovationNumber(mutation));
+                            newLink.SetInnovationNumber(mutation.GetInnovationNumber());
+                            AddLinkRaw(newLink);
+                            Debug.Log("ADDING LINK MUTATION HAPPENED");
+                        }
                     }
                 }
             }
-            for (int i = 0; i < LinkCount / 6; i++)
+            for (int i = 0; i < 3; i++)
             {
                 if (UnityEngine.Random.Range(0F, 1F) < mutationRate)
                 {
                     LinkGene random = links.ElementAt(UnityEngine.Random.Range(0, links.Count));
                     random.SetWeight(UnityEngine.Random.Range(-1F, 1F));
-                    //Debug.Log("WEIGHT MUTATION HAPPENED: " + random.ToString());
+                    Debug.Log("WEIGHT MUTATION HAPPENED: " + random.ToString());
                 }
             }
         }
@@ -252,7 +255,7 @@ namespace Assets.Scripts.NeuralNet
             return output;
         }
 
-        private int GetCurrentMaxId()
+        private int GetCurrentNodeMaxId()
         {
             int max = 0;
             foreach (NodeGene node in all)
@@ -263,6 +266,12 @@ namespace Assets.Scripts.NeuralNet
                 }
             }
             return max;
+        }
+
+        public float GetTopologicalDistance(Genotype to)
+        {
+            //TODO implement
+            return 0;
         }
     }
 }

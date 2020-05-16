@@ -1,8 +1,10 @@
-﻿namespace Assets.Scripts.NeuralNet
+﻿using System;
+
+namespace Assets.Scripts.NeuralNet
 {
     public enum TopologyMutationType { SPLIT_LINK, ADD_LINK }
 
-    public class TopologyMutation
+    public class TopologyMutation : IEquatable<TopologyMutation>
     {
         private TopologyMutationType type;
         private int innovationNumber;
@@ -20,19 +22,6 @@
             this.linkInvolved = linkInvolved;
         }
 
-        public override bool Equals(object obj)
-        {
-            if (obj is TopologyMutation)
-            {
-                TopologyMutation other = (TopologyMutation)obj;
-                return type == other.type && linkInvolved.Equals(other.linkInvolved);
-            }
-            else
-            {
-                return base.Equals(obj);
-            }
-        }
-
         public int GetInnovationNumber()
         {
             return innovationNumber;
@@ -41,6 +30,11 @@
         public void SetInnovationNumber(int innovationNumber)
         {
             this.innovationNumber = innovationNumber;
+        }
+
+        public bool Equals(TopologyMutation other)
+        {
+            return type == other.type && linkInvolved.Equals(other.linkInvolved);
         }
     }
 }

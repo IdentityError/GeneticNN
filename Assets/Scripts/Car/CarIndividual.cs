@@ -43,7 +43,6 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual
     private new Rigidbody rigidbody;
 
     private NeuralNetwork neuralNet;
-    private Species species;
     [SerializeField] private double fitness;
     public double pickProbability;
     private PopulationManager populationManager;
@@ -236,11 +235,6 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual
     public void SetSimulationStats(SimulationStats stats)
     {
         this.stats = stats;
-    }
-
-    public Species ProvideSpecies()
-    {
-        return species;
     }
 
     public void ResetStatus()

@@ -150,11 +150,11 @@ namespace Assets.Scripts.MachineLearning
         }
 
         /// <summary>
-        ///   Implements the actual mixing of the DNA of two individuals. The equality parameters
-        ///   determines how the DNA of the child is built from the the parents DNA
+        ///   Implements the actual mixing of the DNA of two individuals. The equality parameters determines how the DNA of the child is
+        ///   built from the the parents DNA
         ///   <para>
-        ///     E.g setting the equality to 3 means that the partner is going to be responsible for
-        ///     1 piece of DNA each 3, so its 1/3 responsible for trasmitting the DNA
+        ///     E.g setting the equality to 3 means that the partner is going to be responsible for 1 piece of DNA each 3, so its 1/3
+        ///     responsible for trasmitting the DNA
         ///   </para>
         ///   <para> Return: the crossovered DNA </para>
         /// </summary>

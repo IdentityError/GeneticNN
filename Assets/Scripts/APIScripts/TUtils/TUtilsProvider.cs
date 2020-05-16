@@ -62,8 +62,7 @@ public class TUtilsProvider
     }
 
     /// <summary>
-    ///   For each element of the first list, zips the first predicate matching element from the
-    ///   second list
+    ///   For each element of the first list, zips the first predicate matching element from the second list
     /// </summary>
     /// <typeparam name="Type1"> </typeparam>
     /// <typeparam name="Type2"> </typeparam>
