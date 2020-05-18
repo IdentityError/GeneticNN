@@ -1,3 +1,5 @@
+# **Currently implementing NEAT algorithm**
+
 # *Neural Network training method using a Genetic Algorithm*
  ---
 ## Overview of the project
