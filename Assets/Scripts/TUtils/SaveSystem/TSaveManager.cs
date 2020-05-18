@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using UnityEngine;
 
 public class TSaveManager
 {
@@ -17,8 +16,6 @@ public class TSaveManager
     }
 
     //Can write here the static file names to use in the game
-    public static readonly string TRACKS_STATS = Application.persistentDataPath + "/tracks_stats.data";
-    public static readonly string CHOSEN_ONE = Application.persistentDataPath + "/chosen_one.data";
     //I.E
     //public static readonly string PLAYER_DATA = Application.persistentDataPath + "/player_data.data";
     //Calling the methods will look like this:
@@ -28,9 +25,9 @@ public class TSaveManager
     ///   Save a generic type of data in the application persisten data path.
     ///   <para> Returns: a SaveObject instance, null on error </para>
     /// </summary>
-    public TSaveObject SavePersistentData<T>(T data, string path)
+    public SaveObject SavePersistentData<T>(T data, string path)
     {
-        TSaveObject saveObject = new TSaveObject(data);
+        SaveObject saveObject = new SaveObject(data);
         BinaryFormatter formatter = new BinaryFormatter();
         FileStream stream = new FileStream(path, FileMode.Create);
         formatter.Serialize(stream, data);
@@ -42,7 +39,7 @@ public class TSaveManager
     ///   Load a SaveObject that contains the type of data in the selected path.
     ///   <para> Returns: a SaveObject instance, null on error </para>
     /// </summary>
-    public TSaveObject LoadPersistentData(string path)
+    public SaveObject LoadPersistentData(string path)
     {
         if (File.Exists(path))
         {
@@ -51,7 +48,7 @@ public class TSaveManager
             if (stream.Length == 0)
                 return null;
             object data = formatter.Deserialize(stream);
-            TSaveObject saveObject = new TSaveObject(data);
+            SaveObject saveObject = new SaveObject(data);
             stream.Close();
             return saveObject;
         }

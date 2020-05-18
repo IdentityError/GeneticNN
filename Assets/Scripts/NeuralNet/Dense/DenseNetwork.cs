@@ -1,5 +1,8 @@
-﻿namespace Assets.Scripts.MachineLearning
+﻿using System;
+
+namespace Assets.Scripts.MachineLearning
 {
+    [Obsolete("Needs further implementations")]
     public class DenseNetwork
     {
         public DNA dna;

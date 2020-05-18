@@ -2,6 +2,9 @@
 
 namespace Assets.Scripts.Interfaces
 {
+    /// <summary>
+    ///   A simulation performer
+    /// </summary>
     public interface ISimulationPerformer
     {
         void SetPopulationManager(PopulationManager populationManager);
@@ -9,8 +12,6 @@ namespace Assets.Scripts.Interfaces
         SimulationStats ProvideSimulationStats();
 
         void SetSimulationStats(SimulationStats stats);
-
-        void ResetStatus();
 
         bool IsSimulating();
 

@@ -99,7 +99,7 @@ public class UINetBuilder : MonoBehaviour
             {
                 for (int k = 0; k < topology.neuronsAtLayer[i + 1]; k++)
                 {
-                    TUtilsUI.GetInstance().DrawSpriteLine(layers[i][j].rectTransform.position, layers[i + 1][k].rectTransform.position, 1.25F, linkImage, transform);
+                    TUtilsUI.DrawSpriteLine(layers[i][j].rectTransform.position, layers[i + 1][k].rectTransform.position, 1.25F, linkImage, transform);
                 }
             }
         }

@@ -136,6 +136,11 @@ PrefabInstance:
       propertyPath: m_TagString
       value: FinishLine
       objectReference: {fileID: 0}
+    - target: {fileID: 5876397691436225728, guid: 8ad4a7ed4fa57e54baf109c449170f5d,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -15
+      objectReference: {fileID: 0}
     - target: {fileID: 6486783325030372510, guid: 8ad4a7ed4fa57e54baf109c449170f5d,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -397,7 +402,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 2.0481e-41, z: 0, w: 9.276846e-10}
+  m_BoundingSphereOverride: {x: 0, y: 2.1e-44, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
@@ -1131,8 +1136,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a05c13aecf02694eb9c02f46aad1cfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  populationNumber: 40
-  timeScale: 2
+  initialPopulationNumber: 40
+  timeScale: 1
+  sharingThreshold: 40
   individualPrefab: {fileID: 6791551976333570425, guid: dda260aae5911af48a27564e8179e873,
     type: 3}
   track: {fileID: 2111517136}
@@ -1164,4 +1170,27 @@ MonoBehaviour:
           toId: 6
         - fromId: 5
           toId: 7
-      mutationRate: 0.04
+      mutation:
+        weightChangeProb: 0.04
+        splitLinkProb: 0
+        addLinkProb: 0
+--- !u!114 &6509384906705858488
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6509384906705858485}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bdf4b53ac32bca243a54f95870a1d0f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  poolsCategory:
+  - name: Individual
+    pools:
+    - tag: prefab
+      prefab: {fileID: 6791551976333570425, guid: dda260aae5911af48a27564e8179e873,
+        type: 3}
+      poolSize: 250
+      spawnProbability: 0

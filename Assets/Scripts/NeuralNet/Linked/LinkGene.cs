@@ -47,7 +47,7 @@ namespace Assets.Scripts.NeuralNet
 
         public LinkGene Copy()
         {
-            return new LinkGene(from.Copy(), to.Copy(), weight, innovationNumber);
+            return new LinkGene(from, to, weight, innovationNumber);
         }
 
         public int GetInnovationNumber()

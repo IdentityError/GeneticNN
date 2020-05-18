@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class CarIndividual : MonoBehaviour, ISimulatingIndividual
 {
+    //TODO Fix the bug that cause the cars to not be initializated correctly
+    //endedSimulation is set as true and never set as false again, maybe some error when copying arrays or resetting them, think about returning a fresh new population of Genotype on the train method
+
     [Header("Specifications")]
     public Wheel[] wheels;
     public bool manualControl;
@@ -36,8 +39,8 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual
     private Vector3[] sensesDirections;
     public double[] neuralNetInput;
     public double[] neuralNetOutput;
-    private bool endedSimulation = false;
-    private bool netInitialized = false;
+    [SerializeField] private bool endedSimulation = false;
+    [SerializeField] private bool netInitialized = false;
     private float angleStride;
     [HideInInspector] public Vector3 lastPosition;
     private new Rigidbody rigidbody;
@@ -164,6 +167,7 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual
 
     private void UpdateStats()
     {
+        stats.lastThrottle = throttle;
         stats.distance += Vector3.Distance(transform.position, lastPosition);
         lastPosition = transform.position;
         stats.time += Time.deltaTime;
@@ -172,15 +176,22 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual
         currentThrottleSum += throttle;
         stats.averageThrottle = currentThrottleSum / updateCycles;
         stats.averageThrottle = stats.averageThrottle < 0 ? 0 : stats.averageThrottle;
-        fitness += (2F * stats.averageThrottle + Vector3.Distance(transform.position, lastPosition)) * Time.deltaTime;
+        fitness += (4F * stats.averageThrottle + 35F * Vector3.Distance(transform.position, lastPosition)) * Time.deltaTime;
+        fitness = fitness < 0 ? 0 : fitness;
     }
 
-    public void EndIndividualSimulation()
+    private void ResetParameters()
     {
         if (endedSimulation) return;
         endedSimulation = true;
         throttle = 0;
         steering = 0;
+        netInitialized = false;
+    }
+
+    private void EndIndividualSimulation()
+    {
+        ResetParameters();
         populationManager?.IndividualEndedSimulation(this);
     }
 
@@ -222,32 +233,9 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual
         return this.fitness;
     }
 
-    public double ProvidePickProbability()
-    {
-        return pickProbability;
-    }
-
-    public void SetPickProbability(double pickProbability)
-    {
-        this.pickProbability = pickProbability;
-    }
-
     public void SetSimulationStats(SimulationStats stats)
     {
         this.stats = stats;
-    }
-
-    public void ResetStatus()
-    {
-        endedSimulation = false;
-        throttle = 0;
-        steering = 0;
-        updateCycles = 0;
-        currentThrottleSum = 0;
-        fitness = 0;
-        transform.position = populationManager.GetTrack().GetStartPoint().position;
-        transform.rotation = populationManager.GetTrack().GetStartPoint().rotation;
-        lastPosition = transform.position;
     }
 
     public bool IsSimulating()
@@ -257,7 +245,7 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual
 
     public void StopSimulating()
     {
-        endedSimulation = true;
+        ResetParameters();
     }
 
     public void SetFitness(double fitness)

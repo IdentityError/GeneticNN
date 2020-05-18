@@ -2,6 +2,6 @@
 {
     public class Paradigms
     {
-        public enum TrainingParadigm { GENETIC }
+        public enum TrainingParadigm { NEAT }
     }
 }

@@ -17,7 +17,7 @@ public class TrainingProvider_CE : PropertyDrawer
         EditorGUI.PropertyField(rect, trainingParadigmProp);
         switch ((Paradigms.TrainingParadigm)trainingParadigmProp.intValue)
         {
-            case Paradigms.TrainingParadigm.GENETIC:
+            case Paradigms.TrainingParadigm.NEAT:
                 EditorGUI.PropertyField(rect1, gaTrainerProp, true);
                 break;
         }
@@ -34,7 +34,7 @@ public class TrainingProvider_CE : PropertyDrawer
         trainingParadigmProp = property.FindPropertyRelative("trainingParadigm");
         switch ((Paradigms.TrainingParadigm)trainingParadigmProp.intValue)
         {
-            case Paradigms.TrainingParadigm.GENETIC:
+            case Paradigms.TrainingParadigm.NEAT:
                 return 2 * EditorGUIUtility.singleLineHeight + (gaTrainerProp.isExpanded ? EditorGUI.GetPropertyHeight(gaTrainerProp) : 0);
         }
         return base.GetPropertyHeight(property, label);

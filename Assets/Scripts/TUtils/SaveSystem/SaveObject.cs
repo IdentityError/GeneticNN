@@ -1,8 +1,8 @@
-﻿public class TSaveObject
+﻿public class SaveObject
 {
     private object data;
 
-    public TSaveObject(object data)
+    public SaveObject(object data)
     {
         this.data = data;
     }

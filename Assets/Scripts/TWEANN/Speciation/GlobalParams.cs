@@ -29,7 +29,7 @@ namespace Assets.Scripts.NeuralNet
 
         public static void InitializeGlobalInnovationNumber(TopologyDescriptor descriptor)
         {
-            globalInnovationNumber = descriptor.inputCount + descriptor.hiddenCount + descriptor.outputCount + 1;
+            globalInnovationNumber = descriptor.links.Count + 1;
         }
     }
 }

@@ -6,38 +6,19 @@ using UnityEngine.UI;
 
 public class TUtilsUI
 {
-    private static TUtilsUI instance = null;
-
-    /// <summary>
-    ///   Returns: the SharedUtilities singleton instance
-    /// </summary>
-    public static TUtilsUI GetInstance()
-    {
-        if (instance == null)
-        {
-            instance = new TUtilsUI();
-        }
-
-        return instance;
-    }
-
-    private TUtilsUI()
-    {
-    }
-
     /// <summary>
     ///   <para> Type: UI </para>
     ///   <para> Coroutine that fills an image in a specified time. (Image has to be set to filled image) </para>
     ///   Returns: the IEnumerator's reference
     /// </summary>
-    public IEnumerator FillImage(MonoBehaviour context, Image image, float duration)
+    public static IEnumerator FillImage(MonoBehaviour context, Image image, float duration)
     {
         IEnumerator coroutine = FillImage_C(image, duration);
         context.StartCoroutine(coroutine);
         return coroutine;
     }
 
-    private IEnumerator FillImage_C(Image image, float duration)
+    private static IEnumerator FillImage_C(Image image, float duration)
     {
         image.fillAmount = 0f;
         float stride = Time.fixedDeltaTime / duration;
@@ -57,14 +38,14 @@ public class TUtilsUI
     ///   </para>
     ///   Returns: the IEnumerator's reference
     /// </summary>
-    public IEnumerator FillImage<T>(MonoBehaviour context, Image image, float duration, Action<T> funcToCall, T funcParameter)
+    public static IEnumerator FillImage<T>(MonoBehaviour context, Image image, float duration, Action<T> funcToCall, T funcParameter)
     {
         IEnumerator coroutine = FillImage_C<T>(image, duration, funcToCall, funcParameter);
         context.StartCoroutine(coroutine);
         return coroutine;
     }
 
-    private IEnumerator FillImage_C<T>(Image image, float duration, Action<T> funcToCall, T funcParameter)
+    private static IEnumerator FillImage_C<T>(Image image, float duration, Action<T> funcToCall, T funcParameter)
     {
         image.fillAmount = 0f;
         float stride = Time.fixedDeltaTime / duration;
@@ -85,14 +66,14 @@ public class TUtilsUI
     ///   <para> Coroutine that unfills an image in a specified time. (Image has to be set to filled image) </para>
     ///   Returns: the IEnumerator's reference
     /// </summary>
-    public IEnumerator UnfillImage(MonoBehaviour context, Image image, float duration)
+    public static IEnumerator UnfillImage(MonoBehaviour context, Image image, float duration)
     {
         IEnumerator coroutine = UnfillImage_C(image, duration);
         context.StartCoroutine(coroutine);
         return coroutine;
     }
 
-    private IEnumerator UnfillImage_C(Image image, float duration)
+    private static IEnumerator UnfillImage_C(Image image, float duration)
     {
         image.fillAmount = 1f;
         float stride = Time.fixedDeltaTime / duration;
@@ -112,14 +93,14 @@ public class TUtilsUI
     ///   </para>
     ///   Returns: the IEnumerator's reference
     /// </summary>
-    public IEnumerator UnfillImage<T>(MonoBehaviour context, Image image, float duration, Action<T> funcToCall, T funcParameter)
+    public static IEnumerator UnfillImage<T>(MonoBehaviour context, Image image, float duration, Action<T> funcToCall, T funcParameter)
     {
         IEnumerator coroutine = UnfillImage_C<T>(image, duration, funcToCall, funcParameter);
         context.StartCoroutine(coroutine);
         return coroutine;
     }
 
-    private IEnumerator UnfillImage_C<T>(Image image, float duration, Action<T> funcToCall, T funcParameter)
+    private static IEnumerator UnfillImage_C<T>(Image image, float duration, Action<T> funcToCall, T funcParameter)
     {
         image.fillAmount = 1f;
         float stride = Time.fixedDeltaTime / duration;
@@ -138,7 +119,7 @@ public class TUtilsUI
     /// <summary>
     ///   Draw a line from a point to another
     /// </summary>
-    public void DrawSpriteLine(Vector3 from, Vector3 to, Image lineImage)
+    public static void DrawSpriteLine(Vector3 from, Vector3 to, Image lineImage)
     {
         DrawSpriteLine_A(from, to, 1F, lineImage, null);
     }
@@ -146,7 +127,7 @@ public class TUtilsUI
     /// <summary>
     ///   Draw a line from a point to another
     /// </summary>
-    public void DrawSpriteLine(Vector3 from, Vector3 to, float thickness, Image lineImage)
+    public static void DrawSpriteLine(Vector3 from, Vector3 to, float thickness, Image lineImage)
     {
         DrawSpriteLine_A(from, to, thickness, lineImage, null);
     }
@@ -154,7 +135,7 @@ public class TUtilsUI
     /// <summary>
     ///   Draw a line from a point to another
     /// </summary>
-    public void DrawSpriteLine(Vector3 from, Vector3 to, Image lineImage, Transform parent)
+    public static void DrawSpriteLine(Vector3 from, Vector3 to, Image lineImage, Transform parent)
     {
         DrawSpriteLine_A(from, to, 1F, lineImage, parent);
     }
@@ -162,12 +143,12 @@ public class TUtilsUI
     /// <summary>
     ///   Draw a line from a point to another
     /// </summary>
-    public void DrawSpriteLine(Vector3 from, Vector3 to, float thickness, Image lineImage, Transform parent)
+    public static void DrawSpriteLine(Vector3 from, Vector3 to, float thickness, Image lineImage, Transform parent)
     {
         DrawSpriteLine_A(from, to, thickness, lineImage, parent);
     }
 
-    private void DrawSpriteLine_A(Vector3 from, Vector3 to, float thickness, Image lineImage, Transform parent)
+    private static void DrawSpriteLine_A(Vector3 from, Vector3 to, float thickness, Image lineImage, Transform parent)
     {
         Image linkRef = UnityEngine.Object.Instantiate(lineImage);
         if (parent != null)
@@ -186,7 +167,7 @@ public class TUtilsUI
     /// <summary>
     ///   Return: formatted string "h:m:s" calculated from seconds
     /// </summary>
-    public string GetTimeStringFromSeconds(float _seconds)
+    public static string GetTimeStringFromSeconds(float _seconds)
     {
         int hours = 0;
         int minutes = 0;

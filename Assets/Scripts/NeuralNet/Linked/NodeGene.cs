@@ -130,5 +130,10 @@ namespace Assets.Scripts.NeuralNet
         {
             return this.id == other.id && this.type == other.type;
         }
+
+        public override string ToString()
+        {
+            return "ID: " + id + ", Type: " + type;
+        }
     }
 }

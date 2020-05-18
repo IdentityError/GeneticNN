@@ -2,12 +2,14 @@
 public class SimulationStats
 {
     public float averageThrottle;
+    public float lastThrottle;
     public float time;
     public float distance;
     public string trackID;
 
-    public SimulationStats(float averageThrottle, float time, float distance, string track)
+    public SimulationStats(float averageThrottle, float time, float distance, float lastThrottle, string track)
     {
+        this.lastThrottle = lastThrottle;
         this.averageThrottle = averageThrottle;
         this.time = time;
         this.distance = distance;

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
+using static Assets.Scripts.TWEANN.TrainerNEAT;
 
 namespace Assets.Scripts.NeuralNet
 {
@@ -48,7 +48,7 @@ namespace Assets.Scripts.NeuralNet
             int lenght = descriptor.inputCount + descriptor.hiddenCount + descriptor.outputCount;
             for (int i = 0; i < lenght; i++)
             {
-                NodeGene current = new NodeGene(i + 1, TMath.Tanh);
+                NodeGene current = new NodeGene(-i - 1, TMath.Tanh);
                 if (i < descriptor.inputCount)
                 {
                     current.SetType(NodeType.INPUT);
@@ -67,7 +67,7 @@ namespace Assets.Scripts.NeuralNet
             int linkN = 1;
             foreach (LinkDescriptor link in descriptor.links)
             {
-                AddLink(link, linkN++, UnityEngine.Random.Range(-1F, 1F));
+                AddLink(new LinkDescriptor(-link.fromId, -link.toId), linkN++, UnityEngine.Random.Range(-1F, 1F));
             }
         }
 
@@ -80,119 +80,187 @@ namespace Assets.Scripts.NeuralNet
             links = new List<LinkGene>();
         }
 
-        public Genotype Crossover(Genotype partner)
+        /// <summary>
+        ///   Perform a crossover between the two genotypes and get the result
+        /// </summary>
+        /// <param name="partner"> </param>
+        /// <param name="thisFitness"> </param>
+        /// <param name="partnerFitness"> </param>
+        /// <returns> </returns>
+        public Genotype Crossover(Genotype partner, double thisFitness, double partnerFitness)
         {
             Genotype childGen = new Genotype();
-            ////TODO IMPROVE
-            foreach (NodeGene gene in inputs)
-            {
-                childGen.AddNode(gene.CopyNoLinks());
-            }
-            foreach (NodeGene gene in outputs)
-            {
-                childGen.AddNode(gene.CopyNoLinks());
-            }
+            //TODO IMPROVE
+
             List<LinkGene> remaining = new List<LinkGene>(links);
+            List<LinkGene> partnerRemaining = new List<LinkGene>(partner.links);
             // Zip togheter the links that have the same innovation number
             List<Tuple<LinkGene, LinkGene>> zippedLinks = TUtilsProvider.ZipWithPredicate(links, partner.links, (item1, item2) => item1.GetInnovationNumber().Equals(item2.GetInnovationNumber()));
 
-            // Add to che child all the matching genes (links)
+            //Add to che child all the matching genes(links)
             foreach (Tuple<LinkGene, LinkGene> gene in zippedLinks)
             {
                 LinkGene copy;
-                if (UnityEngine.Random.Range(0F, 1F) < 0.5F)
+                if (/*thisFitness > partnerFitness*/UnityEngine.Random.Range(0F, 1F) < 0.5F)
                 {
-                    copy = gene.Item1.Copy();
+                    copy = gene.Item1;
                 }
                 else
                 {
-                    copy = gene.Item2.Copy();
+                    copy = gene.Item2;
                 }
-                if (!childGen.all.Contains(copy.From()))
-                {
-                    childGen.AddNode(copy.From().CopyNoLinks());
-                }
-                if (!childGen.all.Contains(copy.To()))
-                {
-                    childGen.AddNode(copy.To().CopyNoLinks());
-                }
-                childGen.AddLink(new LinkDescriptor(copy.From().id, copy.To().id), copy.GetInnovationNumber(), copy.GetWeight());
+
+                childGen.AddLinkAndNodes(copy);
                 remaining.RemoveAll(item => item.GetInnovationNumber().Equals(copy.GetInnovationNumber()));
+                partnerRemaining.RemoveAll(item => item.GetInnovationNumber().Equals(copy.GetInnovationNumber()));
             }
-            //// At this point all common genes are added we add all the disjoint genes from the fittest
-            foreach (LinkGene gene in remaining)
+
+            // At this point all common genes are added we add all the disjoint genes from the fittest
+            if (thisFitness > partnerFitness)
             {
-                childGen.AddLink(new LinkDescriptor(gene.From().id, gene.To().id), gene.GetInnovationNumber(), gene.GetWeight());
+                foreach (LinkGene gene in remaining)
+                {
+                    childGen.AddLinkAndNodes(gene);
+                }
+            }
+            else
+            {
+                foreach (LinkGene gene in partnerRemaining)
+                {
+                    childGen.AddLinkAndNodes(gene);
+                }
             }
 
             return childGen;
         }
 
-        public void Mutate(float mutationRate)
+        /// <summary>
+        ///   Add a link and the nodes involved, if not already present
+        /// </summary>
+        /// <param name="newLink"> </param>
+        public void AddLinkAndNodes(LinkGene newLink)
         {
-            if (UnityEngine.Random.Range(0F, 1F) < mutationRate * 5)
+            if (links.Contains(newLink))
             {
-                if (UnityEngine.Random.Range(0F, 1F) < 0.5F)
+                return;
+            }
+            NodeGene from = null;
+            NodeGene to = null;
+            foreach (NodeGene node in all)
+            {
+                if (node.Equals(newLink.From()))
                 {
-                    LinkGene random = links.ElementAt(UnityEngine.Random.Range(0, links.Count));
-                    NodeGene newNode = new NodeGene(GetCurrentNodeMaxId() + 1, TMath.Tanh, NodeType.HIDDEN);
-                    TopologyMutation mutation = new TopologyMutation(TopologyMutationType.SPLIT_LINK, random);
-                    mutation.SetInnovationNumber(GlobalParams.GetGenerationInnovationNumber(mutation));
-                    LinkGene newLink = new LinkGene(random.From(), newNode, 1F, mutation.GetInnovationNumber());
-                    newNode.AddIncomingLink(newLink);
-                    random.SetFrom(newNode);
-                    AddNode(newNode);
-                    AddLinkRaw(newLink);
-                    Debug.Log("SPLIT LINK MUTATION HAPPENED");
+                    from = node;
                 }
-                else
+                if (node.Equals(newLink.To()))
                 {
-                    // Create a list of all nodes except output nodes to select the random From node
-                    List<NodeGene> temp = new List<NodeGene>(inputs);
-                    temp.AddRange(hidden);
-                    // Select a random From node
-                    int index = UnityEngine.Random.Range(0, temp.Count);
-                    NodeGene fromRandom = temp.ElementAt(index);
+                    to = node;
+                }
+                if (from != null && to != null) break;
+            }
+            if (to == null)
+            {
+                to = newLink.To().CopyNoLinks();
+            }
+            if (from == null)
+            {
+                from = newLink.From().CopyNoLinks();
+            }
+            LinkGene currentNew = new LinkGene(from, to, newLink.GetWeight(), newLink.GetInnovationNumber());
+            to.AddIncomingLink(currentNew);
+            AddNode(to);
+            AddNode(from);
+            links.Add(currentNew);
+        }
 
-                    // Create now the list of all nodes except input nodes to select the random To node, the node can only be a forward node
-                    // in respect of the From node, the net is not recurrent
-                    temp = new List<NodeGene>(outputs);
-                    temp.Remove(fromRandom);
-                    // Remove all the back nodes
-                    foreach (NodeGene gene in temp)
+        /// <summary>
+        ///   Mutate this genotype based on the specified probabilities
+        /// </summary>
+        /// <param name="mutation"> </param>
+        public void Mutate(MutationProbabilities mutation)
+        {
+            if (UnityEngine.Random.Range(0F, 1F) < mutation.splitLinkProb)
+            {
+                // Select a random link to be mutated
+                LinkGene random = links.ElementAt(UnityEngine.Random.Range(0, links.Count));
+                // Create a node with a random id
+                NodeGene newNode = new NodeGene(UnityEngine.Random.Range(0, int.MaxValue), TMath.Tanh, NodeType.HIDDEN);
+                // Create a topological mutation object that will represent this mutation
+                TopologyMutation topologyMutation = new TopologyMutation(TopologyMutationType.SPLIT_LINK, random);
+                // Retrieve the innovation number from the global params
+                topologyMutation.SetInnovationNumber(GlobalParams.GetGenerationInnovationNumber(topologyMutation));
+                // Create a new link going from the old link From node to the new node
+                LinkGene newLink = new LinkGene(random.From(), newNode, 1F, topologyMutation.GetInnovationNumber());
+                // Add to the node incoming link the newLink
+                newNode.AddIncomingLink(newLink);
+                // Set the initial randomly selected link From node to the new node
+                random.SetFrom(newNode);
+                // Add the new node and the link
+                AddNode(newNode);
+                AddLinkAndNodes(newLink);
+            }
+            if (UnityEngine.Random.Range(0F, 1F) < mutation.addLinkProb)
+            {
+                // Create a list of all nodes except output nodes to select the random From node
+                List<NodeGene> temp = new List<NodeGene>(inputs);
+                temp.AddRange(hidden);
+                // Select a random From node
+                NodeGene fromRandom = temp.ElementAt(UnityEngine.Random.Range(0, temp.Count));
+
+                // Create a list of all nodes except input nodes to select the random To node
+                temp = new List<NodeGene>(outputs);
+                temp.AddRange(hidden);
+                // Remove the already selected node
+                temp.Remove(fromRandom);
+
+                // Remove all the nodes that are "behind" the From node
+                List<NodeGene> newList = new List<NodeGene>(temp);
+                foreach (NodeGene gene in newList)
+                {
+                    if (fromRandom.id > gene.id && gene.GetType() != NodeType.OUTPUT)
                     {
-                        if (gene.id < fromRandom.id)
-                        {
-                            temp.Remove(gene);
-                        }
+                        temp.Remove(gene);
                     }
-                    if (temp.Count > 0)
+                }
+                // If there still is at least one node
+                if (temp.Count > 0)
+                {
+                    // Select a random To node
+                    NodeGene toRandom = temp.ElementAt(UnityEngine.Random.Range(0, temp.Count));
+                    // Create the new link
+                    LinkGene newLink = new LinkGene(fromRandom, toRandom, 1F);
+                    // If the link is not already present add it
+                    if (!links.Contains(newLink))
                     {
-                        NodeGene toRandom = temp.ElementAt(UnityEngine.Random.Range(0, temp.Count));
-
-                        LinkGene newLink = new LinkGene(fromRandom, toRandom, UnityEngine.Random.Range(-1F, 1F));
-                        if (!links.Contains(newLink))
-                        {
-                            TopologyMutation mutation = new TopologyMutation(TopologyMutationType.ADD_LINK, newLink);
-                            mutation.SetInnovationNumber(GlobalParams.GetGenerationInnovationNumber(mutation));
-                            newLink.SetInnovationNumber(mutation.GetInnovationNumber());
-                            AddLinkRaw(newLink);
-                            Debug.Log("ADDING LINK MUTATION HAPPENED");
-                        }
+                        // Create a topological mutation object that will represent this mutation
+                        TopologyMutation topologyMutation = new TopologyMutation(TopologyMutationType.ADD_LINK, newLink);
+                        // Retrieve the innovation number from the global params
+                        topologyMutation.SetInnovationNumber(GlobalParams.GetGenerationInnovationNumber(topologyMutation));
+                        newLink.SetInnovationNumber(topologyMutation.GetInnovationNumber());
+                        // Add the new link to the links list and to the incoming links of the To node
+                        AddLinkAndNodes(newLink);
+                        toRandom.AddIncomingLink(newLink);
                     }
                 }
             }
-            for (int i = 0; i < 3; i++)
+            // For each link of this genotype try to mutate it
+            foreach (LinkGene gene in links)
             {
-                if (UnityEngine.Random.Range(0F, 1F) < mutationRate)
+                if (UnityEngine.Random.Range(0F, 1F) < mutation.weightChangeProb)
                 {
-                    LinkGene random = links.ElementAt(UnityEngine.Random.Range(0, links.Count));
-                    random.SetWeight(UnityEngine.Random.Range(-1F, 1F));
-                    Debug.Log("WEIGHT MUTATION HAPPENED: " + random.ToString());
+                    int random = UnityEngine.Random.Range(0, LinkCount);
+                    links[random].SetWeight(UnityEngine.Random.Range(-1F, 1F));
                 }
             }
         }
 
+        /// <summary>
+        ///   Add a link described by a link descriptor only if the two nodes involved are present
+        /// </summary>
+        /// <param name="link"> </param>
+        /// <param name="innovationNumber"> </param>
+        /// <param name="weight"> </param>
+        /// <returns> </returns>
         private LinkGene AddLink(LinkDescriptor link, int innovationNumber, double weight)
         {
             LinkGene newLink = null;
@@ -219,14 +287,14 @@ namespace Assets.Scripts.NeuralNet
             return newLink;
         }
 
-        private void AddLinkRaw(LinkGene linkCopy)
+        /// <summary>
+        ///   Add a nodes only if not already present
+        /// </summary>
+        /// <param name="nodeCopy"> </param>
+        /// <returns> </returns>
+        public NodeGene AddNode(NodeGene nodeCopy)
         {
-            links.Add(linkCopy);
-        }
-
-        public void AddNode(NodeGene nodeCopy)
-        {
-            if (all.Contains(nodeCopy)) return;
+            if (all.Contains(nodeCopy)) return nodeCopy;
 
             if (nodeCopy.GetType().Equals(NodeType.INPUT))
             {
@@ -243,35 +311,47 @@ namespace Assets.Scripts.NeuralNet
 
             all.Add(nodeCopy);
             NodeCount++;
+            return nodeCopy;
         }
 
+        /// <summary>
+        ///   Get the string representation of this genotype
+        /// </summary>
+        /// <returns> </returns>
         public override string ToString()
         {
             string output = "Inputs: " + InputCount + ", Outputs: " + OutputCount + ", Hidden: " + HiddenCount + ", Total: " + NodeCount + ", Link count: " + LinkCount + "\n";
-            foreach (LinkGene link in links)
+            foreach (NodeGene node in all)
             {
-                output += link.ToString() + "\n";
+                if (node.GetIncomingLinks().Count > 0)
+                    output += "To node " + node.id + ":\n";
+                foreach (LinkGene gene in node.GetIncomingLinks())
+                {
+                    output += gene.ToString() + "\n";
+                }
             }
             return output;
         }
 
-        private int GetCurrentNodeMaxId()
-        {
-            int max = 0;
-            foreach (NodeGene node in all)
-            {
-                if (node.id > max)
-                {
-                    max = node.id;
-                }
-            }
-            return max;
-        }
-
+        /// <summary>
+        ///   Get the genotype distance between this genotype and another one
+        /// </summary>
+        /// <param name="to"> </param>
+        /// <returns> </returns>
         public float GetTopologicalDistance(Genotype to)
         {
-            //TODO implement
-            return 0;
+            int maxGenomes = this.LinkCount > to.LinkCount ? this.LinkCount : to.LinkCount;
+            int genesDifference = this.LinkCount - to.LinkCount;
+            List<Tuple<LinkGene, LinkGene>> zippedLinks = TUtilsProvider.ZipWithPredicate(links, to.links, (item1, item2) => item1.GetInnovationNumber().Equals(item2.GetInnovationNumber()));
+            float differenceSum = 0;
+            foreach (Tuple<LinkGene, LinkGene> current in zippedLinks)
+            {
+                differenceSum += TMath.Abs((float)(current.Item1.GetWeight() - current.Item2.GetWeight()));
+            }
+            float averageDiff = differenceSum / zippedLinks.Count;
+            float c = 1F, c2 = 0.3F;
+            //Debug.Log("current diff: " + (c * genesDifference) / maxGenomes + (c2 * averageDiff));
+            return (c * genesDifference) / maxGenomes + (c2 * averageDiff);
         }
     }
 }

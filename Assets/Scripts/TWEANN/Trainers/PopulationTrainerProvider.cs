@@ -9,11 +9,15 @@ namespace Assets.Scripts.TWEANN
 
         public TrainerNEAT gaTrainer = new TrainerNEAT();
 
+        /// <summary>
+        ///   Provide the current set Trainer
+        /// </summary>
+        /// <returns> </returns>
         public PopulationTrainer ProvideTrainer()
         {
             switch (trainingParadigm)
             {
-                case Paradigms.TrainingParadigm.GENETIC:
+                case Paradigms.TrainingParadigm.NEAT:
                     return gaTrainer;
 
                 default:

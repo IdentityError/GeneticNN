@@ -10,6 +10,10 @@ namespace Assets.Scripts.CustomBehaviour
 
         private float trackLength;
 
+        /// <summary>
+        ///   Get the length of this track
+        /// </summary>
+        /// <returns> </returns>
         public float Length()
         {
             return trackLength;
@@ -36,16 +40,28 @@ namespace Assets.Scripts.CustomBehaviour
             return length;
         }
 
+        /// <summary>
+        ///   Get the finish line gameObject
+        /// </summary>
+        /// <returns> </returns>
         public GameObject GetFinishLine()
         {
             return finishLine;
         }
 
+        /// <summary>
+        ///   Get the start point of the track
+        /// </summary>
+        /// <returns> </returns>
         public Transform GetStartPoint()
         {
             return startPoint;
         }
 
+        /// <summary>
+        ///   Get this track's id (name)
+        /// </summary>
+        /// <returns> </returns>
         public string GetId()
         {
             return gameObject.name;

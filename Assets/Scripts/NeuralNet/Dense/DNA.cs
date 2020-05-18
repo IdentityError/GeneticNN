@@ -1,8 +1,10 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Assets.Scripts.MachineLearning
 {
-    [System.Serializable]
+    [Serializable]
+    [Obsolete("Needs further implementations")]
     public class DNA
     {
         public float fitness = 0F;

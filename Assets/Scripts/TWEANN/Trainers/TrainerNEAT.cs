@@ -6,62 +6,117 @@ namespace Assets.Scripts.TWEANN
     [System.Serializable]
     public class TrainerNEAT : PopulationTrainer
     {
-        //[Header("Paradigms")]
-        //[Tooltip("Defines the NeuralNet mutation paradigm:" +
-        //"\n1. WEIGHTS: only weights will be affected" +
-        //"\n2. TOPOLOGY: only the topology will be affected" +
-        //"\n3. HYBRID: both topology and weights will be affected")]
-        //[SerializeField] private Paradigms.MutationParadigm mutationParadigm;
-        //[Tooltip("Defines the weights fill paradigm (Crossover and Mutation):" +
-        //"\n1. COPY: weights will be copied from another existing neuron" +
-        //"\n2. RANDOM: weights will be initialized as random" +
-        //"\n3. HYBRID: weights will be a linear combination of the weights of another neuron and random ones")]
-        //[SerializeField] private Paradigms.MissingWeightsFillParadigm weightsFillParadigm;
-        [Space(5)]
-        [Header("Parameters")]
-        [Range(0, 1)]
-        [SerializeField] private float mutationRate;
-
-        public override void Train(IIndividual[] population, ref Biocenosis biocenosis)
+        [System.Serializable]
+        public struct MutationProbabilities
         {
-            base.Train(population, ref biocenosis);
+            [Range(0, 1)]
+            public float weightChangeProb;
+
+            [Range(0, 1)]
+            public float splitLinkProb;
+
+            [Range(0, 1)]
+            public float addLinkProb;
+        }
+
+        [Header("Mutation Parameters")]
+        [SerializeField] private MutationProbabilities mutation;
+
+        public override NeuralNetwork[] Train(Biocenosis biocenosis)
+        {
+            GlobalParams.ResetGenerationMutations();
+
+            int expectedIndividualCount = biocenosis.GetExpectedIndividualNumber();
+            NeuralNetwork[] pop = new NeuralNetwork[expectedIndividualCount];
 
             int currentIndex = 0;
             foreach (Species current in biocenosis.GetSpeciesList())
             {
-                for (int i = 0; i < current.GetIndividualCount(); i++, currentIndex++)
+                for (int i = 0; i < current.GetExpectedIndividualCount(); i++)
                 {
-                    (IndividualDescriptor, IndividualDescriptor) parents = PickFittestTwoInSpecies(current);
+                    (IIndividual, IIndividual) parents = SelectionFromSpecies(current);
                     Genotype childGen = Crossover(parents.Item1, parents.Item2);
-                    childGen.Mutate(mutationRate);
-                    population[currentIndex].SetNeuralNet(new NeuralNetwork(childGen));
-                    newBiocenosis.AddToSpeciesOrCreate(population[currentIndex]);
+                    childGen.Mutate(mutation);
+                    pop[currentIndex] = new NeuralNetwork(childGen);
+                    currentIndex++;
                 }
             }
-            GlobalParams.ResetGenerationMutations();
-            biocenosis = newBiocenosis;
+            return pop;
         }
 
-        private (IndividualDescriptor, IndividualDescriptor) Selection()
+        /// <summary>
+        ///   Perform selection from a specified species
+        /// </summary>
+        /// <param name="species"> </param>
+        /// <returns> </returns>
+        private (IIndividual, IIndividual) SelectionFromSpecies(Species species)
         {
-            NormalizePopulationPickProbability();
-            //Pick first parent and temporarily set its fitness to 0 and renormalize the probabilities so it won't be picked as second parent
-            IndividualDescriptor first = PickRandom();
-            double firstFitness = first.fitness;
-            first.fitness = 0;
-            NormalizePopulationPickProbability();
+            if (species.GetIndividualCount() == 1)
+            {
+                IIndividual champ = species.GetChamp();
+                return (champ, champ);
+            }
+            else if (species.GetIndividualCount() > 1)
+            {
+                //Debug.Log("Returning 2 ");
+                return PickFittestTwoInSpecies(species);
+            }
+            else
+            {
+                throw new System.Exception("Unable to select parents from a species");
+            }
+        }
 
-            //Picks second parent and reset the first parent fitness so it can be picked on the next iteration
-            IndividualDescriptor second = PickRandom();
-            first.fitness = firstFitness;
+        /// <summary>
+        ///   Pick the 2 fittest individuals in the species, if the species has only 1 member, it returns the member (duplicate)
+        /// </summary>
+        /// <param name="species"> </param>
+        /// <returns> </returns>
+        private (IIndividual, IIndividual) PickFittestTwoInSpecies(Species species)
+        {
+            IIndividual first = null;
+            double firstFitness = -1F;
+            foreach (IIndividual car in species.GetIndividuals())
+            {
+                if (car.ProvideFitness() > firstFitness)
+                {
+                    first = car;
+                    firstFitness = car.ProvideFitness();
+                }
+            }
+            double secondFitness = -1F;
+            IIndividual second = null;
+            foreach (IIndividual car in species.GetIndividuals())
+            {
+                if (car.ProvideFitness() > secondFitness)
+                {
+                    if (species.GetIndividualCount() > 1)
+                    {
+                        if (car != first)
+                        {
+                            second = car;
+                            secondFitness = car.ProvideFitness();
+                        }
+                    }
+                    else
+                    {
+                        second = car;
+                        secondFitness = car.ProvideFitness();
+                    }
+                }
+            }
             return (first, second);
         }
 
-        private Genotype Crossover(IndividualDescriptor parent, IndividualDescriptor parent1)
+        /// <summary>
+        ///   Perform the crossover between the 2 parents
+        /// </summary>
+        /// <param name="parent"> </param>
+        /// <param name="parent1"> </param>
+        /// <returns> </returns>
+        private Genotype Crossover(IIndividual parent, IIndividual parent1)
         {
-            IndividualDescriptor fittest = parent.fitness > parent1.fitness ? parent : parent1;
-            IndividualDescriptor partner = fittest.Equals(parent) ? parent1 : parent;
-            Genotype newGen = fittest.genotype.Crossover(partner.genotype);
+            Genotype newGen = parent.ProvideNeuralNet().GetGenotype().Crossover(parent1.ProvideNeuralNet().GetGenotype(), parent.ProvideFitness(), parent1.ProvideFitness());
             return newGen;
         }
     }
