@@ -16,14 +16,6 @@ public class SimulationStats
         this.trackID = track;
     }
 
-    public override string ToString()
-    {
-        return "Track: " + trackID +
-             "\nAverage throttle: " + averageThrottle +
-             "\nTime: " + time +
-             "\nDistance: " + distance;
-    }
-
     public bool BetterThan(SimulationStats other)
     {
         if (other == null)
@@ -31,5 +23,21 @@ public class SimulationStats
             return true;
         }
         return this.time < other.time && this.averageThrottle > other.averageThrottle;
+    }
+
+    public void Reset()
+    {
+        averageThrottle = 0;
+        time = 0;
+        distance = 0;
+        lastThrottle = 0;
+    }
+
+    public override string ToString()
+    {
+        return "Track: " + trackID +
+             "\nAverage throttle: " + averageThrottle +
+             "\nTime: " + time +
+             "\nDistance: " + distance;
     }
 }

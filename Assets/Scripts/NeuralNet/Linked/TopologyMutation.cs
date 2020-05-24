@@ -6,10 +6,9 @@ namespace Assets.Scripts.NeuralNet
 
     public class TopologyMutation : IEquatable<TopologyMutation>
     {
-        private TopologyMutationType type;
         private int innovationNumber;
-
         private LinkGene linkInvolved;
+        private TopologyMutationType type;
 
         public TopologyMutation(TopologyMutationType type, LinkGene linkInvolved, int innovationNumber) : this(type, linkInvolved)
         {
@@ -22,6 +21,11 @@ namespace Assets.Scripts.NeuralNet
             this.linkInvolved = linkInvolved;
         }
 
+        public bool Equals(TopologyMutation other)
+        {
+            return type == other.type && linkInvolved.Equals(other.linkInvolved);
+        }
+
         public int GetInnovationNumber()
         {
             return innovationNumber;
@@ -30,11 +34,6 @@ namespace Assets.Scripts.NeuralNet
         public void SetInnovationNumber(int innovationNumber)
         {
             this.innovationNumber = innovationNumber;
-        }
-
-        public bool Equals(TopologyMutation other)
-        {
-            return type == other.type && linkInvolved.Equals(other.linkInvolved);
         }
     }
 }

@@ -1,4 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
+using UnityEngine;
 
 namespace Assets.Scripts.TWEANN
 {
@@ -18,6 +22,28 @@ namespace Assets.Scripts.TWEANN
             this.speciesList = speciesList;
         }
 
+        /// <summary>
+        ///   <b> Speciates the population </b><br> </br>
+        ///   1. Split oranism into species based on the Biocenosis sharing threshold <br> </br>
+        ///   2. Calculate the next generation expected number per species and total number of individuals
+        /// </summary>
+        /// <param name="population"> </param>
+        public void Speciate(IIndividual[] population)
+        {
+            Reset();
+            int lenght = population.Length;
+            for (int i = 0; i < lenght; i++)
+            {
+                AddToSpeciesOrCreate(population[i]);
+            }
+            CalculateSpeciesExpectedNumber();
+
+            //foreach (IIndividual individual in population)
+            //{
+            //    UnityEngine.Debug.Log(((MonoBehaviour)individual).name + ", fitness adj: " + individual.ProvideFitness());
+            //}
+        }
+
         public void AddToSpeciesOrCreate(IIndividual individual)
         {
             foreach (Species species in speciesList)
@@ -31,39 +57,6 @@ namespace Assets.Scripts.TWEANN
             Species newSpecies = new Species();
             newSpecies.AddToSpecies(individual);
             AddSpecies(newSpecies);
-        }
-
-        private void AddSpecies(Species species)
-        {
-            if (!speciesList.Contains(species))
-            {
-                speciesList.Add(species);
-            }
-        }
-
-        public List<Species> GetSpeciesList()
-        {
-            return speciesList;
-        }
-
-        public int GetTotalIndividualNumber()
-        {
-            int count = 0;
-            foreach (Species species in speciesList)
-            {
-                count += species.GetIndividualCount();
-            }
-            return count;
-        }
-
-        public int GetExpectedIndividualNumber()
-        {
-            int count = 0;
-            foreach (Species species in speciesList)
-            {
-                count += species.GetExpectedIndividualCount();
-            }
-            return count;
         }
 
         private void Reset()
@@ -105,26 +98,58 @@ namespace Assets.Scripts.TWEANN
             }
         }
 
+        public int GetExpectedIndividualNumber()
+        {
+            int count = 0;
+            foreach (Species species in speciesList)
+            {
+                count += species.GetExpectedIndividualCount();
+            }
+            return count;
+        }
+
+        public int GetTotalIndividualNumber()
+        {
+            int count = 0;
+            foreach (Species species in speciesList)
+            {
+                count += species.GetIndividualCount();
+            }
+            return count;
+        }
+
         public float GetSharingTreshold()
         {
             return speciesSharingThreshold;
         }
 
-        /// <summary>
-        ///   <b> Speciates the population </b><br> </br>
-        ///   1. Split oranism into species based on the Biocenosis sharing threshold <br> </br>
-        ///   2. Calculate the next generation expected number per species and total number of individuals
-        /// </summary>
-        /// <param name="population"> </param>
-        public void Speciate(IIndividual[] population)
+        public List<Species> GetSpeciesList()
         {
-            Reset();
-            int lenght = population.Length;
-            for (int i = 0; i < lenght; i++)
+            return speciesList;
+        }
+
+        public IIndividual GetCurrentFittes()
+        {
+            double max = 0;
+            IIndividual fittest = null;
+            foreach (Species species in speciesList)
             {
-                AddToSpeciesOrCreate(population[i]);
+                IIndividual current = species.GetChamp();
+                if (current != null && current.ProvideFitness() > max)
+                {
+                    fittest = species.GetChamp();
+                    max = fittest.ProvideFitness();
+                }
             }
-            CalculateSpeciesExpectedNumber();
+            return fittest;
+        }
+
+        private void AddSpecies(Species species)
+        {
+            if (!speciesList.Contains(species))
+            {
+                speciesList.Add(species);
+            }
         }
 
         public override string ToString()

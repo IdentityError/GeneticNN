@@ -10,5 +10,7 @@ namespace Assets.Scripts.TWEANN
         double ProvideFitness();
 
         void SetFitness(double fitness);
+
+        double EvaluateFitnessFunction();
     }
 }

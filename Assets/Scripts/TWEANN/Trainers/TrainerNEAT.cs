@@ -35,9 +35,11 @@ namespace Assets.Scripts.TWEANN
                 for (int i = 0; i < current.GetExpectedIndividualCount(); i++)
                 {
                     (IIndividual, IIndividual) parents = SelectionFromSpecies(current);
+                    Debug.Log(((MonoBehaviour)parents.Item1).name + ", " + ((MonoBehaviour)parents.Item2).name + "\n" + parents.Item1.ProvideNeuralNet().GetGenotype().ToString() + ", " + parents.Item2.ProvideNeuralNet().GetGenotype().ToString());
                     Genotype childGen = Crossover(parents.Item1, parents.Item2);
                     childGen.Mutate(mutation);
                     pop[currentIndex] = new NeuralNetwork(childGen);
+                    //Debug.Log("Child: " + childGen.ToString());
                     currentIndex++;
                 }
             }

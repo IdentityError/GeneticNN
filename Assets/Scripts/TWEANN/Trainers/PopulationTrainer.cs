@@ -11,30 +11,30 @@ namespace Assets.Scripts.TWEANN
 
         public TopologyDescriptor GetPredefinedTopologyDescriptor()
         {
-            descriptor = new TopologyDescriptor(5, 16, 2);
+            //descriptor = new TopologyDescriptor(5, 16, 2);
 
-            for (int i = 1; i < 6; i++)
-            {
-                for (int j = 6; j < 14; j++)
-                {
-                    descriptor.links.Add(new LinkDescriptor(i, j));
-                }
-            }
-            for (int i = 6; i < 14; i++)
-            {
-                for (int j = 14; j < 22; j++)
-                {
-                    descriptor.links.Add(new LinkDescriptor(i, j));
-                }
-            }
+            //for (int i = 1; i < 6; i++)
+            //{
+            //    for (int j = 6; j < 14; j++)
+            //    {
+            //        descriptor.links.Add(new LinkDescriptor(i, j));
+            //    }
+            //}
+            //for (int i = 6; i < 14; i++)
+            //{
+            //    for (int j = 14; j < 22; j++)
+            //    {
+            //        descriptor.links.Add(new LinkDescriptor(i, j));
+            //    }
+            //}
 
-            for (int i = 14; i < 22; i++)
-            {
-                for (int j = 22; j < 24; j++)
-                {
-                    descriptor.links.Add(new LinkDescriptor(i, j));
-                }
-            }
+            //for (int i = 14; i < 22; i++)
+            //{
+            //    for (int j = 22; j < 24; j++)
+            //    {
+            //        descriptor.links.Add(new LinkDescriptor(i, j));
+            //    }
+            //}
             return descriptor;
         }
 

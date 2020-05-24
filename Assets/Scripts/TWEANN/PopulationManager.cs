@@ -8,30 +8,26 @@ namespace Assets.Scripts.TWEANN
 {
     public class PopulationManager : MonoBehaviour
     {
-        [Header("Parameters")]
-        [SerializeField] private int initialPopulationNumber;
-        [SerializeField] private float timeScale = 1F;
-        [SerializeField] private float sharingThreshold;
+        public List<ISimulatingIndividual> populationList;
+        private float averageThrottle = 1;
+        private Biocenosis biocenosis;
+        private int currentSimulating;
+        private Genotype fittestGenotype;
+        private int generationCount = 0;
+        private double generationMaxFitness = 0;
         [Header("References")]
         [SerializeField] private GameObject individualPrefab;
+        [Header("Parameters")]
+        [SerializeField] private int initialPopulationNumber;
+        [SerializeField] private float sharingThreshold;
+        private IEnumerator ShouldRestart_C;
+        private bool simulating = false;
+        private float simulationTime = 0;
+        [SerializeField] private float timeScale = 1F;
         [SerializeField] private Track track;
         [Header("Training")]
         [SerializeField] private PopulationTrainerProvider trainerProvider;
-        private float averageThrottle = 1;
-        private float simulationTime = 0;
-
-        public List<ISimulatingIndividual> populationList;
-        private int generationCount = 0;
-        private int currentSimulating;
         private UIManager uiManager;
-
-        private Genotype fittestGenotype;
-        private double generationMaxFitness = 0;
-
-        private IEnumerator ShouldRestart_C;
-        private Biocenosis biocenosis;
-
-        private bool simulating = false;
 
         private void Start()
         {
@@ -59,39 +55,6 @@ namespace Assets.Scripts.TWEANN
         }
 
         /// <summary>
-        ///   Advance to the next generation with the following steps: <br> </br>
-        ///   1. Speciation <br> </br>
-        ///   2. Training <br> </br>
-        ///   3. Instantiate new population <br> </br>
-        /// </summary>
-        private void AdvanceGeneration()
-        {
-            //! Speciation
-            biocenosis.Speciate(populationList.ToArray());
-
-            // Retrieve a new trained Network population
-            NeuralNetwork[] pop = trainerProvider.ProvideTrainer().Train(biocenosis);
-
-            // Destroy all the objects
-            foreach (ISimulatingIndividual individual in populationList)
-            {
-                PoolManager.GetInstance().DeactivateObject(((MonoBehaviour)individual).gameObject);
-            }
-            populationList.Clear();
-
-            for (int i = 0; i < pop.Length; i++)
-            {
-                populationList.Add(InstantiateIndividual(pop[i], i.ToString()));
-            }
-
-            generationCount++;
-            currentSimulating = pop.Length;
-            simulating = true;
-            averageThrottle = 1;
-            uiManager.UpdateGenerationCount(generationCount);
-        }
-
-        /// <summary>
         ///   Initialize the first population, used only one time at the start
         /// </summary>
         private void InitializeAncestors()
@@ -112,23 +75,69 @@ namespace Assets.Scripts.TWEANN
         }
 
         /// <summary>
-        ///   Instantiate a new individual
+        ///   Advance to the next generation with the following steps: <br> </br>
+        ///   1. Speciation <br> </br>
+        ///   2. Training <br> </br>
+        ///   3. Instantiate new population <br> </br>
         /// </summary>
-        /// <param name="neuralNet"> </param>
-        /// <param name="name"> </param>
-        /// <returns> </returns>
-        private ISimulatingIndividual InstantiateIndividual(NeuralNetwork neuralNet, string name)
+        private void AdvanceGeneration()
         {
-            GameObject obj = PoolManager.GetInstance().Spawn("Individual", "prefab", track.GetStartPoint().localPosition, track.GetStartPoint().rotation);
-            obj.name = name;
-            ISimulatingIndividual individual = obj.GetComponent<ISimulatingIndividual>();
-            if (individual == null)
+            //! Speciation
+            biocenosis.Speciate(populationList.ToArray());
+            Debug.Log(biocenosis.ToString());
+            Debug.Log("Fittest: " + ((MonoBehaviour)biocenosis.GetCurrentFittes()).name + ", FTN: " + biocenosis.GetCurrentFittes().ProvideFitness());
+            // Retrieve a new trained Network population
+            NeuralNetwork[] pop = trainerProvider.ProvideTrainer().Train(biocenosis);
+
+            // Destroy all the objects
+            foreach (ISimulatingIndividual individual in populationList)
             {
-                throw new System.Exception("The individual prefab is not implementing the ISimulatingIndividual interface");
+                PoolManager.GetInstance().DeactivateObject(((MonoBehaviour)individual).gameObject);
             }
-            individual.SetPopulationManager(this);
-            individual.SetNeuralNet(neuralNet);
-            return individual;
+            populationList.Clear();
+
+            for (int i = 0; i < pop.Length; i++)
+            {
+                populationList.Add(InstantiateIndividual(pop[i], i.ToString()));
+                //Debug.Log(((MonoBehaviour)populationList[i]).gameObject.name + populationList[i].ProvideNeuralNet().GetGenotype().ToString());
+            }
+
+            generationCount++;
+            currentSimulating = pop.Length;
+            simulating = true;
+            averageThrottle = 1;
+            uiManager.UpdateGenerationCount(generationCount);
+        }
+
+        /// <summary>
+        ///   Force the end of the simulation
+        /// </summary>
+        public void ForceSimulationEnd()
+        {
+            foreach (ISimulatingIndividual individual in populationList)
+            {
+                if (individual.IsSimulating())
+                {
+                    individual.StopSimulating();
+                }
+            }
+            currentSimulating = 0;
+            SimulationEnded();
+        }
+
+        /// <summary>
+        ///   Called when the simulation has ended
+        /// </summary>
+        private void SimulationEnded()
+        {
+            simulating = false;
+            simulationTime = 0;
+            generationMaxFitness = 0;
+            foreach (IIndividual individual in populationList)
+            {
+                individual.SetFitness(individual.EvaluateFitnessFunction());
+            }
+            AdvanceGeneration();
         }
 
         /// <summary>
@@ -148,37 +157,24 @@ namespace Assets.Scripts.TWEANN
         }
 
         /// <summary>
-        ///   Force the end of the simulation
+        ///   Instantiate a new individual
         /// </summary>
-        public void ForceSimulationEnd()
+        /// <param name="neuralNet"> </param>
+        /// <param name="name"> </param>
+        /// <returns> </returns>
+        private ISimulatingIndividual InstantiateIndividual(NeuralNetwork neuralNet, string name)
         {
-            foreach (ISimulatingIndividual individual in populationList)
+            GameObject obj = PoolManager.GetInstance().Spawn("Individual", "prefab", track.GetStartPoint().localPosition, track.GetStartPoint().rotation);
+            obj.name = name;
+            ISimulatingIndividual individual = obj.GetComponent<ISimulatingIndividual>();
+            if (individual == null)
             {
-                if (individual.IsSimulating())
-                {
-                    individual.StopSimulating();
-                }
+                throw new System.Exception("The individual prefab is not implementing the ISimulatingIndividual interface");
             }
-            SimulationEnded();
-        }
+            individual.SetPopulationManager(this);
+            individual.SetNeuralNet(neuralNet);
 
-        /// <summary>
-        ///   Called when the simulation has ended
-        /// </summary>
-        private void SimulationEnded()
-        {
-            simulating = false;
-            simulationTime = 0;
-            generationMaxFitness = 0;
-            foreach (IIndividual individual in populationList)
-            {
-                if (individual.ProvideFitness() > generationMaxFitness)
-                {
-                    fittestGenotype = individual.ProvideNeuralNet().GetGenotype();
-                    generationMaxFitness = individual.ProvideFitness();
-                }
-            }
-            AdvanceGeneration();
+            return individual;
         }
 
         /// <summary>

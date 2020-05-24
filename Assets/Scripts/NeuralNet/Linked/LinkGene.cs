@@ -5,9 +5,9 @@ namespace Assets.Scripts.NeuralNet
     public class LinkGene : IEquatable<LinkGene>
     {
         private NodeGene from;
+        private int innovationNumber;
         private NodeGene to;
         private double weight;
-        private int innovationNumber;
 
         public LinkGene(NodeGene from, NodeGene to, double weight) : this(from, to, weight, 0)
         {
@@ -25,29 +25,19 @@ namespace Assets.Scripts.NeuralNet
             this.innovationNumber = innovationNumber;
         }
 
-        public NodeGene From()
-        {
-            return from;
-        }
-
-        public void SetFrom(NodeGene node)
-        {
-            from = node;
-        }
-
-        public NodeGene To()
-        {
-            return to;
-        }
-
-        public void SetTo(NodeGene node)
-        {
-            to = node;
-        }
-
         public LinkGene Copy()
         {
             return new LinkGene(from, to, weight, innovationNumber);
+        }
+
+        public bool Equals(LinkGene other)
+        {
+            return this.from.id == other.from.id && this.to.id == other.to.id;
+        }
+
+        public NodeGene From()
+        {
+            return from;
         }
 
         public int GetInnovationNumber()
@@ -55,14 +45,24 @@ namespace Assets.Scripts.NeuralNet
             return innovationNumber;
         }
 
+        public double GetWeight()
+        {
+            return weight;
+        }
+
+        public void SetFrom(NodeGene node)
+        {
+            from = node;
+        }
+
         public void SetInnovationNumber(int innovationNumber)
         {
             this.innovationNumber = innovationNumber;
         }
 
-        public double GetWeight()
+        public void SetTo(NodeGene node)
         {
-            return weight;
+            to = node;
         }
 
         public void SetWeight(double weight)
@@ -70,14 +70,14 @@ namespace Assets.Scripts.NeuralNet
             this.weight = weight;
         }
 
+        public NodeGene To()
+        {
+            return to;
+        }
+
         public override string ToString()
         {
             return from.id + " -> " + to.id + ", W: " + weight + ", I: " + innovationNumber;
-        }
-
-        public bool Equals(LinkGene other)
-        {
-            return this.from.id == other.from.id && this.to.id == other.to.id;
         }
     }
 }

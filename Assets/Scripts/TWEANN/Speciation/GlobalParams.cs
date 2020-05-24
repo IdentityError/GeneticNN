@@ -22,14 +22,14 @@ namespace Assets.Scripts.NeuralNet
             }
         }
 
-        public static void ResetGenerationMutations()
-        {
-            generationMutations.Clear();
-        }
-
         public static void InitializeGlobalInnovationNumber(TopologyDescriptor descriptor)
         {
             globalInnovationNumber = descriptor.links.Count + 1;
+        }
+
+        public static void ResetGenerationMutations()
+        {
+            generationMutations.Clear();
         }
     }
 }

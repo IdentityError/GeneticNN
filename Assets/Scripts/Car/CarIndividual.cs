@@ -2,99 +2,56 @@
 using Assets.Scripts.TWEANN;
 using UnityEngine;
 
-public class CarIndividual : MonoBehaviour, ISimulatingIndividual
+public class CarIndividual : MonoBehaviour, ISimulatingIndividual, IPooledObject
 {
     //TODO Fix the bug that cause the cars to not be initializated correctly
     //endedSimulation is set as true and never set as false again, maybe some error when copying arrays or resetting them, think about returning a fresh new population of Genotype on the train method
 
-    [Header("Specifications")]
-    public Wheel[] wheels;
-    public bool manualControl;
-
-    [Tooltip("Length from rear to front axes")]
-    public float wheelBase;
-
-    [Tooltip("Length from left to right axes")]
-    public float rearTrack;
-
-    [Tooltip("Radius of the turn")]
-    public float turnRadius;
-    public float motorPower;
-    public float steeringPower;
-
+    [HideInInspector] public Vector3 lastPosition;
     [Header("Senses")]
     [Tooltip("Length of the raycasted senses")]
     public float length;
-
-    [Header("Debug")]
-    public float steering;
-    public float throttle;
-    public SimulationStats stats;
-
-    private int updateCycles = 0;
-    private float currentThrottleSum = 0F;
-    private float ackermanAngleRight;
-    private float ackermanAngleLeft;
-    private int directionsCount;
-    private Vector3[] sensesDirections;
+    public bool manualControl;
+    public float motorPower;
     public double[] neuralNetInput;
     public double[] neuralNetOutput;
-    [SerializeField] private bool endedSimulation = false;
-    [SerializeField] private bool netInitialized = false;
-    private float angleStride;
-    [HideInInspector] public Vector3 lastPosition;
-    private new Rigidbody rigidbody;
-
-    private NeuralNetwork neuralNet;
-    [SerializeField] private double fitness;
     public double pickProbability;
+    [Tooltip("Length from left to right axes")]
+    public float rearTrack;
+    public SimulationStats stats;
+    [Header("Debug")]
+    public float steering;
+    public float steeringPower;
+    public float throttle;
+    [Tooltip("Radius of the turn")]
+    public float turnRadius;
+    [Tooltip("Length from rear to front axes")]
+    public float wheelBase;
+    [Header("Specifications")]
+    public Wheel[] wheels;
+    private float ackermanAngleLeft;
+    private float ackermanAngleRight;
+    private float angleStride;
+    private float currentThrottleSum = 0F;
+    private int directionsCount;
+    [SerializeField] private bool endedSimulation = false;
+    [SerializeField] private double fitness = 0;
+    [SerializeField] private bool netInitialized = false;
+    private NeuralNetwork neuralNet;
     private PopulationManager populationManager;
+    private new Rigidbody rigidbody;
+    private Vector3[] sensesDirections;
+    private int updateCycles = 0;
 
-    private void Start()
+    public CarIndividualData GetIndividualData()
     {
-        lastPosition = transform.position;
-        rigidbody = GetComponent<Rigidbody>();
-
-        foreach (Wheel w in wheels)
-        {
-            w.motorPower = this.motorPower;
-            w.steeringPower = this.steeringPower;
-        }
-
-        if (populationManager != null)
-        {
-            stats.trackID = populationManager.GetTrack().GetId();
-        }
+        return new CarIndividualData(neuralNet.GetGenotype(), ProvideFitness());
     }
 
-    private void Update()
+    private void EndIndividualSimulation()
     {
-        if (!endedSimulation && netInitialized)
-        {
-            if (!manualControl)
-            {
-                Sense();
-                neuralNetOutput = neuralNet.FeedForward(neuralNetInput);
-            }
-            ManageWheels();
-            UpdateStats();
-        }
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (!endedSimulation)
-        {
-            EndIndividualSimulation();
-        }
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.tag.Equals("FinishLine"))
-        {
-            EndIndividualSimulation();
-        }
+        StopSimulating();
+        populationManager?.IndividualEndedSimulation(this);
     }
 
     private void ManageWheels()
@@ -139,6 +96,36 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual
         }
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (!endedSimulation)
+        {
+            EndIndividualSimulation();
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag.Equals("FinishLine"))
+        {
+            EndIndividualSimulation();
+        }
+    }
+
+    private void ResetParameters()
+    {
+        endedSimulation = true;
+        netInitialized = false;
+
+        lastPosition = transform.position;
+
+        throttle = 0;
+        steering = 0;
+        fitness = 0;
+
+        stats.Reset();
+    }
+
     private void Sense()
     {
         RaycastHit[] hits = new RaycastHit[directionsCount];
@@ -165,51 +152,85 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual
         neuralNetInput[neuralNet.GetGenotype().InputCount - 1] = throttle;
     }
 
+    private void Start()
+    {
+        lastPosition = transform.position;
+        rigidbody = GetComponent<Rigidbody>();
+
+        foreach (Wheel w in wheels)
+        {
+            w.motorPower = this.motorPower;
+            w.steeringPower = this.steeringPower;
+        }
+
+        if (populationManager != null)
+        {
+            stats.trackID = populationManager.GetTrack().GetId();
+        }
+    }
+
+    private void Update()
+    {
+        if (!endedSimulation && netInitialized)
+        {
+            if (!manualControl)
+            {
+                Sense();
+                neuralNetOutput = neuralNet.FeedForward(neuralNetInput);
+            }
+            ManageWheels();
+            UpdateStats();
+        }
+    }
+
     private void UpdateStats()
     {
         stats.lastThrottle = throttle;
         stats.distance += Vector3.Distance(transform.position, lastPosition);
-        lastPosition = transform.position;
         stats.time += Time.deltaTime;
-
         updateCycles++;
         currentThrottleSum += throttle;
         stats.averageThrottle = currentThrottleSum / updateCycles;
         stats.averageThrottle = stats.averageThrottle < 0 ? 0 : stats.averageThrottle;
-        fitness += (4F * stats.averageThrottle + 35F * Vector3.Distance(transform.position, lastPosition)) * Time.deltaTime;
-        fitness = fitness < 0 ? 0 : fitness;
-    }
 
-    private void ResetParameters()
-    {
-        if (endedSimulation) return;
-        endedSimulation = true;
-        throttle = 0;
-        steering = 0;
-        netInitialized = false;
-    }
-
-    private void EndIndividualSimulation()
-    {
-        ResetParameters();
-        populationManager?.IndividualEndedSimulation(this);
-    }
-
-    public CarIndividualData GetIndividualData()
-    {
-        return new CarIndividualData(neuralNet.GetGenotype(), ProvideFitness());
+        lastPosition = transform.position;
     }
 
     #region Interface
 
-    public void SetPopulationManager(PopulationManager populationManager)
+    public double EvaluateFitnessFunction()
     {
-        this.populationManager = populationManager;
+        return ((2 * stats.averageThrottle + 1) * (2 * stats.averageThrottle + 1)) + 2F * stats.distance;
+    }
+
+    public bool IsSimulating()
+    {
+        return !endedSimulation;
+    }
+
+    public void OnObjectSpawn()
+    {
+        ResetParameters();
+    }
+
+    public double ProvideFitness()
+    {
+        return this.fitness;
     }
 
     public NeuralNetwork ProvideNeuralNet()
     {
         return this.neuralNet;
+    }
+
+    public SimulationStats ProvideSimulationStats()
+    {
+        return stats;
+    }
+
+    public void SetFitness(double fitness)
+    {
+        this.fitness = fitness;
     }
 
     public void SetNeuralNet(NeuralNetwork net)
@@ -221,16 +242,12 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual
         neuralNetInput = new double[gen.InputCount];
         angleStride = 180F / (directionsCount + 1);
         netInitialized = true;
+        endedSimulation = false;
     }
 
-    public SimulationStats ProvideSimulationStats()
+    public void SetPopulationManager(PopulationManager populationManager)
     {
-        return stats;
-    }
-
-    public double ProvideFitness()
-    {
-        return this.fitness;
+        this.populationManager = populationManager;
     }
 
     public void SetSimulationStats(SimulationStats stats)
@@ -238,19 +255,9 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual
         this.stats = stats;
     }
 
-    public bool IsSimulating()
-    {
-        return !endedSimulation;
-    }
-
     public void StopSimulating()
     {
-        ResetParameters();
-    }
-
-    public void SetFitness(double fitness)
-    {
-        this.fitness = fitness;
+        endedSimulation = true;
     }
 
     #endregion Interface
