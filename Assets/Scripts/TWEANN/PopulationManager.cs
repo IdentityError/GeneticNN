@@ -84,8 +84,7 @@ namespace Assets.Scripts.TWEANN
         {
             //! Speciation
             biocenosis.Speciate(populationList.ToArray());
-            Debug.Log(biocenosis.ToString());
-            Debug.Log("Fittest: " + ((MonoBehaviour)biocenosis.GetCurrentFittes()).name + ", FTN: " + biocenosis.GetCurrentFittes().ProvideFitness());
+            uiManager.AppendToLog("Current biocenosis: \n" + biocenosis.ToString());
             // Retrieve a new trained Network population
             NeuralNetwork[] pop = trainerProvider.ProvideTrainer().Train(biocenosis);
 

@@ -200,7 +200,7 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual, IPooledObject
 
     public double EvaluateFitnessFunction()
     {
-        return ((2 * stats.averageThrottle + 1) * (2 * stats.averageThrottle + 1)) + 2F * stats.distance;
+        return ((1.5F * stats.averageThrottle + 1) * (1.5F * stats.averageThrottle + 1)) * stats.distance;
     }
 
     public bool IsSimulating()
