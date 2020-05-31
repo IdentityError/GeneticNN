@@ -131,16 +131,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1981271639088077229, guid: 8ad4a7ed4fa57e54baf109c449170f5d,
-        type: 3}
-      propertyPath: m_TagString
-      value: FinishLine
-      objectReference: {fileID: 0}
-    - target: {fileID: 5876397691436225728, guid: 8ad4a7ed4fa57e54baf109c449170f5d,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -5
-      objectReference: {fileID: 0}
     - target: {fileID: 6486783325030372510, guid: 8ad4a7ed4fa57e54baf109c449170f5d,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -200,36 +190,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Track02
-      objectReference: {fileID: 0}
-    - target: {fileID: 6486783325030372511, guid: 8ad4a7ed4fa57e54baf109c449170f5d,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6838174801841147342, guid: 8ad4a7ed4fa57e54baf109c449170f5d,
-        type: 3}
-      propertyPath: m_TagString
-      value: StartPoint
-      objectReference: {fileID: 0}
-    - target: {fileID: 6838174801841147343, guid: 8ad4a7ed4fa57e54baf109c449170f5d,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6838174801841147343, guid: 8ad4a7ed4fa57e54baf109c449170f5d,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.8
-      objectReference: {fileID: 0}
-    - target: {fileID: 7014099702647270749, guid: 8ad4a7ed4fa57e54baf109c449170f5d,
-        type: 3}
-      propertyPath: m_LocalScale.z
-      value: 0.7
-      objectReference: {fileID: 0}
-    - target: {fileID: 8280539725814646305, guid: 8ad4a7ed4fa57e54baf109c449170f5d,
-        type: 3}
-      propertyPath: m_LocalScale.z
-      value: 0.55
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8ad4a7ed4fa57e54baf109c449170f5d, type: 3}
@@ -690,11 +650,11 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 543053043}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2111517136
+--- !u!114 &2111517136 stripped
 MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 2111517136, guid: 8ad4a7ed4fa57e54baf109c449170f5d,
+    type: 3}
+  m_PrefabInstance: {fileID: 543053043}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2111517135}
   m_Enabled: 1
@@ -921,6 +881,11 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4514718875220909228, guid: 1a35ae9d94187dd4b80b70e89813f56d,
+        type: 3}
+      propertyPath: m_ScrollSensitivity
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 4514718875247420194, guid: 1a35ae9d94187dd4b80b70e89813f56d,
         type: 3}
       propertyPath: m_SizeDelta.y
@@ -1139,8 +1104,8 @@ MonoBehaviour:
   individualPrefab: {fileID: 6791551976333570425, guid: dda260aae5911af48a27564e8179e873,
     type: 3}
   initialPopulationNumber: 100
-  sharingThreshold: 0.225
-  timeScale: 2
+  sharingThreshold: 0.3
+  timeScale: 1
   track: {fileID: 2111517136}
   trainerProvider:
     trainingParadigm: 0
@@ -1170,10 +1135,11 @@ MonoBehaviour:
           toId: 6
         - fromId: 5
           toId: 7
-      mutation:
-        weightChangeProb: 0.15
-        splitLinkProb: 0.175
-        addLinkProb: 0.35
+  breedingParameters:
+    addLinkProb: 0.25
+    crossoverProbability: 1
+    splitLinkProb: 0.1
+    weightChangeProb: 0.0625
 --- !u!114 &6509384906705858488
 MonoBehaviour:
   m_ObjectHideFlags: 0

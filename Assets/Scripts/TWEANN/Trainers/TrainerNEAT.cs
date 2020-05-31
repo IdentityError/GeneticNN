@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.NeuralNet;
+using Assets.Scripts.Stores;
 using UnityEngine;
 
 namespace Assets.Scripts.TWEANN
@@ -6,23 +7,7 @@ namespace Assets.Scripts.TWEANN
     [System.Serializable]
     public class TrainerNEAT : PopulationTrainer
     {
-        [System.Serializable]
-        public struct MutationProbabilities
-        {
-            [Range(0, 1)]
-            public float weightChangeProb;
-
-            [Range(0, 1)]
-            public float splitLinkProb;
-
-            [Range(0, 1)]
-            public float addLinkProb;
-        }
-
-        [Header("Mutation Parameters")]
-        [SerializeField] private MutationProbabilities mutation;
-
-        public override NeuralNetwork[] Train(Biocenosis biocenosis)
+        public override NeuralNetwork[] Train(Biocenosis biocenosis, BreedingParameters breedingParameters)
         {
             GlobalParams.ResetGenerationMutations();
 
@@ -35,9 +20,24 @@ namespace Assets.Scripts.TWEANN
                 for (int i = 0; i < current.GetExpectedIndividualCount(); i++)
                 {
                     (IIndividual, IIndividual) parents = SelectionFromSpecies(current);
-                    Debug.Log(((MonoBehaviour)parents.Item1).name + ", " + ((MonoBehaviour)parents.Item2).name + "\n" + parents.Item1.ProvideNeuralNet().GetGenotype().ToString() + ", " + parents.Item2.ProvideNeuralNet().GetGenotype().ToString());
-                    Genotype childGen = Crossover(parents.Item1, parents.Item2);
-                    childGen.Mutate(mutation);
+                    Genotype childGen = null;
+                    if (Random.Range(0F, 1F) < breedingParameters.crossoverProbability)
+                    {
+                        childGen = Crossover(parents.Item1, parents.Item2);
+                    }
+                    else
+                    {
+                        if (Random.Range(0F, 1F) < 0.5F)
+                        {
+                            childGen = parents.Item1.ProvideNeuralNet().GetGenotype();
+                        }
+                        else
+                        {
+                            childGen = parents.Item2.ProvideNeuralNet().GetGenotype();
+                        }
+                    }
+
+                    childGen.Mutate(breedingParameters);
                     pop[currentIndex] = new NeuralNetwork(childGen);
                     //Debug.Log("Child: " + childGen.ToString());
                     currentIndex++;
@@ -47,26 +47,15 @@ namespace Assets.Scripts.TWEANN
         }
 
         /// <summary>
-        ///   Perform selection from a specified species
+        ///   Perform the crossover between the 2 individuals
         /// </summary>
-        /// <param name="species"> </param>
+        /// <param name="parent"> </param>
+        /// <param name="parent1"> </param>
         /// <returns> </returns>
-        private (IIndividual, IIndividual) SelectionFromSpecies(Species species)
+        private Genotype Crossover(IIndividual parent, IIndividual parent1)
         {
-            if (species.GetIndividualCount() == 1)
-            {
-                IIndividual champ = species.GetChamp();
-                return (champ, champ);
-            }
-            else if (species.GetIndividualCount() > 1)
-            {
-                //Debug.Log("Returning 2 ");
-                return PickFittestTwoInSpecies(species);
-            }
-            else
-            {
-                throw new System.Exception("Unable to select parents from a species");
-            }
+            Genotype newGen = parent.ProvideNeuralNet().GetGenotype().Crossover(parent1.ProvideNeuralNet().GetGenotype(), parent.ProvideFitness(), parent1.ProvideFitness());
+            return newGen;
         }
 
         /// <summary>
@@ -111,15 +100,26 @@ namespace Assets.Scripts.TWEANN
         }
 
         /// <summary>
-        ///   Perform the crossover between the 2 parents
+        ///   Perform selection from a specified species
         /// </summary>
-        /// <param name="parent"> </param>
-        /// <param name="parent1"> </param>
+        /// <param name="species"> </param>
         /// <returns> </returns>
-        private Genotype Crossover(IIndividual parent, IIndividual parent1)
+        private (IIndividual, IIndividual) SelectionFromSpecies(Species species)
         {
-            Genotype newGen = parent.ProvideNeuralNet().GetGenotype().Crossover(parent1.ProvideNeuralNet().GetGenotype(), parent.ProvideFitness(), parent1.ProvideFitness());
-            return newGen;
+            if (species.GetIndividualCount() == 1)
+            {
+                IIndividual champ = species.GetChamp();
+                return (champ, champ);
+            }
+            else if (species.GetIndividualCount() > 1)
+            {
+                //Debug.Log("Returning 2 ");
+                return PickFittestTwoInSpecies(species);
+            }
+            else
+            {
+                throw new System.Exception("Unable to select parents from a species");
+            }
         }
     }
 }

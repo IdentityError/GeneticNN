@@ -1,8 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.Remoting.Metadata.W3cXsd2001;
-using UnityEngine;
 
 namespace Assets.Scripts.TWEANN
 {
@@ -44,7 +40,7 @@ namespace Assets.Scripts.TWEANN
             //}
         }
 
-        public void AddToSpeciesOrCreate(IIndividual individual)
+        private void AddToSpeciesOrCreate(IIndividual individual)
         {
             foreach (Species species in speciesList)
             {
@@ -59,15 +55,15 @@ namespace Assets.Scripts.TWEANN
             AddSpecies(newSpecies);
         }
 
-        private void Reset()
+        private void AddSpecies(Species species)
         {
-            foreach (Species species in speciesList)
+            if (!speciesList.Contains(species))
             {
-                species.Reset();
+                speciesList.Add(species);
             }
         }
 
-        public void CalculateSpeciesExpectedNumber()
+        private void CalculateSpeciesExpectedNumber()
         {
             foreach (Species species in speciesList)
             {
@@ -77,25 +73,18 @@ namespace Assets.Scripts.TWEANN
                 }
             }
             double sum = 0;
-            int count = 0;
             foreach (Species species in speciesList)
             {
-                foreach (IIndividual individual in species.GetIndividuals())
-                {
-                    count++;
-                    sum += individual.ProvideFitness();
-                }
+                sum += species.GetFitnessSum();
             }
-            double averageFitness = sum / count;
-            //UnityEngine.Debug.Log("Sum: " + sum + ", count: " + count + ", avg: " + averageFitness);
 
-            int summ = 0;
+            double averageFitness = sum / GetTotalIndividualNumber();
+
             foreach (Species species in speciesList)
             {
                 species.SetNewExpectedIndividualCount((int)(species.GetFitnessSum() / averageFitness));
-                //UnityEngine.Debug.Log("Set specie number: " + species.GetFitnessSum());
-                summ += species.GetExpectedIndividualCount();
             }
+            Purge();
         }
 
         public int GetExpectedIndividualNumber()
@@ -128,7 +117,7 @@ namespace Assets.Scripts.TWEANN
             return speciesList;
         }
 
-        public IIndividual GetCurrentFittes()
+        public IIndividual GetCurrentFittest()
         {
             double max = 0;
             IIndividual fittest = null;
@@ -144,17 +133,22 @@ namespace Assets.Scripts.TWEANN
             return fittest;
         }
 
-        private void AddSpecies(Species species)
+        private void Reset()
         {
-            if (!speciesList.Contains(species))
+            foreach (Species species in speciesList)
             {
-                speciesList.Add(species);
+                species.Reset();
             }
+        }
+
+        private void Purge()
+        {
+            speciesList.RemoveAll((current) => current.GetExpectedIndividualCount() == 0);
         }
 
         public override string ToString()
         {
-            return "Sharing threshold: " + speciesSharingThreshold + "\n" + "Number of species: " + speciesList.Count;
+            return "Sharing threshold: " + speciesSharingThreshold + ", Number of species: " + speciesList.Count + ", Tot: " + GetExpectedIndividualNumber();
         }
     }
 }

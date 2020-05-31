@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assets.Scripts.TUtils.Utils;
+using System;
 
 namespace Assets.Scripts.MachineLearning
 {
@@ -10,6 +11,22 @@ namespace Assets.Scripts.MachineLearning
         public DenseNetwork(DNA dna)
         {
             this.dna = dna;
+        }
+
+        /// <summary>
+        ///   Execute a process through the NeuralNet
+        ///   <para> Return: the output vector (outputCount) </para>
+        /// </summary>
+        public float[] FeedForward(float[] inputs)
+        {
+            float[] current = inputs;
+
+            //Feed forward thorugh all the layers
+            for (int i = 0; i < dna.topology.layerCount - 1; i++)
+            {
+                current = ActivationVector_Matrix(current, dna.weights[i], dna.topology.neuronsAtLayer[i], dna.topology.neuronsAtLayer[i + 1]);
+            }
+            return current;
         }
 
         /// <summary>
@@ -30,22 +47,6 @@ namespace Assets.Scripts.MachineLearning
                 output[i] = (float)TMath.Tanh(sum);
             }
             return output;
-        }
-
-        /// <summary>
-        ///   Execute a process through the NeuralNet
-        ///   <para> Return: the output vector (outputCount) </para>
-        /// </summary>
-        public float[] FeedForward(float[] inputs)
-        {
-            float[] current = inputs;
-
-            //Feed forward thorugh all the layers
-            for (int i = 0; i < dna.topology.layerCount - 1; i++)
-            {
-                current = ActivationVector_Matrix(current, dna.weights[i], dna.topology.neuronsAtLayer[i], dna.topology.neuronsAtLayer[i + 1]);
-            }
-            return current;
         }
     }
 }

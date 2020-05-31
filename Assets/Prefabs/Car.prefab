@@ -44,12 +44,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   restLength: 0.4
-  springTravel: 0.2
-  springStiffness: 160000
-  damperStiffness: 5000
-  wheelRadius: 0.4
+  springTravel: 0.175
+  springStiffness: 380000
+  damperStiffness: 3500
+  wheelRadius: 0.275
   type: 3
-  steerTime: 6
+  steerTime: 8
   steerAngle: 0
   motorPower: 0
   steeringPower: 0
@@ -119,32 +119,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ca2627979832704d88f2a62ce50a803, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wheels:
-  - {fileID: 6791551976957021535}
-  - {fileID: 6791551977793162675}
-  - {fileID: 6791551976658705091}
-  - {fileID: 6791551976215878552}
+  lastPosition: {x: 17.1, y: 0.8, z: 0}
+  length: 10
   manualControl: 0
+  motorPower: 58000
+  steeringPower: 4250
+  turnRadius: 10
   wheelBase: 2.5
   rearTrack: 1.75
-  turnRadius: 11
-  motorPower: 36500
-  steeringPower: 4500
-  predefinedTopology:
-    hiddenLayerCount: 5
-    neuronsPerHiddenLayer: 7
-  length: 10
+  wheels:
+  - {fileID: 6791551977793162675}
+  - {fileID: 6791551976957021535}
+  - {fileID: 6791551976215878552}
+  - {fileID: 6791551976658705091}
+  stats:
+    averageThrottle: 0.13547012
+    distance: 525.11066
+    time: 26.743643
+    trackID: Track02
   steering: 0
   throttle: 0
-  stats:
-    averageThrottle: 0
-    time: 0
-    distance: 0
-    trackID: 
-  lastPosition: {x: 0, y: 0, z: 0}
-  manager: {fileID: 0}
+  endedSimulation: 1
   fitness: 0
-  breedingProbability: 0
+  netInitialized: 0
 --- !u!1 &6791551976658705101
 GameObject:
   m_ObjectHideFlags: 0
@@ -189,12 +186,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   restLength: 0.4
-  springTravel: 0.2
-  springStiffness: 160000
-  damperStiffness: 5000
-  wheelRadius: 0.4
+  springTravel: 0.175
+  springStiffness: 380000
+  damperStiffness: 3500
+  wheelRadius: 0.275
   type: 2
-  steerTime: 6
+  steerTime: 8
   steerAngle: 0
   motorPower: 0
   steeringPower: 0
@@ -243,12 +240,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   restLength: 0.4
-  springTravel: 0.2
-  springStiffness: 160000
-  damperStiffness: 5000
-  wheelRadius: 0.4
+  springTravel: 0.175
+  springStiffness: 380000
+  damperStiffness: 3500
+  wheelRadius: 0.275
   type: 0
-  steerTime: 6
+  steerTime: 8
   steerAngle: 0
   motorPower: 0
   steeringPower: 0
@@ -297,12 +294,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   restLength: 0.4
-  springTravel: 0.2
-  springStiffness: 160000
-  damperStiffness: 5000
-  wheelRadius: 0.4
+  springTravel: 0.175
+  springStiffness: 380000
+  damperStiffness: 3500
+  wheelRadius: 0.275
   type: 1
-  steerTime: 6
+  steerTime: 8
   steerAngle: 0
   motorPower: 0
   steeringPower: 0

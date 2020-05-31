@@ -1,4 +1,6 @@
 ﻿using Assets.Scripts.NeuralNet;
+using Assets.Scripts.TUtils.ObjectPooling;
+using Assets.Scripts.TUtils.Utils;
 using Assets.Scripts.TWEANN;
 using UnityEngine;
 
@@ -13,9 +15,6 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual, IPooledObject
     public float length;
     public bool manualControl;
     public float motorPower;
-    public double[] neuralNetInput;
-    public double[] neuralNetOutput;
-    public double pickProbability;
     [Tooltip("Length from left to right axes")]
     public float rearTrack;
     public SimulationStats stats;
@@ -32,16 +31,16 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual, IPooledObject
     private float ackermanAngleLeft;
     private float ackermanAngleRight;
     private float angleStride;
-    private float currentThrottleSum = 0F;
     private int directionsCount;
     [SerializeField] private bool endedSimulation = false;
     [SerializeField] private double fitness = 0;
     [SerializeField] private bool netInitialized = false;
     private NeuralNetwork neuralNet;
+    private double[] neuralNetInput;
+    private double[] neuralNetOutput;
     private PopulationManager populationManager;
     private new Rigidbody rigidbody;
     private Vector3[] sensesDirections;
-    private int updateCycles = 0;
 
     public CarIndividualData GetIndividualData()
     {
@@ -185,22 +184,16 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual, IPooledObject
 
     private void UpdateStats()
     {
-        stats.lastThrottle = throttle;
-        stats.distance += Vector3.Distance(transform.position, lastPosition);
-        stats.time += Time.deltaTime;
-        updateCycles++;
-        currentThrottleSum += throttle;
-        stats.averageThrottle = currentThrottleSum / updateCycles;
-        stats.averageThrottle = stats.averageThrottle < 0 ? 0 : stats.averageThrottle;
-
-        lastPosition = transform.position;
+        stats.Update(throttle, transform.position);
     }
 
     #region Interface
 
     public double EvaluateFitnessFunction()
     {
-        return ((1.5F * stats.averageThrottle + 1) * (1.5F * stats.averageThrottle + 1)) * stats.distance;
+        float speedInfluence = populationManager.GetGenerationCount() / 2;
+        float distanceInfluence = 4F;
+        return (speedInfluence * (stats.averageThrottle + 1) * (stats.averageThrottle + 1)) + (distanceInfluence * stats.distance);
     }
 
     public bool IsSimulating()
@@ -248,11 +241,6 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual, IPooledObject
     public void SetPopulationManager(PopulationManager populationManager)
     {
         this.populationManager = populationManager;
-    }
-
-    public void SetSimulationStats(SimulationStats stats)
-    {
-        this.stats = stats;
     }
 
     public void StopSimulating()

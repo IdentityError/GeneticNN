@@ -21,19 +21,32 @@ namespace Assets.Scripts.NeuralNet
             this.linkInvolved = linkInvolved;
         }
 
-        public bool Equals(TopologyMutation other)
+        /// <summary>
+        ///   Set the innovation number of this mutation
+        /// </summary>
+        /// <param name="innovationNumber"> </param>
+        public void SetInnovationNumber(int innovationNumber)
         {
-            return type == other.type && linkInvolved.Equals(other.linkInvolved);
+            this.innovationNumber = innovationNumber;
         }
 
+        /// <summary>
+        ///   Retrieve the innovation number of this mutation
+        /// </summary>
+        /// <returns> </returns>
         public int GetInnovationNumber()
         {
             return innovationNumber;
         }
 
-        public void SetInnovationNumber(int innovationNumber)
+        /// <summary>
+        ///   Override of the Equals function
+        /// </summary>
+        /// <param name="other"> </param>
+        /// <returns> </returns>
+        public bool Equals(TopologyMutation other)
         {
-            this.innovationNumber = innovationNumber;
+            return type == other.type && linkInvolved.Equals(other.linkInvolved);
         }
     }
 }

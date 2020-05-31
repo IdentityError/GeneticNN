@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 namespace Assets.Scripts.NeuralNet
 {
-    public enum NodeType { INPUT, HIDDEN, OUTPUT }
-
     public class NodeGene : IEquatable<NodeGene>
     {
         public Func<double, double> activationFunction;
@@ -13,83 +11,82 @@ namespace Assets.Scripts.NeuralNet
         private double activation, activationSum;
         private double bias;
         private List<LinkGene> incoming;
+        private List<LinkGene> outgoing;
         private NodeType type;
 
         #region Constructors
 
-        public NodeGene(int id, Func<double, double> activationFunction, List<LinkGene> incoming, NodeType type) : this(id, activationFunction, UnityEngine.Random.Range(-0.25F, 0.25F))
-        {
-        }
-
-        public NodeGene(int id, Func<double, double> activationFunction, NodeType type) : this(id, activationFunction, null, type, UnityEngine.Random.Range(-0.25F, 0.25F))
-        {
-        }
-
-        public NodeGene(int id, Func<double, double> activationFunction) : this(id, activationFunction, UnityEngine.Random.Range(-0.25F, 0.25F))
-        {
-        }
-
-        public NodeGene(int id, Func<double, double> activationFunction, List<LinkGene> incoming, NodeType type, double bias) : this(id, activationFunction, bias)
+        public NodeGene(int id, Func<double, double> activationFunction, List<LinkGene> incoming, List<LinkGene> outgoing, NodeType type, double bias) : this(id, activationFunction, bias, type)
         {
             if (incoming != null)
             {
                 this.incoming = new List<LinkGene>(incoming);
             }
+            if (outgoing != null)
+            {
+                this.outgoing = new List<LinkGene>(outgoing);
+            }
 
             this.type = type;
         }
 
-        public NodeGene(int id, Func<double, double> activationFunction, NodeType type, double bias) : this(id, activationFunction, null, type, bias)
+        public NodeGene(int id, Func<double, double> activationFunction, NodeType type) : this(id, activationFunction, UnityEngine.Random.Range(-0.25F, 0.25F), type)
         {
         }
 
-        public NodeGene(int id, Func<double, double> activationFunction, double bias)
+        public NodeGene(int id, Func<double, double> activationFunction, double bias, NodeType type)
         {
+            this.type = type;
             this.bias = bias;
+        }
+
+        public NodeGene(int id, Func<double, double> activationFunction)
+        {
             this.activated = false;
             this.id = id;
             this.activationFunction = activationFunction;
             this.incoming = new List<LinkGene>();
+            this.outgoing = new List<LinkGene>();
         }
 
         #endregion Constructors
 
         /// <summary>
-        ///   Activates the current node -&gt; calculate the activation value and activation sum
+        ///   Add an incoming link to this node
         /// </summary>
-        public void Activate()
-        {
-            if (!activated)
-            {
-                double sum = 0;
-                foreach (LinkGene link in incoming)
-                {
-                    sum += link.From().GetActivation() * link.GetWeight();
-                }
-                activationSum = sum;
-                activation = activationFunction(activationSum/* + bias*/);
-                activated = true;
-            }
-        }
-
+        /// <param name="link"> The link is directly added, no copied </param>
         public void AddIncomingLink(LinkGene link)
         {
             incoming.Add(link);
         }
 
-        public NodeGene Copy()
+        public void AddOutgoingLink(LinkGene link)
         {
-            return new NodeGene(id, activationFunction, new List<LinkGene>(GetIncomingLinks()), GetType());
+            this.outgoing.Add(link);
         }
 
+        /// <summary>
+        ///   Get a copy of this node, omitting the incoming links
+        /// </summary>
+        /// <returns> The node copy </returns>
         public NodeGene CopyNoLinks()
         {
             return new NodeGene(id, activationFunction, GetType());
         }
 
+        /// <summary>
+        ///   Override of the Equals function
+        /// </summary>
+        /// <param name="other"> </param>
+        /// <returns> </returns>
         public bool Equals(NodeGene other)
         {
             return this.id == other.id && this.type == other.type;
+        }
+
+        public void AddActivationContribute(double contribute)
+        {
+            activationSum += contribute;
         }
 
         /// <summary>
@@ -105,21 +102,32 @@ namespace Assets.Scripts.NeuralNet
             return activation;
         }
 
+        /// <summary>
+        ///   Retrieve all the incoming links
+        /// </summary>
+        /// <returns> The incoming links list </returns>
         public List<LinkGene> GetIncomingLinks()
         {
             return incoming;
         }
 
+        public List<LinkGene> GetOutgoingLinks()
+        {
+            return outgoing;
+        }
+
+        /// <summary>
+        ///   Get the type of this node
+        /// </summary>
+        /// <returns> </returns>
         public new NodeType GetType()
         {
             return type;
         }
 
-        public bool IsActivated()
-        {
-            return activated;
-        }
-
+        /// <summary>
+        ///   Reset the activation status of this node
+        /// </summary>
         public void ResetActivation()
         {
             activated = false;
@@ -128,14 +136,14 @@ namespace Assets.Scripts.NeuralNet
         }
 
         /// <summary>
-        ///   Sets the node activation manually. Can be set only on inputs type nodes
+        ///   Set the node activation manually. If this node is not an input node, nothing is done
         /// </summary>
-        /// <param name="activation"> </param>
-        public void SetInputValue(double activation)
+        /// <param name="value"> </param>
+        public void SetInputValue(double value)
         {
             if (type == NodeType.INPUT)
             {
-                this.activation = activation;
+                this.activation = value;
                 activated = true;
             }
             else
@@ -144,14 +152,39 @@ namespace Assets.Scripts.NeuralNet
             }
         }
 
+        /// <summary>
+        ///   Set a new type for this node
+        /// </summary>
+        /// <param name="position"> </param>
         public void SetType(NodeType position)
         {
             this.type = position;
         }
 
+        /// <summary>
+        ///   Override of the ToString function
+        /// </summary>
+        /// <returns> </returns>
         public override string ToString()
         {
             return "ID: " + id + ", Type: " + type;
         }
+
+        private void Activate()
+        {
+            if (!activated)
+            {
+                activated = true;
+                double sum = 0;
+                foreach (LinkGene link in incoming)
+                {
+                    sum += link.From().GetActivation() * link.GetWeight();
+                }
+                activationSum = sum;
+                activation = activationFunction(activationSum/* + bias*/);
+            }
+        }
     }
+
+    public enum NodeType { INPUT, HIDDEN, OUTPUT }
 }

@@ -7,9 +7,6 @@ namespace Assets.Scripts.MachineLearning
     [Obsolete("Needs further implementations")]
     public class DNA
     {
-        public float fitness = 0F;
-        public float pickProbability = 0F;
-
         [System.Serializable]
         public class DnaTopology
         {
@@ -17,14 +14,6 @@ namespace Assets.Scripts.MachineLearning
             [HideInInspector] public int[] neuronsAtLayer;
 
             private int linkNumber;
-
-            /// <summary>
-            ///   Get the total link number in this DNA
-            /// </summary>
-            public int GetLinkNumber()
-            {
-                return linkNumber;
-            }
 
             public int InputCount
             {
@@ -51,6 +40,23 @@ namespace Assets.Scripts.MachineLearning
                 CalculateLinkNumber();
             }
 
+            public void CalculateLinkNumber()
+            {
+                linkNumber = 0;
+                for (int i = 0; i < layerCount - 1; i++)
+                {
+                    linkNumber += neuronsAtLayer[i] * neuronsAtLayer[i + 1];
+                }
+            }
+
+            /// <summary>
+            ///   Get the total link number in this DNA
+            /// </summary>
+            public int GetLinkNumber()
+            {
+                return linkNumber;
+            }
+
             public bool IsValid()
             {
                 if (layerCount < 3) return false;
@@ -75,15 +81,6 @@ namespace Assets.Scripts.MachineLearning
                 }
                 return code;
             }
-
-            public void CalculateLinkNumber()
-            {
-                linkNumber = 0;
-                for (int i = 0; i < layerCount - 1; i++)
-                {
-                    linkNumber += neuronsAtLayer[i] * neuronsAtLayer[i + 1];
-                }
-            }
         }
 
         public DnaTopology topology;
@@ -104,51 +101,6 @@ namespace Assets.Scripts.MachineLearning
         {
             this.topology = new DnaTopology(topology.neuronsAtLayer);
             InitializeWeights(weights);
-        }
-
-        /// <summary>
-        ///   Each element of each weights matrix will mutate with a mutationRate probability
-        /// </summary>
-        public void Mutate(float mutationRate)
-        {
-            MutateWeights(mutationRate / 2);
-        }
-
-        private void MutateWeights(float mutationRate)
-        {
-            int mutationsNumber = UnityEngine.Random.Range(1, topology.layerCount);
-
-            for (int i = 0; i < mutationsNumber; i++)
-            {
-                if (UnityEngine.Random.Range(0F, 1F) < mutationRate)
-                {
-                    int layer = UnityEngine.Random.Range(0, this.topology.layerCount - 1);
-                    int row, col;
-                    //Selected the input weight matrix
-                    if (layer == 0)
-                    {
-                        Debug.Log("Mutating the input matrix");
-                        row = UnityEngine.Random.Range(0, topology.InputCount);
-                        col = UnityEngine.Random.Range(0, this.topology.neuronsAtLayer[1]);
-                    }
-                    //Selected the output weight matrix
-                    else if (layer == (this.topology.layerCount - 2))
-                    {
-                        Debug.Log("Mutating the output matrix");
-                        row = UnityEngine.Random.Range(0, this.topology.neuronsAtLayer[layer]);
-                        col = UnityEngine.Random.Range(0, topology.OutputCount);
-                    }
-                    //Selected a hidden weight matrix
-                    else
-                    {
-                        Debug.Log("Mutating the matrix");
-                        row = UnityEngine.Random.Range(0, this.topology.neuronsAtLayer[layer]);
-                        col = UnityEngine.Random.Range(0, this.topology.neuronsAtLayer[layer + 1]);
-                    }
-
-                    this.weights[layer][row][col] = UnityEngine.Random.Range(0F, 1F);
-                }
-            }
         }
 
         /// <summary>
@@ -184,6 +136,14 @@ namespace Assets.Scripts.MachineLearning
             return childDna;
         }
 
+        /// <summary>
+        ///   Each element of each weights matrix will mutate with a mutationRate probability
+        /// </summary>
+        public void Mutate(float mutationRate)
+        {
+            MutateWeights(mutationRate / 2);
+        }
+
         private void InitializeWeights(float[][][] weights)
         {
             this.weights = new float[topology.layerCount - 1][][];
@@ -205,6 +165,43 @@ namespace Assets.Scripts.MachineLearning
                             this.weights[i][j][k] = weights[i][j][k];
                         }
                     }
+                }
+            }
+        }
+
+        private void MutateWeights(float mutationRate)
+        {
+            int mutationsNumber = UnityEngine.Random.Range(1, topology.layerCount);
+
+            for (int i = 0; i < mutationsNumber; i++)
+            {
+                if (UnityEngine.Random.Range(0F, 1F) < mutationRate)
+                {
+                    int layer = UnityEngine.Random.Range(0, this.topology.layerCount - 1);
+                    int row, col;
+                    //Selected the input weight matrix
+                    if (layer == 0)
+                    {
+                        Debug.Log("Mutating the input matrix");
+                        row = UnityEngine.Random.Range(0, topology.InputCount);
+                        col = UnityEngine.Random.Range(0, this.topology.neuronsAtLayer[1]);
+                    }
+                    //Selected the output weight matrix
+                    else if (layer == (this.topology.layerCount - 2))
+                    {
+                        Debug.Log("Mutating the output matrix");
+                        row = UnityEngine.Random.Range(0, this.topology.neuronsAtLayer[layer]);
+                        col = UnityEngine.Random.Range(0, topology.OutputCount);
+                    }
+                    //Selected a hidden weight matrix
+                    else
+                    {
+                        Debug.Log("Mutating the matrix");
+                        row = UnityEngine.Random.Range(0, this.topology.neuronsAtLayer[layer]);
+                        col = UnityEngine.Random.Range(0, this.topology.neuronsAtLayer[layer + 1]);
+                    }
+
+                    this.weights[layer][row][col] = UnityEngine.Random.Range(0F, 1F);
                 }
             }
         }

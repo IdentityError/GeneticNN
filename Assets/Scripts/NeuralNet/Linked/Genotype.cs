@@ -1,7 +1,8 @@
-﻿using System;
+﻿using Assets.Scripts.Stores;
+using Assets.Scripts.TUtils.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using static Assets.Scripts.TWEANN.TrainerNEAT;
 
 namespace Assets.Scripts.NeuralNet
 {
@@ -114,6 +115,7 @@ namespace Assets.Scripts.NeuralNet
             }
             LinkGene currentNew = new LinkGene(from, to, newLink.GetWeight(), newLink.GetInnovationNumber());
             to.AddIncomingLink(currentNew);
+            from.AddOutgoingLink(currentNew);
             AddNode(to);
             AddNode(from);
             links.Add(currentNew);
@@ -225,7 +227,7 @@ namespace Assets.Scripts.NeuralNet
         ///   Mutate this genotype based on the specified probabilities
         /// </summary>
         /// <param name="mutation"> </param>
-        public void Mutate(MutationProbabilities mutation)
+        public void Mutate(BreedingParameters mutation)
         {
             if (UnityEngine.Random.Range(0F, 1F) < mutation.splitLinkProb)
             {
@@ -352,6 +354,7 @@ namespace Assets.Scripts.NeuralNet
             {
                 newLink = new LinkGene(from, to, weight, innovationNumber);
                 to.AddIncomingLink(newLink);
+                from.AddOutgoingLink(newLink);
                 links.Add(newLink);
             }
             return newLink;

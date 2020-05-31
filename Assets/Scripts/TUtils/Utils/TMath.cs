@@ -1,121 +1,126 @@
-﻿using System;
+﻿// Copyright (c) 2020 Matteo Beltrame
 
-/// <summary>
-///   Trat Math
-/// </summary>
-public static class TMath
+using System;
+
+namespace Assets.Scripts.TUtils.Utils
 {
-    public const float RadToDeg = 57.29578F;
-    public const float DegToRad = 0.0174533F;
-
     /// <summary>
-    ///   Return: hyperbolic sine
+    ///   Trat Math
     /// </summary>
-    public static float Sinh(float x)
+    public static class TMath
     {
-        return (float)(Math.Exp(x) - Math.Exp(-x)) / 2F;
-    }
+        public const float RadToDeg = 57.29578F;
+        public const float DegToRad = 0.0174533F;
 
-    /// <summary>
-    ///   Return: hyperbolic tangent
-    /// </summary>
-    public static double Tanh(double x)
-    {
-        double exp = (double)Math.Exp(2 * x);
-        return (exp - 1) / (exp + 1);
-    }
-
-    /// <summary>
-    ///   Return: hyperbolic cosine
-    /// </summary>
-    public static float Cosh(float x)
-    {
-        return (float)(Math.Exp(x) + Math.Exp(-x)) / 2F;
-    }
-
-    /// <summary>
-    ///   Return: the arctan value given the 2 catetis
-    /// </summary>
-    public static float Arctan4(float x, float y)
-    {
-        if (x >= 0)
+        /// <summary>
+        ///   Return: hyperbolic sine
+        /// </summary>
+        public static float Sinh(float x)
         {
-            if (y >= 0)
-            {
-                if (y == 0) return -90f;
+            return (float)(Math.Exp(x) - Math.Exp(-x)) / 2F;
+        }
 
-                return (float)-Math.Atan(x / y) * TMath.RadToDeg;
+        /// <summary>
+        ///   Return: hyperbolic tangent
+        /// </summary>
+        public static double Tanh(double x)
+        {
+            double exp = (double)Math.Exp(2 * x);
+            return (exp - 1) / (exp + 1);
+        }
+
+        /// <summary>
+        ///   Return: hyperbolic cosine
+        /// </summary>
+        public static float Cosh(float x)
+        {
+            return (float)(Math.Exp(x) + Math.Exp(-x)) / 2F;
+        }
+
+        /// <summary>
+        ///   Return: the arctan value given the 2 catetis
+        /// </summary>
+        public static float Arctan4(float x, float y)
+        {
+            if (x >= 0)
+            {
+                if (y >= 0)
+                {
+                    if (y == 0) return -90f;
+
+                    return (float)-Math.Atan(x / y) * TMath.RadToDeg;
+                }
+                else
+                {
+                    return -180f + ((float)Math.Atan(x / -y) * TMath.RadToDeg);
+                }
             }
             else
             {
-                return -180f + ((float)Math.Atan(x / -y) * TMath.RadToDeg);
+                if (y >= 0)
+                {
+                    if (y == 0) return 90f;
+
+                    return (float)Math.Atan(-x / y) * TMath.RadToDeg;
+                }
+                else
+                {
+                    return 180f - ((float)Math.Atan(x / y) * TMath.RadToDeg);
+                }
             }
         }
-        else
+
+        /// <summary>
+        ///   Return: the Gaussian function with a, b and c costants
+        /// </summary>
+        public static float Gaussian(float x, float a, float b, float c)
         {
-            if (y >= 0)
+            if (c == 0)
             {
-                if (y == 0) return 90f;
-
-                return (float)Math.Atan(-x / y) * TMath.RadToDeg;
+                throw new System.Exception("TMath Exception -> Costant C cannot be 0 in Gaussian function");
             }
-            else
-            {
-                return 180f - ((float)Math.Atan(x / y) * TMath.RadToDeg);
-            }
+            float sub = x - b;
+            return -a * (sub * sub) / (2 * c * c);
         }
-    }
 
-    /// <summary>
-    ///   Return: the Gaussian function with a, b and c costants
-    /// </summary>
-    public static float Gaussian(float x, float a, float b, float c)
-    {
-        if (c == 0)
+        /// <summary>
+        ///   Return: the Kronecker Delta given the two indexes
+        /// </summary>
+        public static int KroneckerDelta(int i, int j)
         {
-            throw new System.Exception("TMath Exception -> Costant C cannot be 0 in Gaussian function");
+            return (i == j ? 1 : 0);
         }
-        float sub = x - b;
-        return -a * (sub * sub) / (2 * c * c);
-    }
 
-    /// <summary>
-    ///   Return: the Kronecker Delta given the two indexes
-    /// </summary>
-    public static int KroneckerDelta(int i, int j)
-    {
-        return (i == j ? 1 : 0);
-    }
+        /// <summary>
+        ///   Return: the Heaviside Step function
+        /// </summary>
+        public static int HeavisideStep(int x)
+        {
+            return (x > 0 ? 1 : 0);
+        }
 
-    /// <summary>
-    ///   Return: the Heaviside Step function
-    /// </summary>
-    public static int HeavisideStep(int x)
-    {
-        return (x > 0 ? 1 : 0);
-    }
+        /// <summary>
+        ///   Reutrn: the Levi-Civita tensor value
+        /// </summary>
+        public static int LeviCivitaTensor(int i, int j, int k)
+        {
+            return Math.Sign(j - i) + Math.Sign(k - j) + Math.Sign(i - k);
+        }
 
-    /// <summary>
-    ///   Reutrn: the Levi-Civita tensor value
-    /// </summary>
-    public static int LeviCivitaTensor(int i, int j, int k)
-    {
-        return Math.Sign(j - i) + Math.Sign(k - j) + Math.Sign(i - k);
-    }
+        /// <summary>
+        ///   Reutrn: the absolute value of a floating point number
+        /// </summary>
+        public static float Abs(float value)
+        {
+            return value > 0 ? value : -value;
+        }
 
-    /// <summary>
-    ///   Reutrn: the absolute value of a floating point number
-    /// </summary>
-    public static float Abs(float value)
-    {
-        return value > 0 ? value : -value;
-    }
-
-    /// <summary>
-    ///   Reutrn: the absolute value of an int number
-    /// </summary>
-    public static int Abs(int value)
-    {
-        return value > 0 ? value : -value;
+        /// <summary>
+        ///   Reutrn: the absolute value of an int number
+        /// </summary>
+        public static int Abs(int value)
+        {
+            return value > 0 ? value : -value;
+        }
     }
 }

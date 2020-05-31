@@ -51,6 +51,10 @@ namespace Assets.Scripts.NeuralNet
             return FeedForward(inputs.ToList()).ToArray();
         }
 
+        /// <summary>
+        ///   Get the genotype of this Network
+        /// </summary>
+        /// <returns> </returns>
         public Genotype GetGenotype()
         {
             return genotype;

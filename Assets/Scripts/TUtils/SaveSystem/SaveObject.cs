@@ -1,17 +1,22 @@
-﻿public class SaveObject
+﻿// Copyright (c) 2020 Matteo Beltrame
+
+namespace Assets.Scripts.TUtils.SaveSystem
 {
-    private object data;
-
-    public SaveObject(object data)
+    public class SaveObject
     {
-        this.data = data;
-    }
+        private object data;
 
-    /// <summary>
-    ///   Returns: casted Type data
-    /// </summary>
-    public T GetData<T>()
-    {
-        return (T)data;
+        public SaveObject(object data)
+        {
+            this.data = data;
+        }
+
+        /// <summary>
+        ///   Returns: casted Type data
+        /// </summary>
+        public T GetData<T>()
+        {
+            return (T)data;
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.MachineLearning;
+﻿using Assets.Scripts.NeuralNet;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,47 +6,11 @@ public class UIManager : MonoBehaviour
 {
     [Header("UI")]
     public Text generationTxt = null;
+    public Text logText = null;
     public Text savedBestTrackStats = null;
     public Text trackLengthText = null;
-    public Text logText = null;
-
-    private UINetBuilder uiNetBuilder;
     private ScrollRect scroll;
-
-    private void Awake()
-    {
-        uiNetBuilder = FindObjectOfType<UINetBuilder>();
-        scroll = gameObject.GetComponentInChildren<ScrollRect>();
-    }
-
-    public void DrawNetUI(DNA.DnaTopology topology)
-    {
-        uiNetBuilder?.DrawNetUI(topology);
-    }
-
-    public void UpdateGenerationCount(int count)
-    {
-        if (generationTxt != null)
-        {
-            generationTxt.text = count.ToString() + "° generation";
-        }
-    }
-
-    public void UpdateTrackLength(float length)
-    {
-        if (trackLengthText != null)
-        {
-            trackLengthText.text = "Stimated average track length: " + length.ToString("0.0");
-        }
-    }
-
-    public void UpdateSavedBestStats(TrackBest best)
-    {
-        if (savedBestTrackStats != null)
-        {
-            savedBestTrackStats.text = "Current track best stats\n\nFitness: " + best.individualData.GetFitness() + "\n" + best.stats.ToString();
-        }
-    }
+    private UINetBuilder uiNetBuilder;
 
     public void AppendToLog(string text)
     {
@@ -56,7 +20,7 @@ public class UIManager : MonoBehaviour
         }
         if (scroll != null)
         {
-            scroll.velocity = new Vector2(0f, 200f);
+            scroll.velocity = new Vector2(0f, 1000f);
         }
     }
 
@@ -70,5 +34,40 @@ public class UIManager : MonoBehaviour
         {
             scroll.velocity = new Vector2(0f, -5000f);
         }
+    }
+
+    public void DrawNetUI(Genotype topology)
+    {
+        uiNetBuilder?.DrawNetUI(topology);
+    }
+
+    public void UpdateGenerationCount(int count)
+    {
+        if (generationTxt != null)
+        {
+            generationTxt.text = count.ToString() + "° generation";
+        }
+    }
+
+    public void UpdateTextBox1(string text)
+    {
+        if (savedBestTrackStats != null)
+        {
+            savedBestTrackStats.text = text;
+        }
+    }
+
+    public void UpdateTrackLength(float length)
+    {
+        if (trackLengthText != null)
+        {
+            trackLengthText.text = "Stimated track length: " + length.ToString("0.0");
+        }
+    }
+
+    private void Awake()
+    {
+        uiNetBuilder = FindObjectOfType<UINetBuilder>();
+        scroll = gameObject.GetComponentInChildren<ScrollRect>();
     }
 }

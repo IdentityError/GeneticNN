@@ -6,7 +6,20 @@ using UnityEngine;
 [CustomPropertyDrawer(typeof(PopulationTrainerProvider))]
 public class TrainingProvider_CE : PropertyDrawer
 {
-    private SerializedProperty gaTrainerProp, bpaTrainerProp, trainingParadigmProp;
+    private SerializedProperty gaTrainerProp, trainingParadigmProp;
+
+    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+    {
+        gaTrainerProp = property.FindPropertyRelative("gaTrainer");
+
+        trainingParadigmProp = property.FindPropertyRelative("trainingParadigm");
+        switch ((Paradigms.TrainingParadigm)trainingParadigmProp.intValue)
+        {
+            case Paradigms.TrainingParadigm.NEAT:
+                return 2 * EditorGUIUtility.singleLineHeight + (gaTrainerProp.isExpanded ? EditorGUI.GetPropertyHeight(gaTrainerProp) : 0);
+        }
+        return base.GetPropertyHeight(property, label);
+    }
 
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
@@ -24,19 +37,5 @@ public class TrainingProvider_CE : PropertyDrawer
 
         EditorGUI.EndProperty();
         property.serializedObject.ApplyModifiedProperties();
-    }
-
-    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-    {
-        gaTrainerProp = property.FindPropertyRelative("gaTrainer");
-        bpaTrainerProp = property.FindPropertyRelative("bpaTrainer");
-
-        trainingParadigmProp = property.FindPropertyRelative("trainingParadigm");
-        switch ((Paradigms.TrainingParadigm)trainingParadigmProp.intValue)
-        {
-            case Paradigms.TrainingParadigm.NEAT:
-                return 2 * EditorGUIUtility.singleLineHeight + (gaTrainerProp.isExpanded ? EditorGUI.GetPropertyHeight(gaTrainerProp) : 0);
-        }
-        return base.GetPropertyHeight(property, label);
     }
 }

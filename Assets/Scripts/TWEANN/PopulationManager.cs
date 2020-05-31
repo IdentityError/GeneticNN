@@ -1,5 +1,7 @@
 ﻿using Assets.Scripts.CustomBehaviour;
 using Assets.Scripts.NeuralNet;
+using Assets.Scripts.Stores;
+using Assets.Scripts.TUtils.ObjectPooling;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -28,50 +30,56 @@ namespace Assets.Scripts.TWEANN
         [Header("Training")]
         [SerializeField] private PopulationTrainerProvider trainerProvider;
         private UIManager uiManager;
+        [SerializeField] private BreedingParameters breedingParameters;
 
-        private void Start()
+        /// <summary>
+        ///   Force the end of the simulation
+        /// </summary>
+        public void ForceSimulationEnd()
         {
-            uiManager = FindObjectOfType<UIManager>();
-            //uiManager?.DrawNetUI(trainerProvider.ProvideTrainer().GetPredefinedTopologyDescriptor());
-
-            ShouldRestart_C = CheckAverageThrottle();
-            populationList = new List<ISimulatingIndividual>();
-            biocenosis = new Biocenosis(sharingThreshold);
-            InitializeAncestors();
-        }
-
-        private void Update()
-        {
-            Time.timeScale = this.timeScale;
-            //if (simulating)
-            //{
-            //    simulationTime += Time.deltaTime;
-            //    if (simulationTime > 2.5F && averageThrottle < 0.016)
-            //    {
-            //        Debug.LogError("SHOULD");
-            //        ForceSimulationEnd();
-            //    }
-            //}
+            foreach (ISimulatingIndividual individual in populationList)
+            {
+                if (individual.IsSimulating())
+                {
+                    individual.StopSimulating();
+                }
+            }
+            currentSimulating = 0;
+            SimulationEnded();
         }
 
         /// <summary>
-        ///   Initialize the first population, used only one time at the start
+        ///   Get the current track of the simulation
         /// </summary>
-        private void InitializeAncestors()
+        /// <returns> </returns>
+        public Track GetTrack()
         {
-            for (int i = 0; i < initialPopulationNumber; i++)
+            return track;
+        }
+
+        /// <summary>
+        ///   Get the generation count
+        /// </summary>
+        /// <returns> </returns>
+        public int GetGenerationCount()
+        {
+            return generationCount;
+        }
+
+        /// <summary>
+        ///   Inform the manager that an individual has ended the simulation <br> </br><b> Important: </b> do not call this method on the
+        ///   implementation of the function StopSimulating() from the interface ISimulationPerformer/ISimulationIndividual, since when
+        ///   force ending simulation, the manager calls that function and it takes care of restarting the simulation
+        /// </summary>
+        /// <param name="subject"> </param>
+        public void IndividualEndedSimulation(ISimulatingIndividual subject)
+        {
+            //subject.SetFitness(FitnessFunction(subject.ProvideSimulationStats()));
+            currentSimulating--;
+            if (currentSimulating <= 0 && simulating)
             {
-                populationList.Add(InstantiateIndividual(new NeuralNetwork(new Genotype(trainerProvider.ProvideTrainer().GetPredefinedTopologyDescriptor())), i.ToString()));
+                SimulationEnded();
             }
-            generationCount++;
-            currentSimulating = initialPopulationNumber;
-            GlobalParams.InitializeGlobalInnovationNumber(trainerProvider.ProvideTrainer().GetPredefinedTopologyDescriptor());
-            //foreach (IIndividual ind in population)
-            //{
-            //    Debug.Log(ind.ProvideNeuralNet().GetGenotype().ToString());
-            //}
-            //StartCoroutine(ShouldRestart_C);
-            simulating = true;
         }
 
         /// <summary>
@@ -84,9 +92,16 @@ namespace Assets.Scripts.TWEANN
         {
             //! Speciation
             biocenosis.Speciate(populationList.ToArray());
-            uiManager.AppendToLog("Current biocenosis: \n" + biocenosis.ToString());
+            //uiManager.AppendToLog("Current biocenosis: \n" + biocenosis.ToString());
+            float parameter = Mathf.Exp(-generationCount / 50F);
+
+            //breedingParameters.crossoverProbability = parameter;
+            breedingParameters.weightChangeProb = -parameter + 1;
+
+            uiManager?.AppendToLog("Fittest: \n" + biocenosis.GetCurrentFittest().ProvideNeuralNet().GetGenotype().ToString());
+
             // Retrieve a new trained Network population
-            NeuralNetwork[] pop = trainerProvider.ProvideTrainer().Train(biocenosis);
+            NeuralNetwork[] pop = trainerProvider.ProvideTrainer().Train(biocenosis, breedingParameters);
 
             // Destroy all the objects
             foreach (ISimulatingIndividual individual in populationList)
@@ -108,51 +123,46 @@ namespace Assets.Scripts.TWEANN
             uiManager.UpdateGenerationCount(generationCount);
         }
 
-        /// <summary>
-        ///   Force the end of the simulation
-        /// </summary>
-        public void ForceSimulationEnd()
+        private IEnumerator CheckAverageThrottle()
         {
-            foreach (ISimulatingIndividual individual in populationList)
+            //TODO fix the problem that sometimes restarts too quickly
+            yield return new WaitForSeconds(1F);
+            while (true)
             {
-                if (individual.IsSimulating())
+                averageThrottle = 0;
+                float sum = 0;
+                foreach (ISimulatingIndividual individual in populationList)
                 {
-                    individual.StopSimulating();
+                    if (individual.IsSimulating())
+                    {
+                        sum += individual.ProvideSimulationStats().averageThrottle;
+                    }
                 }
+
+                averageThrottle = sum / initialPopulationNumber;
+                //Debug.Log(averageThrottle);
+                yield return new WaitForSeconds(2F);
             }
-            currentSimulating = 0;
-            SimulationEnded();
         }
 
         /// <summary>
-        ///   Called when the simulation has ended
+        ///   Initialize the first population, used only one time at the start
         /// </summary>
-        private void SimulationEnded()
+        private void InitializeAncestors()
         {
-            simulating = false;
-            simulationTime = 0;
-            generationMaxFitness = 0;
-            foreach (IIndividual individual in populationList)
+            for (int i = 0; i < initialPopulationNumber; i++)
             {
-                individual.SetFitness(individual.EvaluateFitnessFunction());
+                populationList.Add(InstantiateIndividual(new NeuralNetwork(new Genotype(trainerProvider.ProvideTrainer().GetPredefinedTopologyDescriptor())), i.ToString()));
             }
-            AdvanceGeneration();
-        }
-
-        /// <summary>
-        ///   Inform the manager that an individual has ended the simulation <br> </br><b> Important: </b> do not call this method on the
-        ///   implementation of the function StopSimulating() from the interface ISimulationPerformer/ISimulationIndividual, since when
-        ///   force ending simulation, the manager calls that function and it takes care of restarting the simulation
-        /// </summary>
-        /// <param name="subject"> </param>
-        public void IndividualEndedSimulation(ISimulatingIndividual subject)
-        {
-            //subject.SetFitness(FitnessFunction(subject.ProvideSimulationStats()));
-            currentSimulating--;
-            if (currentSimulating <= 0 && simulating)
-            {
-                SimulationEnded();
-            }
+            generationCount++;
+            currentSimulating = initialPopulationNumber;
+            GlobalParams.InitializeGlobalInnovationNumber(trainerProvider.ProvideTrainer().GetPredefinedTopologyDescriptor());
+            //foreach (IIndividual ind in population)
+            //{
+            //    Debug.Log(ind.ProvideNeuralNet().GetGenotype().ToString());
+            //}
+            //StartCoroutine(ShouldRestart_C);
+            simulating = true;
         }
 
         /// <summary>
@@ -177,34 +187,44 @@ namespace Assets.Scripts.TWEANN
         }
 
         /// <summary>
-        ///   Get the current track of the simulation
+        ///   Called when the simulation has ended
         /// </summary>
-        /// <returns> </returns>
-        public Track GetTrack()
+        private void SimulationEnded()
         {
-            return track;
+            simulating = false;
+            simulationTime = 0;
+            generationMaxFitness = 0;
+            foreach (IIndividual individual in populationList)
+            {
+                individual.SetFitness(individual.EvaluateFitnessFunction());
+            }
+            AdvanceGeneration();
         }
 
-        private IEnumerator CheckAverageThrottle()
+        private void Start()
         {
-            //TODO fix the problem that sometimes restarts too quickly
-            yield return new WaitForSeconds(1F);
-            while (true)
-            {
-                averageThrottle = 0;
-                float sum = 0;
-                foreach (ISimulatingIndividual individual in populationList)
-                {
-                    if (individual.IsSimulating())
-                    {
-                        sum += individual.ProvideSimulationStats().averageThrottle;
-                    }
-                }
+            uiManager = FindObjectOfType<UIManager>();
+            uiManager?.UpdateTrackLength(track.Length());
+            //uiManager?.DrawNetUI(trainerProvider.ProvideTrainer().GetPredefinedTopologyDescriptor());
 
-                averageThrottle = sum / initialPopulationNumber;
-                //Debug.Log(averageThrottle);
-                yield return new WaitForSeconds(2F);
-            }
+            ShouldRestart_C = CheckAverageThrottle();
+            populationList = new List<ISimulatingIndividual>();
+            biocenosis = new Biocenosis(sharingThreshold);
+            InitializeAncestors();
+        }
+
+        private void Update()
+        {
+            Time.timeScale = this.timeScale;
+            //if (simulating)
+            //{
+            //    simulationTime += Time.deltaTime;
+            //    if (simulationTime > 2.5F && averageThrottle < 0.016)
+            //    {
+            //        Debug.LogError("SHOULD");
+            //        ForceSimulationEnd();
+            //    }
+            //}
         }
     }
 }

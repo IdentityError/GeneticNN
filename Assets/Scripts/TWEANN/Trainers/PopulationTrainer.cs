@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.NeuralNet;
+using Assets.Scripts.Stores;
 using UnityEngine;
 
 namespace Assets.Scripts.TWEANN
@@ -42,9 +43,13 @@ namespace Assets.Scripts.TWEANN
         ///   <b> Train a new population </b><br> </br> The Biocenosis needs to be speciated since it will be used for the intra-species
         ///   selection, be sure to call
         ///   <code>Biocenosis.Speciate([]) </code>
-        ///   to the passed Biocenosis
+        ///   before passing it
         /// </summary>
-        /// <returns> </returns>
-        public abstract NeuralNetwork[] Train(Biocenosis genotypesSpecies);
+        /// <param name="biocenosis">
+        ///   The biocenosis of the population. Note that the biocenosis needs to be speciated before passing it to this function
+        /// </param>
+        /// <param name="breedingParameters"> The breeding parameters to use during crossover and mutation </param>
+        /// <returns> Next generation of NeuralNetworks </returns>
+        public abstract NeuralNetwork[] Train(Biocenosis biocenosis, BreedingParameters breedingParameters);
     }
 }

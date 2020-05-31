@@ -1,4 +1,6 @@
 ﻿using Assets.Scripts.MachineLearning;
+using Assets.Scripts.NeuralNet;
+using Assets.Scripts.TUtils.Utils;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,25 +20,25 @@ public class UINetBuilder : MonoBehaviour
         rectTransform = GetComponent<RectTransform>();
     }
 
-    public void DrawNetUI(DNA.DnaTopology topology)
+    public void DrawNetUI(Genotype genotype)
     {
-        Clear();
-        verticalStride = new float[topology.layerCount];
-        for (int i = 0; i < topology.layerCount; i++)
-        {
-            verticalStride[i] = (rectTransform.rect.height - 140F) / topology.neuronsAtLayer[i];
-        }
+        //Clear();
+        //verticalStride = new float[genotype.layerCount];
+        //for (int i = 0; i < genotype.layerCount; i++)
+        //{
+        //    verticalStride[i] = (rectTransform.rect.height - 140F) / genotype.neuronsAtLayer[i];
+        //}
 
-        horizontalStride = (rectTransform.rect.width - 140F) / (topology.layerCount);
+        //horizontalStride = (rectTransform.rect.width - 140F) / (genotype.layerCount);
 
-        layers = new Image[topology.layerCount][];
-        for (int i = 0; i < topology.layerCount; i++)
-        {
-            layers[i] = new Image[topology.neuronsAtLayer[i]];
-        }
+        //layers = new Image[genotype.layerCount][];
+        //for (int i = 0; i < genotype.layerCount; i++)
+        //{
+        //    layers[i] = new Image[genotype.neuronsAtLayer[i]];
+        //}
 
-        DrawNeurons(topology);
-        DrawLinks(topology);
+        //DrawNeurons(genotype);
+        //DrawLinks(genotype);
     }
 
     //public void DrawNeuralNetUI(Genotype genotype)
