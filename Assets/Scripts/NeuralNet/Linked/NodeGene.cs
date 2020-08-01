@@ -16,7 +16,7 @@ namespace Assets.Scripts.NeuralNet
 
         #region Constructors
 
-        public NodeGene(int id, Func<double, double> activationFunction, List<LinkGene> incoming, List<LinkGene> outgoing, NodeType type, double bias) : this(id, activationFunction, bias, type)
+        public NodeGene(int id, Func<double, double> activationFunction, List<LinkGene> incoming, List<LinkGene> outgoing, double bias, NodeType type) : this(id, activationFunction, bias, type)
         {
             if (incoming != null)
             {
@@ -26,22 +26,21 @@ namespace Assets.Scripts.NeuralNet
             {
                 this.outgoing = new List<LinkGene>(outgoing);
             }
-
-            this.type = type;
         }
 
-        public NodeGene(int id, Func<double, double> activationFunction, NodeType type) : this(id, activationFunction, UnityEngine.Random.Range(-0.25F, 0.25F), type)
+        public NodeGene(int id, Func<double, double> activationFunction, double bias, NodeType type) : this(id, activationFunction, type)
         {
-        }
-
-        public NodeGene(int id, Func<double, double> activationFunction, double bias, NodeType type)
-        {
-            this.type = type;
             this.bias = bias;
+        }
+
+        public NodeGene(int id, Func<double, double> activationFunction, NodeType type) : this(id, activationFunction)
+        {
+            this.type = type;
         }
 
         public NodeGene(int id, Func<double, double> activationFunction)
         {
+            this.bias = UnityEngine.Random.Range(-0.25F, 0.25F);
             this.activated = false;
             this.id = id;
             this.activationFunction = activationFunction;

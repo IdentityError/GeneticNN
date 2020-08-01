@@ -39,7 +39,7 @@ public class SimulationStats
         {
             return true;
         }
-        return this.time < other.time && this.averageThrottle > other.averageThrottle;
+        return this.distance > other.distance && this.averageThrottle > other.averageThrottle;
     }
 
     /// <summary>

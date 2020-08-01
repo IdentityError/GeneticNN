@@ -2,7 +2,7 @@
 public class TrackBest
 {
     public SimulationStats stats;
-    public CarIndividualData individualData;
+    public IndividualData individualData;
 
     public TrackBest()
     {
@@ -10,7 +10,7 @@ public class TrackBest
         individualData = null;
     }
 
-    public TrackBest(SimulationStats stats, CarIndividualData individualData)
+    public TrackBest(SimulationStats stats, IndividualData individualData)
     {
         this.stats = stats;
         this.individualData = individualData;

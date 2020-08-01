@@ -13,6 +13,7 @@ namespace Assets.Scripts.TWEANN
         public List<ISimulatingIndividual> populationList;
         private float averageThrottle = 1;
         private Biocenosis biocenosis;
+        [SerializeField] private BreedingParameters breedingParameters;
         private int currentSimulating;
         private Genotype fittestGenotype;
         private int generationCount = 0;
@@ -30,7 +31,6 @@ namespace Assets.Scripts.TWEANN
         [Header("Training")]
         [SerializeField] private PopulationTrainerProvider trainerProvider;
         private UIManager uiManager;
-        [SerializeField] private BreedingParameters breedingParameters;
 
         /// <summary>
         ///   Force the end of the simulation
@@ -43,18 +43,10 @@ namespace Assets.Scripts.TWEANN
                 {
                     individual.StopSimulating();
                 }
+                individual.SetFitness(individual.EvaluateFitnessFunction());
             }
             currentSimulating = 0;
             SimulationEnded();
-        }
-
-        /// <summary>
-        ///   Get the current track of the simulation
-        /// </summary>
-        /// <returns> </returns>
-        public Track GetTrack()
-        {
-            return track;
         }
 
         /// <summary>
@@ -67,6 +59,15 @@ namespace Assets.Scripts.TWEANN
         }
 
         /// <summary>
+        ///   Get the current track of the simulation
+        /// </summary>
+        /// <returns> </returns>
+        public Track GetTrack()
+        {
+            return track;
+        }
+
+        /// <summary>
         ///   Inform the manager that an individual has ended the simulation <br> </br><b> Important: </b> do not call this method on the
         ///   implementation of the function StopSimulating() from the interface ISimulationPerformer/ISimulationIndividual, since when
         ///   force ending simulation, the manager calls that function and it takes care of restarting the simulation
@@ -76,6 +77,7 @@ namespace Assets.Scripts.TWEANN
         {
             //subject.SetFitness(FitnessFunction(subject.ProvideSimulationStats()));
             currentSimulating--;
+            subject.SetFitness(subject.EvaluateFitnessFunction());
             if (currentSimulating <= 0 && simulating)
             {
                 SimulationEnded();
@@ -90,15 +92,17 @@ namespace Assets.Scripts.TWEANN
         /// </summary>
         private void AdvanceGeneration()
         {
+            ISimulatingIndividual fittest = GetFittest();
+            Debug.Log(fittest.ToString() + "\n" + fittest.ProvideNeuralNet().GetGenotype().ToString());
+
             //! Speciation
             biocenosis.Speciate(populationList.ToArray());
             //uiManager.AppendToLog("Current biocenosis: \n" + biocenosis.ToString());
             float parameter = Mathf.Exp(-generationCount / 50F);
 
+            //UpdateFittest(fittest.ProvideNeuralNet().GetGenotype(), fittest.ProvideFitness());
             //breedingParameters.crossoverProbability = parameter;
             breedingParameters.weightChangeProb = -parameter + 1;
-
-            uiManager?.AppendToLog("Fittest: \n" + biocenosis.GetCurrentFittest().ProvideNeuralNet().GetGenotype().ToString());
 
             // Retrieve a new trained Network population
             NeuralNetwork[] pop = trainerProvider.ProvideTrainer().Train(biocenosis, breedingParameters);
@@ -143,6 +147,21 @@ namespace Assets.Scripts.TWEANN
                 //Debug.Log(averageThrottle);
                 yield return new WaitForSeconds(2F);
             }
+        }
+
+        private ISimulatingIndividual GetFittest()
+        {
+            double max = 0;
+            ISimulatingIndividual best = null;
+            foreach (ISimulatingIndividual individual in populationList)
+            {
+                if (individual.ProvideFitness() > max)
+                {
+                    best = individual;
+                    max = individual.ProvideFitness();
+                }
+            }
+            return best;
         }
 
         /// <summary>
@@ -194,10 +213,6 @@ namespace Assets.Scripts.TWEANN
             simulating = false;
             simulationTime = 0;
             generationMaxFitness = 0;
-            foreach (IIndividual individual in populationList)
-            {
-                individual.SetFitness(individual.EvaluateFitnessFunction());
-            }
             AdvanceGeneration();
         }
 
@@ -224,6 +239,30 @@ namespace Assets.Scripts.TWEANN
             //        Debug.LogError("SHOULD");
             //        ForceSimulationEnd();
             //    }
+            //}
+        }
+
+        private void UpdateFittest(Genotype candidate, double fitness)
+        {
+            //IndividualData newBest = null;
+            //SaveObject obj = TSaveManager.LoadPersistentData(TSaveManager.BEST_INDIVIDUAL);
+            //if (obj != null)
+            //{
+            //    IndividualData other = obj.GetData<IndividualData>();
+            //    if (other.GetFitness() < fitness)
+            //    {
+            //        uiManager?.AppendToLog("Updating current best");
+            //        newBest = new IndividualData(candidate, fitness);
+            //    }
+            //}
+            //else
+            //{
+            //    uiManager?.AppendToLog("Initializing first best individual");
+            //    newBest = new IndividualData(candidate, fitness);
+            //}
+            //if (newBest != null)
+            //{
+            //    TSaveManager.SavePersistentData(newBest, TSaveManager.BEST_INDIVIDUAL);
             //}
         }
     }

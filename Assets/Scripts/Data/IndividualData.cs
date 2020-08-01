@@ -1,12 +1,12 @@
 ﻿using Assets.Scripts.NeuralNet;
 
 [System.Serializable]
-public class CarIndividualData
+public class IndividualData
 {
     private Genotype genotype;
     private double fitness;
 
-    public CarIndividualData(Genotype genotype, double fitness)
+    public IndividualData(Genotype genotype, double fitness)
     {
         this.genotype = genotype;
         this.fitness = fitness;

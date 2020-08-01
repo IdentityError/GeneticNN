@@ -14,6 +14,8 @@ namespace Assets.Scripts.TUtils.SaveSystem
         //Calling the methods will look like this:
         //SaveManager.GetInstance().SavePersistentData<T>(data, SaveManager.PLAYER_DATA);
 
+        public static readonly string BEST_INDIVIDUAL = Application.persistentDataPath + "/best.data";
+
         /// <summary>
         ///   Save a generic type of data in the application persisten data path.
         ///   <para> Returns: a SaveObject instance, null on error </para>

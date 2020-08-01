@@ -255,7 +255,6 @@ namespace Assets.Scripts.NeuralNet
                 // Add the new node and the link
                 AddNode(newNode);
                 AddLinkAndNodes(newLink);
-                UnityEngine.Debug.Log("SPLITTED");
             }
             if (UnityEngine.Random.Range(0F, 1F) < mutation.addLinkProb)
             {
@@ -275,13 +274,8 @@ namespace Assets.Scripts.NeuralNet
                 temp.AddRange(hidden);
                 temp.Remove(fromRandom);
                 List<NodeGene> newList = new List<NodeGene>(temp);
-                foreach (NodeGene gene in newList)
-                {
-                    if (fromRandom.id > gene.id && gene.GetType() != NodeType.OUTPUT)
-                    {
-                        temp.Remove(gene);
-                    }
-                }
+                newList.RemoveAll((node) => node.id < fromRandom.id && node.GetType() != NodeType.OUTPUT);
+
                 if (temp.Count > 0)
                 {
                     NodeGene toRandom = temp.ElementAt(UnityEngine.Random.Range(0, temp.Count));
@@ -292,7 +286,6 @@ namespace Assets.Scripts.NeuralNet
                         topologyMutation.SetInnovationNumber(GlobalParams.GetGenerationInnovationNumber(topologyMutation));
                         newLink.SetInnovationNumber(topologyMutation.GetInnovationNumber());
                         AddLinkAndNodes(newLink);
-                        UnityEngine.Debug.Log("ADDED");
                     }
                 }
             }

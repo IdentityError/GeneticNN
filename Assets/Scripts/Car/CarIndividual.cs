@@ -42,9 +42,9 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual, IPooledObject
     private new Rigidbody rigidbody;
     private Vector3[] sensesDirections;
 
-    public CarIndividualData GetIndividualData()
+    public IndividualData GetIndividualData()
     {
-        return new CarIndividualData(neuralNet.GetGenotype(), ProvideFitness());
+        return new IndividualData(neuralNet.GetGenotype(), ProvideFitness());
     }
 
     private void EndIndividualSimulation()
