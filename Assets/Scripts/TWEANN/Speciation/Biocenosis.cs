@@ -1,21 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using Assets.Scripts.Stores;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace Assets.Scripts.TWEANN
 {
+    [System.Serializable]
     public class Biocenosis
     {
-        private List<Species> speciesList;
+        [SerializeField] private List<Species> speciesList;
         private float speciesSharingThreshold;
+        private BreedingParameters defaultBreedingParameters;
 
-        public Biocenosis(float speciesSharingThreshold)
+        public Biocenosis(float speciesSharingThreshold, BreedingParameters defaultBreedingParameters)
         {
+            this.defaultBreedingParameters = defaultBreedingParameters;
             speciesList = new List<Species>();
             this.speciesSharingThreshold = speciesSharingThreshold;
-        }
-
-        public Biocenosis(List<Species> speciesList, float speciesSharingThreshold) : this(speciesSharingThreshold)
-        {
-            this.speciesList = speciesList;
         }
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace Assets.Scripts.TWEANN
             {
                 AddToSpeciesOrCreate(population[i]);
             }
-            CalculateSpeciesExpectedNumber();
+            SetupSpecies();
 
             //foreach (IIndividual individual in population)
             //{
@@ -50,7 +50,7 @@ namespace Assets.Scripts.TWEANN
                     return;
                 }
             }
-            Species newSpecies = new Species();
+            Species newSpecies = new Species(defaultBreedingParameters);
             newSpecies.AddToSpecies(individual);
             AddSpecies(newSpecies);
         }
@@ -63,7 +63,10 @@ namespace Assets.Scripts.TWEANN
             }
         }
 
-        private void CalculateSpeciesExpectedNumber()
+        /// <summary>
+        ///   Normalize the fitness within the species, adjust the species breeding parameters and set the expected species individual count
+        /// </summary>
+        private void SetupSpecies()
         {
             foreach (Species species in speciesList)
             {
@@ -71,6 +74,9 @@ namespace Assets.Scripts.TWEANN
                 {
                     individual.SetFitness(individual.ProvideFitness() / species.GetIndividualCount());
                 }
+                double newMutationProb = TweannMath.MutationRate(species.GetChamp().ProvideFitness(), species.GetFitnessSum() / species.GetIndividualCount(), 0.25F);
+
+                species.breedingParameters.mutationProbability = (float)newMutationProb;
             }
             double sum = 0;
             foreach (Species species in speciesList)
@@ -133,6 +139,20 @@ namespace Assets.Scripts.TWEANN
             return fittest;
         }
 
+        public double GetAverageFitness()
+        {
+            double avg = 0F;
+            foreach (Species species in speciesList)
+            {
+                avg += species.GetFitnessSum() / species.GetIndividualCount();
+            }
+            avg /= speciesList.Count;
+            return avg;
+        }
+
+        /// <summary>
+        ///   Clear all the species in the Biocenosis
+        /// </summary>
         private void Reset()
         {
             foreach (Species species in speciesList)
@@ -141,6 +161,9 @@ namespace Assets.Scripts.TWEANN
             }
         }
 
+        /// <summary>
+        ///   Remove all the extinct species
+        /// </summary>
         private void Purge()
         {
             speciesList.RemoveAll((current) => current.GetExpectedIndividualCount() == 0);

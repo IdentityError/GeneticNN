@@ -1,14 +1,23 @@
-﻿using System.Collections.Generic;
+﻿using Assets.Scripts.Stores;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace Assets.Scripts.TWEANN
 {
+    [System.Serializable]
     public class Species
     {
-        private int individualCount;
+        [SerializeField] private int individualCount;
         private int expectedIndividualCount;
         private List<IIndividual> individuals;
         private IIndividual representative = null;
         private bool initializated;
+        public BreedingParameters breedingParameters = null;
+
+        public Species(BreedingParameters breedingParameters) : this()
+        {
+            this.breedingParameters = new BreedingParameters(breedingParameters.mutationProbability, breedingParameters.crossoverProbability);
+        }
 
         public Species()
         {
@@ -86,7 +95,7 @@ namespace Assets.Scripts.TWEANN
             IIndividual best = null;
             foreach (IIndividual individual in individuals)
             {
-                if (maxFitness < individual.ProvideFitness())
+                if (maxFitness <= individual.ProvideFitness())
                 {
                     maxFitness = individual.ProvideFitness();
                     best = individual;

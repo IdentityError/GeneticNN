@@ -5,15 +5,15 @@ namespace Assets.Scripts.Stores
     [System.Serializable]
     public class BreedingParameters
     {
-        [Tooltip("Probability of adding a new non existing link")]
+        public BreedingParameters(float mutationProbability, float crossoverProbability)
+        {
+            this.mutationProbability = mutationProbability;
+            this.crossoverProbability = crossoverProbability;
+        }
+
+        [Tooltip("Probability of mutating the gene")]
         [Range(0, 1)]
-        public float addLinkProb;
-        [Tooltip("Probability of splitting a link into two links and inserting a new node")]
-        [Range(0, 1)]
-        public float splitLinkProb;
-        [Tooltip("Probability for each link to be randomly mutated")]
-        [Range(0, 1)]
-        public float weightChangeProb;
+        public float mutationProbability;
         [Tooltip("Probability of executing a crossover for each individual")]
         [Range(0, 1)]
         public float crossoverProbability;

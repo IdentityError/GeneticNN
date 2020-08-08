@@ -1,5 +1,4 @@
 ﻿using Assets.Scripts.NeuralNet;
-using Assets.Scripts.Stores;
 using UnityEngine;
 
 namespace Assets.Scripts.TWEANN
@@ -7,7 +6,7 @@ namespace Assets.Scripts.TWEANN
     [System.Serializable]
     public class TrainerNEAT : PopulationTrainer
     {
-        public override NeuralNetwork[] Train(Biocenosis biocenosis, BreedingParameters breedingParameters)
+        public override NeuralNetwork[] Train(Biocenosis biocenosis)
         {
             GlobalParams.ResetGenerationMutations();
 
@@ -21,7 +20,7 @@ namespace Assets.Scripts.TWEANN
                 {
                     (IIndividual, IIndividual) parents = SelectionFromSpecies(current);
                     Genotype childGen = null;
-                    if (Random.Range(0F, 1F) < breedingParameters.crossoverProbability)
+                    if (Random.Range(0F, 1F) < current.breedingParameters.crossoverProbability)
                     {
                         childGen = Crossover(parents.Item1, parents.Item2);
                     }
@@ -37,7 +36,7 @@ namespace Assets.Scripts.TWEANN
                         }
                     }
 
-                    childGen.Mutate(breedingParameters);
+                    childGen.Mutate(current.breedingParameters);
                     pop[currentIndex] = new NeuralNetwork(childGen);
                     //Debug.Log("Child: " + childGen.ToString());
                     currentIndex++;

@@ -1,5 +1,4 @@
 ﻿using Assets.Scripts.NeuralNet;
-using Assets.Scripts.Stores;
 using UnityEngine;
 
 namespace Assets.Scripts.TWEANN
@@ -50,6 +49,6 @@ namespace Assets.Scripts.TWEANN
         /// </param>
         /// <param name="breedingParameters"> The breeding parameters to use during crossover and mutation </param>
         /// <returns> Next generation of NeuralNetworks </returns>
-        public abstract NeuralNetwork[] Train(Biocenosis biocenosis, BreedingParameters breedingParameters);
+        public abstract NeuralNetwork[] Train(Biocenosis biocenosis);
     }
 }

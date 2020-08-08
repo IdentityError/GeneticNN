@@ -12,7 +12,7 @@ namespace Assets.Scripts.TWEANN
     {
         public List<ISimulatingIndividual> populationList;
         private float averageThrottle = 1;
-        private Biocenosis biocenosis;
+        [SerializeField] private Biocenosis biocenosis;
         [SerializeField] private BreedingParameters breedingParameters;
         private int currentSimulating;
         private Genotype fittestGenotype;
@@ -92,20 +92,18 @@ namespace Assets.Scripts.TWEANN
         /// </summary>
         private void AdvanceGeneration()
         {
-            ISimulatingIndividual fittest = GetFittest();
-            Debug.Log(fittest.ToString() + "\n" + fittest.ProvideNeuralNet().GetGenotype().ToString());
-
             //! Speciation
             biocenosis.Speciate(populationList.ToArray());
             //uiManager.AppendToLog("Current biocenosis: \n" + biocenosis.ToString());
-            float parameter = Mathf.Exp(-generationCount / 50F);
 
+            ISimulatingIndividual fittest = GetFittest();
+            uiManager.UpdateTextBox1("Highest fitness: " + fittest.ProvideFitness() + "\n" + "Average fitness: " + biocenosis.GetAverageFitness());
+            Debug.Log(fittest.ToString() + "\n" + fittest.ProvideNeuralNet().GetGenotype().ToString());
             //UpdateFittest(fittest.ProvideNeuralNet().GetGenotype(), fittest.ProvideFitness());
             //breedingParameters.crossoverProbability = parameter;
-            breedingParameters.weightChangeProb = -parameter + 1;
 
             // Retrieve a new trained Network population
-            NeuralNetwork[] pop = trainerProvider.ProvideTrainer().Train(biocenosis, breedingParameters);
+            NeuralNetwork[] pop = trainerProvider.ProvideTrainer().Train(biocenosis);
 
             // Destroy all the objects
             foreach (ISimulatingIndividual individual in populationList)
@@ -224,7 +222,7 @@ namespace Assets.Scripts.TWEANN
 
             ShouldRestart_C = CheckAverageThrottle();
             populationList = new List<ISimulatingIndividual>();
-            biocenosis = new Biocenosis(sharingThreshold);
+            biocenosis = new Biocenosis(sharingThreshold, breedingParameters);
             InitializeAncestors();
         }
 

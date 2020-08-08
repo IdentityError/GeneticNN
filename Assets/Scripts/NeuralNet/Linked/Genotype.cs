@@ -205,13 +205,13 @@ namespace Assets.Scripts.NeuralNet
         /// <summary>
         ///   Get the genotype distance between this genotype and another one
         /// </summary>
-        /// <param name="to"> </param>
+        /// <param name="from"> </param>
         /// <returns> </returns>
-        public float GetTopologicalDistance(Genotype to)
+        public float GetTopologicalDistance(Genotype from)
         {
-            int maxGenomes = this.LinkCount > to.LinkCount ? this.LinkCount : to.LinkCount;
-            int genesDifference = this.LinkCount - to.LinkCount;
-            List<Tuple<LinkGene, LinkGene>> zippedLinks = TUtilsProvider.ZipWithPredicate(links, to.links, (item1, item2) => item1.GetInnovationNumber().Equals(item2.GetInnovationNumber()));
+            int maxGenomes = this.LinkCount > from.LinkCount ? this.LinkCount : from.LinkCount;
+            int genesDifference = this.LinkCount - from.LinkCount;
+            List<Tuple<LinkGene, LinkGene>> zippedLinks = TUtilsProvider.ZipWithPredicate(links, from.links, (item1, item2) => item1.GetInnovationNumber().Equals(item2.GetInnovationNumber()));
             float differenceSum = 0;
             foreach (Tuple<LinkGene, LinkGene> current in zippedLinks)
             {
@@ -229,7 +229,7 @@ namespace Assets.Scripts.NeuralNet
         /// <param name="mutation"> </param>
         public void Mutate(BreedingParameters mutation)
         {
-            if (UnityEngine.Random.Range(0F, 1F) < mutation.splitLinkProb)
+            if (UnityEngine.Random.Range(0F, 1F) < mutation.mutationProbability)
             {
                 // 1. Select a random link to be mutated
                 // 2. Create a new node
@@ -256,7 +256,7 @@ namespace Assets.Scripts.NeuralNet
                 AddNode(newNode);
                 AddLinkAndNodes(newLink);
             }
-            if (UnityEngine.Random.Range(0F, 1F) < mutation.addLinkProb)
+            if (UnityEngine.Random.Range(0F, 1F) < mutation.mutationProbability)
             {
                 // Create a list of all nodes except the output nodes and select the random From node
                 List<NodeGene> temp = new List<NodeGene>(inputs);
@@ -292,7 +292,7 @@ namespace Assets.Scripts.NeuralNet
             // For each link of this genotype try to mutate it
             foreach (LinkGene gene in links)
             {
-                if (UnityEngine.Random.Range(0F, 1F) < mutation.weightChangeProb)
+                if (UnityEngine.Random.Range(0F, 1F) < (mutation.mutationProbability / links.Count))
                 {
                     int random = UnityEngine.Random.Range(0, LinkCount);
                     links[random].SetWeight(UnityEngine.Random.Range(-1F, 1F));
