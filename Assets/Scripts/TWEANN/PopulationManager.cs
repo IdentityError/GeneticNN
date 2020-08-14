@@ -2,6 +2,7 @@
 using Assets.Scripts.NeuralNet;
 using Assets.Scripts.Stores;
 using Assets.Scripts.TUtils.ObjectPooling;
+using Assets.Scripts.TUtils.Utils;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -96,9 +97,17 @@ namespace Assets.Scripts.TWEANN
             biocenosis.Speciate(populationList.ToArray());
             //uiManager.AppendToLog("Current biocenosis: \n" + biocenosis.ToString());
 
+            foreach (Species species in biocenosis.GetSpeciesList())
+            {
+                float stdv = (float)TweannMath.StandardDeviation(species.GetIndividuals());
+                Debug.Log("STDV: " + stdv);
+                species.breedingParameters.mutationProbability = (float)TMath.AdjExp(1, -0.175F, generationCount + 1);
+            }
+
             ISimulatingIndividual fittest = GetFittest();
             uiManager.UpdateTextBox1("Highest fitness: " + fittest.ProvideFitness() + "\n" + "Average fitness: " + biocenosis.GetAverageFitness());
             Debug.Log(fittest.ToString() + "\n" + fittest.ProvideNeuralNet().GetGenotype().ToString());
+            uiManager.AppendToLog("Biocenosis:" + biocenosis.ToString());
             //UpdateFittest(fittest.ProvideNeuralNet().GetGenotype(), fittest.ProvideFitness());
             //breedingParameters.crossoverProbability = parameter;
 

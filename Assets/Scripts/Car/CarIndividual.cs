@@ -145,7 +145,7 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual, IPooledObject
             else
             {
                 neuralNetInput[i] = 1F;
-                Debug.DrawRay(transform.position, sensesDirections[i] * length, Color.blue);
+                Debug.DrawRay(transform.position, sensesDirections[i] * length, Color.green);
             }
         }
         neuralNetInput[neuralNet.GetGenotype().InputCount - 1] = throttle;
@@ -177,7 +177,7 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual, IPooledObject
                 Sense();
                 neuralNetOutput = neuralNet.FeedForward(neuralNetInput);
             }
-            ManageWheels();
+            //ManageWheels();
             UpdateStats();
         }
     }

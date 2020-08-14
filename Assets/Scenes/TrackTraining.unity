@@ -1108,8 +1108,8 @@ MonoBehaviour:
     crossoverProbability: 1
   individualPrefab: {fileID: 6791551976333570425, guid: dda260aae5911af48a27564e8179e873,
     type: 3}
-  initialPopulationNumber: 120
-  sharingThreshold: 0.35
+  initialPopulationNumber: 150
+  sharingThreshold: 0.32
   timeScale: 1
   track: {fileID: 2111517136}
   trainerProvider:

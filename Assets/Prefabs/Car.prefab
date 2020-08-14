@@ -123,22 +123,22 @@ MonoBehaviour:
   length: 10
   manualControl: 0
   motorPower: 58000
-  steeringPower: 4250
-  turnRadius: 10
-  wheelBase: 2.5
   rearTrack: 1.75
-  wheels:
-  - {fileID: 6791551977793162675}
-  - {fileID: 6791551976957021535}
-  - {fileID: 6791551976215878552}
-  - {fileID: 6791551976658705091}
   stats:
     averageThrottle: 0.13547012
     distance: 525.11066
     time: 26.743643
     trackID: Track02
   steering: 0
+  steeringPower: 4250
   throttle: 0
+  turnRadius: 10
+  wheelBase: 2.5
+  wheels:
+  - {fileID: 6791551977793162675}
+  - {fileID: 6791551976957021535}
+  - {fileID: 6791551976215878552}
+  - {fileID: 6791551976658705091}
   endedSimulation: 1
   fitness: 0
   netInitialized: 0

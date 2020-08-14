@@ -36,6 +36,7 @@ namespace Assets.Scripts.TWEANN
                         }
                     }
 
+                    //TODO create a class of dynamic mutation methods
                     childGen.Mutate(current.breedingParameters);
                     pop[currentIndex] = new NeuralNetwork(childGen);
                     //Debug.Log("Child: " + childGen.ToString());
@@ -53,6 +54,7 @@ namespace Assets.Scripts.TWEANN
         /// <returns> </returns>
         private Genotype Crossover(IIndividual parent, IIndividual parent1)
         {
+            //TODO insert class of crossover methods
             Genotype newGen = parent.ProvideNeuralNet().GetGenotype().Crossover(parent1.ProvideNeuralNet().GetGenotype(), parent.ProvideFitness(), parent1.ProvideFitness());
             return newGen;
         }

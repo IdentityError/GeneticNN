@@ -74,9 +74,6 @@ namespace Assets.Scripts.TWEANN
                 {
                     individual.SetFitness(individual.ProvideFitness() / species.GetIndividualCount());
                 }
-                double newMutationProb = TweannMath.MutationRate(species.GetChamp().ProvideFitness(), species.GetFitnessSum() / species.GetIndividualCount(), 0.25F);
-
-                species.breedingParameters.mutationProbability = (float)newMutationProb;
             }
             double sum = 0;
             foreach (Species species in speciesList)
@@ -88,7 +85,7 @@ namespace Assets.Scripts.TWEANN
 
             foreach (Species species in speciesList)
             {
-                species.SetNewExpectedIndividualCount((int)(species.GetFitnessSum() / averageFitness));
+                species.SetNewExpectedIndividualCount(Mathf.RoundToInt((float)(species.GetFitnessSum() / averageFitness)));
             }
             Purge();
         }

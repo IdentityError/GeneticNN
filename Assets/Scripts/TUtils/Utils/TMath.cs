@@ -84,6 +84,18 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
+        ///   Return: the e function raised to the b*x power and multiplied by a
+        /// </summary>
+        /// <param name="a"> </param>
+        /// <param name="b"> </param>
+        /// <param name="x"> </param>
+        /// <returns> </returns>
+        public static double AdjExp(float a, float b, float x)
+        {
+            return Math.Exp(b * x) * a;
+        }
+
+        /// <summary>
         ///   Return: the Kronecker Delta given the two indexes
         /// </summary>
         public static int KroneckerDelta(int i, int j)
