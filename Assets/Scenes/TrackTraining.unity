@@ -1116,30 +1116,14 @@ MonoBehaviour:
     trainingParadigm: 0
     gaTrainer:
       descriptor:
-        inputCount: 5
-        outputCount: 2
+        inputCount: 0
+        outputCount: 0
         hiddenCount: 0
-        links:
-        - fromId: 1
-          toId: 6
-        - fromId: 1
-          toId: 7
-        - fromId: 2
-          toId: 6
-        - fromId: 2
-          toId: 7
-        - fromId: 3
-          toId: 6
-        - fromId: 3
-          toId: 7
-        - fromId: 4
-          toId: 6
-        - fromId: 4
-          toId: 7
-        - fromId: 5
-          toId: 6
-        - fromId: 5
-          toId: 7
+        links: []
+      unifom: 1
+      singlePoint: 1
+      KPoint: 0
+      average: 1
 --- !u!114 &6509384906705858488
 MonoBehaviour:
   m_ObjectHideFlags: 0

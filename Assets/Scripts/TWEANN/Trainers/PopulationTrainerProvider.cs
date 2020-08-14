@@ -7,7 +7,7 @@ namespace Assets.Scripts.TWEANN
     {
         public Paradigms.TrainingParadigm trainingParadigm;
 
-        public TrainerNEAT gaTrainer = new TrainerNEAT();
+        public TrainerNEAT gaTrainer;
 
         /// <summary>
         ///   Provide the current set Trainer

@@ -50,5 +50,7 @@ namespace Assets.Scripts.TWEANN
         /// <param name="breedingParameters"> The breeding parameters to use during crossover and mutation </param>
         /// <returns> Next generation of NeuralNetworks </returns>
         public abstract NeuralNetwork[] Train(Biocenosis biocenosis);
+
+        public abstract void Initialize();
     }
 }

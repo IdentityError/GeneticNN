@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.NeuralNet;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Scripts.TWEANN
@@ -6,6 +7,31 @@ namespace Assets.Scripts.TWEANN
     [System.Serializable]
     public class TrainerNEAT : PopulationTrainer
     {
+        [Header("Crossover Operators")]
+        [SerializeField] private bool unifom;
+
+        [SerializeField] private bool singlePoint;
+        [SerializeField] private bool KPoint;
+        [SerializeField] private bool average;
+
+        [Space(5)]
+        private List<CrossoverOperator> crossoverOperators;
+
+        public override void Initialize()
+        {
+            int crossoverOperatorsN = 0;
+            crossoverOperatorsN += unifom ? 1 : 0;
+            crossoverOperatorsN += singlePoint ? 1 : 0;
+            crossoverOperatorsN += KPoint ? 1 : 0;
+            crossoverOperatorsN += average ? 1 : 0;
+            crossoverOperators = new List<CrossoverOperator>();
+            if (unifom) crossoverOperators.Add(new UniformCrossoverOperator());
+            if (singlePoint) crossoverOperators.Add(new SinglePointCrossover());
+            if (KPoint) crossoverOperators.Add(new KPointsCrossoverOperator());
+            if (average) crossoverOperators.Add(new AverageCrossoverOperator());
+            Debug.Log(crossoverOperators.Count);
+        }
+
         public override NeuralNetwork[] Train(Biocenosis biocenosis)
         {
             GlobalParams.ResetGenerationMutations();

@@ -19,18 +19,23 @@ namespace Assets.Scripts.TWEANN
         private Genotype fittestGenotype;
         private int generationCount = 0;
         private double generationMaxFitness = 0;
+
         [Header("References")]
         [SerializeField] private GameObject individualPrefab;
+
         [Header("Parameters")]
         [SerializeField] private int initialPopulationNumber;
+
         [SerializeField] private float sharingThreshold;
         private IEnumerator ShouldRestart_C;
         private bool simulating = false;
         private float simulationTime = 0;
         [SerializeField] private float timeScale = 1F;
         [SerializeField] private Track track;
+
         [Header("Training")]
         [SerializeField] private PopulationTrainerProvider trainerProvider;
+
         private UIManager uiManager;
 
         /// <summary>
@@ -228,7 +233,7 @@ namespace Assets.Scripts.TWEANN
             uiManager = FindObjectOfType<UIManager>();
             uiManager?.UpdateTrackLength(track.Length());
             //uiManager?.DrawNetUI(trainerProvider.ProvideTrainer().GetPredefinedTopologyDescriptor());
-
+            trainerProvider.ProvideTrainer().Initialize();
             ShouldRestart_C = CheckAverageThrottle();
             populationList = new List<ISimulatingIndividual>();
             biocenosis = new Biocenosis(sharingThreshold, breedingParameters);
