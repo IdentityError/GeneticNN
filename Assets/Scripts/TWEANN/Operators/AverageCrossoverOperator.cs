@@ -1,15 +1,13 @@
 ﻿using Assets.Scripts.NeuralNet;
 using Assets.Scripts.TUtils.Utils;
-using Assets.Scripts.TWEANN;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Assets.Scripts.TWEANN
 {
     /// <summary>
-    /// The Average Crossover operator set the children corresponding gene to the average of the parents genes. Disjoint genes are all imported from the fittest parent
+    ///   The Average Crossover operator set the children corresponding gene to the average of the parents genes. Disjoint genes are all
+    ///   imported from the fittest parent
     /// </summary>
     public class AverageCrossoverOperator : CrossoverOperator
     {
@@ -35,7 +33,7 @@ namespace Assets.Scripts.TWEANN
             }
 
             // At this point all common genes are added we add all the disjoint genes from the fittest
-            if (first.ProvideFitness() > second.ProvideFitness())
+            if (first.ProvideAdjustedFitness() > second.ProvideAdjustedFitness())
             {
                 foreach (LinkGene gene in remaining)
                 {

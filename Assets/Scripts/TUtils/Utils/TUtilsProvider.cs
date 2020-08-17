@@ -1,7 +1,9 @@
 ﻿// Copyright (c) 2020 Matteo Beltrame
 
+using Assets.Scripts.TUtils.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Assets.Scripts.TUtils.Utils
 {
@@ -89,6 +91,22 @@ namespace Assets.Scripts.TUtils.Utils
                 }
             }
             return res;
+        }
+
+        /// <summary>
+        ///   Select an item based on its probability (interface)
+        /// </summary>
+        /// <param name="set"> </param>
+        /// <returns> </returns>
+        public static T SelectWithProbability<T>(List<IProbSelectable> set)
+        {
+            int index = -1;
+            float r = UnityEngine.Random.Range(0F, 1F);
+            while (r > 0)
+            {
+                r -= set.ElementAt(++index).ProvideSelectProbability();
+            }
+            return (T)set.ElementAt(index);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Assets.Scripts.Descriptors;
+using System.Collections.Generic;
 
 namespace Assets.Scripts.NeuralNet
 {
@@ -22,7 +23,7 @@ namespace Assets.Scripts.NeuralNet
             }
         }
 
-        public static void InitializeGlobalInnovationNumber(TopologyDescriptor descriptor)
+        public static void InitializeGlobalInnovationNumber(DescriptorsWrapper.TopologyDescriptor descriptor)
         {
             globalInnovationNumber = descriptor.links.Count + 1;
         }

@@ -80,7 +80,7 @@ namespace Assets.Scripts.TUtils.Utils
                 throw new System.Exception("TMath Exception -> Costant C cannot be 0 in Gaussian function");
             }
             float sub = x - b;
-            return a * (float)System.Math.Exp(-(sub * sub / (c * c)));
+            return (float)(a * Math.Exp(-(sub * sub) / (c * c)));
         }
 
         /// <summary>

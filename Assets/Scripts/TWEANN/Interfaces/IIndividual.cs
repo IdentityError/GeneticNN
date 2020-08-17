@@ -11,13 +11,25 @@ namespace Assets.Scripts.TWEANN
         ///   Retrieve the fitness
         /// </summary>
         /// <returns> </returns>
-        double ProvideFitness();
+        double ProvideAdjustedFitness();
 
         /// <summary>
-        ///   Set the fitness of this individual
+        ///   Retrieve the not adjusted fitness
+        /// </summary>
+        /// <returns> </returns>
+        double ProvideRawFitness();
+
+        /// <summary>
+        ///   Set the raw value of the fitness
+        /// </summary>
+        /// <returns> </returns>
+        void SetRawFitness(double rawFitness);
+
+        /// <summary>
+        ///   Set the adjusted fitness of this individual
         /// </summary>
         /// <param name="fitness"> </param>
-        void SetFitness(double fitness);
+        void AdjustFitness(double fitness);
 
         /// <summary>
         ///   Fitness function

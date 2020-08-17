@@ -10,13 +10,13 @@ namespace Assets.Scripts.TWEANN
             double avg = 0;
             foreach (IIndividual individual in population)
             {
-                avg += individual.ProvideFitness();
+                avg += individual.ProvideAdjustedFitness();
             }
             avg /= population.Count;
             double sum = 0;
             foreach (IIndividual individual1 in population)
             {
-                double diff = individual1.ProvideFitness() - avg;
+                double diff = individual1.ProvideAdjustedFitness() - avg;
                 sum += (diff * diff);
             }
             sum /= population.Count;

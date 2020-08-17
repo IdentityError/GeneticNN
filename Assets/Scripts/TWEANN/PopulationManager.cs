@@ -1,8 +1,8 @@
 ﻿using Assets.Scripts.CustomBehaviour;
+using Assets.Scripts.Descriptors;
 using Assets.Scripts.NeuralNet;
 using Assets.Scripts.Stores;
 using Assets.Scripts.TUtils.ObjectPooling;
-using Assets.Scripts.TUtils.Utils;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -37,6 +37,7 @@ namespace Assets.Scripts.TWEANN
         [SerializeField] private PopulationTrainerProvider trainerProvider;
 
         private UIManager uiManager;
+        private List<DescriptorsWrapper.CrossoverOperationDescriptor> operationsDescriptors = null;
 
         /// <summary>
         ///   Force the end of the simulation
@@ -49,7 +50,7 @@ namespace Assets.Scripts.TWEANN
                 {
                     individual.StopSimulating();
                 }
-                individual.SetFitness(individual.EvaluateFitnessFunction());
+                individual.SetRawFitness(individual.EvaluateFitnessFunction());
             }
             currentSimulating = 0;
             SimulationEnded();
@@ -83,7 +84,7 @@ namespace Assets.Scripts.TWEANN
         {
             //subject.SetFitness(FitnessFunction(subject.ProvideSimulationStats()));
             currentSimulating--;
-            subject.SetFitness(subject.EvaluateFitnessFunction());
+            subject.SetRawFitness(subject.EvaluateFitnessFunction());
             if (currentSimulating <= 0 && simulating)
             {
                 SimulationEnded();
@@ -98,26 +99,40 @@ namespace Assets.Scripts.TWEANN
         /// </summary>
         private void AdvanceGeneration()
         {
+            if (operationsDescriptors == null)
+            {
+                operationsDescriptors = new List<DescriptorsWrapper.CrossoverOperationDescriptor>();
+            }
+            else
+            {
+                TrainerNEAT neat = trainerProvider.ProvideTrainer() as TrainerNEAT;
+                neat.UpdateCrossoverOperatorsProgressions(operationsDescriptors);
+            }
+            operationsDescriptors.Clear();
+
             //! Speciation
             biocenosis.Speciate(populationList.ToArray());
             //uiManager.AppendToLog("Current biocenosis: \n" + biocenosis.ToString());
 
             foreach (Species species in biocenosis.GetSpeciesList())
             {
-                float stdv = (float)TweannMath.StandardDeviation(species.GetIndividuals());
-                Debug.Log("STDV: " + stdv);
-                species.breedingParameters.mutationProbability = (float)TMath.AdjExp(1, -0.175F, generationCount + 1);
+                IIndividual champ = species.GetChamp();
+                double maxFitness = champ.ProvideAdjustedFitness();
+                double averageFitness = species.GetFitnessSum() / species.GetIndividualCount();
+                double value = 1D - ((maxFitness - averageFitness) / maxFitness);
+                species.breedingParameters.mutationProbability = (float)(value);
+                //species.breedingParameters.crossoverProbability = 1 - species.breedingParameters.mutationProbability;
             }
 
             ISimulatingIndividual fittest = GetFittest();
-            uiManager.UpdateTextBox1("Highest fitness: " + fittest.ProvideFitness() + "\n" + "Average fitness: " + biocenosis.GetAverageFitness());
-            Debug.Log(fittest.ToString() + "\n" + fittest.ProvideNeuralNet().GetGenotype().ToString());
+            uiManager.UpdateTextBox1("Highest fitness: " + fittest.ProvideAdjustedFitness() + "\n" + "Average fitness: " + biocenosis.GetAverageFitness());
+            //Debug.Log(fittest.ToString() + "\n" + fittest.ProvideNeuralNet().GetGenotype().ToString());
             uiManager.AppendToLog("Biocenosis:" + biocenosis.ToString());
             //UpdateFittest(fittest.ProvideNeuralNet().GetGenotype(), fittest.ProvideFitness());
             //breedingParameters.crossoverProbability = parameter;
 
             // Retrieve a new trained Network population
-            NeuralNetwork[] pop = trainerProvider.ProvideTrainer().Train(biocenosis);
+            DescriptorsWrapper.OffspringDescriptor[] pop = trainerProvider.ProvideTrainer().Train(biocenosis);
 
             // Destroy all the objects
             foreach (ISimulatingIndividual individual in populationList)
@@ -126,10 +141,12 @@ namespace Assets.Scripts.TWEANN
             }
             populationList.Clear();
 
+            // Instantiate new population
             for (int i = 0; i < pop.Length; i++)
             {
-                populationList.Add(InstantiateIndividual(pop[i], i.ToString()));
-                //Debug.Log(((MonoBehaviour)populationList[i]).gameObject.name + populationList[i].ProvideNeuralNet().GetGenotype().ToString());
+                ISimulatingIndividual childInd = InstantiateIndividual(new NeuralNetwork(pop[i].childGen), i.ToString());
+                populationList.Add(childInd);
+                operationsDescriptors.Add(new DescriptorsWrapper.CrossoverOperationDescriptor(pop[i].parent, pop[i].parent1, childInd, pop[i].operatorUsed));
             }
 
             generationCount++;
@@ -167,10 +184,10 @@ namespace Assets.Scripts.TWEANN
             ISimulatingIndividual best = null;
             foreach (ISimulatingIndividual individual in populationList)
             {
-                if (individual.ProvideFitness() > max)
+                if (individual.ProvideRawFitness() > max)
                 {
                     best = individual;
-                    max = individual.ProvideFitness();
+                    max = individual.ProvideRawFitness();
                 }
             }
             return best;

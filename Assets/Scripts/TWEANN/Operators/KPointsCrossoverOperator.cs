@@ -1,15 +1,13 @@
 ﻿using Assets.Scripts.NeuralNet;
 using Assets.Scripts.TUtils.Utils;
-using Assets.Scripts.TWEANN;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Assets.Scripts.TWEANN
 {
     /// <summary>
-    /// The K point Crossover operator splits the matching genes in k sub strings and copied them alternately into the child dna. Disjoint genes are all imported from the fittest parent
+    ///   The K point Crossover operator splits the matching genes in k sub strings and copied them alternately into the child dna. Disjoint
+    ///   genes are all imported from the fittest parent
     /// </summary>
     public class KPointsCrossoverOperator : CrossoverOperator
     {
@@ -25,7 +23,7 @@ namespace Assets.Scripts.TWEANN
             // Zip togheter the links that have the same innovation number
             List<Tuple<LinkGene, LinkGene>> zippedLinks = TUtilsProvider.ZipWithPredicate(firstGen.links, secondGen.links, (item1, item2) => item1.GetInnovationNumber().Equals(item2.GetInnovationNumber()));
 
-            int stride = zippedLinks.Count / UnityEngine.Random.Range(0, zippedLinks.Count - 1);
+            int stride = zippedLinks.Count / UnityEngine.Random.Range(1, zippedLinks.Count);
             //Add to che child all the matching genes(links)
             int i = 0;
             bool importFromFirst = true;
@@ -51,7 +49,7 @@ namespace Assets.Scripts.TWEANN
             }
 
             // At this point all common genes are added we add all the disjoint genes from the fittest
-            if (first.ProvideFitness() > second.ProvideFitness())
+            if (first.ProvideAdjustedFitness() > second.ProvideAdjustedFitness())
             {
                 foreach (LinkGene gene in remaining)
                 {

@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Stores;
+﻿using Assets.Scripts.Descriptors;
+using Assets.Scripts.Stores;
 using Assets.Scripts.TUtils.Utils;
 using System;
 using System.Collections.Generic;
@@ -44,7 +45,7 @@ namespace Assets.Scripts.NeuralNet
 
         #endregion Properties
 
-        public Genotype(TopologyDescriptor descriptor) : this()
+        public Genotype(DescriptorsWrapper.TopologyDescriptor descriptor) : this()
         {
             int lenght = descriptor.inputCount + descriptor.hiddenCount + descriptor.outputCount;
             for (int i = 0; i < lenght; i++)
@@ -66,9 +67,9 @@ namespace Assets.Scripts.NeuralNet
             }
 
             int linkN = 1;
-            foreach (LinkDescriptor link in descriptor.links)
+            foreach (DescriptorsWrapper.LinkDescriptor link in descriptor.links)
             {
-                AddLink(new LinkDescriptor(-link.fromId, -link.toId), linkN++, UnityEngine.Random.Range(-1F, 1F));
+                AddLink(new DescriptorsWrapper.LinkDescriptor(-link.fromId, -link.toId), linkN++, UnityEngine.Random.Range(-1F, 1F));
             }
         }
 
@@ -146,60 +147,6 @@ namespace Assets.Scripts.NeuralNet
             all.Add(nodeCopy);
             NodeCount++;
             return nodeCopy;
-        }
-
-        /// <summary>
-        ///   Perform a crossover between the two genotypes and get the result
-        /// </summary>
-        /// <param name="partner"> </param>
-        /// <param name="thisFitness"> </param>
-        /// <param name="partnerFitness"> </param>
-        /// <returns> </returns>
-        public Genotype Crossover(Genotype partner, double thisFitness, double partnerFitness)
-        {
-            Genotype childGen = new Genotype();
-            //TODO IMPROVE
-
-            List<LinkGene> remaining = new List<LinkGene>(links);
-            List<LinkGene> partnerRemaining = new List<LinkGene>(partner.links);
-            // Zip togheter the links that have the same innovation number
-            List<Tuple<LinkGene, LinkGene>> zippedLinks = TUtilsProvider.ZipWithPredicate(links, partner.links, (item1, item2) => item1.GetInnovationNumber().Equals(item2.GetInnovationNumber()));
-
-            //Add to che child all the matching genes(links)
-            foreach (Tuple<LinkGene, LinkGene> gene in zippedLinks)
-            {
-                LinkGene copy;
-                if (/*thisFitness > partnerFitness*/UnityEngine.Random.Range(0F, 1F) < 0.5F)
-                {
-                    copy = gene.Item1;
-                }
-                else
-                {
-                    copy = gene.Item2;
-                }
-
-                childGen.AddLinkAndNodes(copy);
-                remaining.RemoveAll(item => item.GetInnovationNumber().Equals(copy.GetInnovationNumber()));
-                partnerRemaining.RemoveAll(item => item.GetInnovationNumber().Equals(copy.GetInnovationNumber()));
-            }
-
-            // At this point all common genes are added we add all the disjoint genes from the fittest
-            if (thisFitness > partnerFitness)
-            {
-                foreach (LinkGene gene in remaining)
-                {
-                    childGen.AddLinkAndNodes(gene);
-                }
-            }
-            else
-            {
-                foreach (LinkGene gene in partnerRemaining)
-                {
-                    childGen.AddLinkAndNodes(gene);
-                }
-            }
-
-            return childGen;
         }
 
         /// <summary>
@@ -326,7 +273,7 @@ namespace Assets.Scripts.NeuralNet
         /// <param name="innovationNumber"> </param>
         /// <param name="weight"> </param>
         /// <returns> </returns>
-        private LinkGene AddLink(LinkDescriptor link, int innovationNumber, double weight)
+        private LinkGene AddLink(DescriptorsWrapper.LinkDescriptor link, int innovationNumber, double weight)
         {
             LinkGene newLink = null;
             NodeGene from = null;

@@ -34,6 +34,7 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual, IPooledObject
     private int directionsCount;
     [SerializeField] private bool endedSimulation = false;
     [SerializeField] private double fitness = 0;
+    [SerializeField] private double rawFitness = 0;
     [SerializeField] private bool netInitialized = false;
     private NeuralNetwork neuralNet;
     private double[] neuralNetInput;
@@ -44,7 +45,7 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual, IPooledObject
 
     public IndividualData GetIndividualData()
     {
-        return new IndividualData(neuralNet.GetGenotype(), ProvideFitness());
+        return new IndividualData(neuralNet.GetGenotype(), ProvideAdjustedFitness());
     }
 
     private void EndIndividualSimulation()
@@ -121,6 +122,7 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual, IPooledObject
         throttle = 0;
         steering = 0;
         fitness = 0;
+        rawFitness = 0;
 
         stats.Reset();
     }
@@ -177,7 +179,7 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual, IPooledObject
                 Sense();
                 neuralNetOutput = neuralNet.FeedForward(neuralNetInput);
             }
-            //ManageWheels();
+            ManageWheels();
             UpdateStats();
         }
     }
@@ -193,7 +195,7 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual, IPooledObject
     {
         float speedInfluence = populationManager.GetGenerationCount() / 2;
         float distanceInfluence = 4F;
-        return (speedInfluence * (stats.averageThrottle + 1) * (stats.averageThrottle + 1)) + (distanceInfluence * stats.distance);
+        return (3F * (stats.averageThrottle + 1) * (stats.averageThrottle + 1)) + (distanceInfluence * stats.distance);
     }
 
     public bool IsSimulating()
@@ -206,7 +208,7 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual, IPooledObject
         ResetParameters();
     }
 
-    public double ProvideFitness()
+    public double ProvideAdjustedFitness()
     {
         return this.fitness;
     }
@@ -221,7 +223,7 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual, IPooledObject
         return stats;
     }
 
-    public void SetFitness(double fitness)
+    public void AdjustFitness(double fitness)
     {
         this.fitness = fitness;
     }
@@ -246,6 +248,16 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual, IPooledObject
     public void StopSimulating()
     {
         endedSimulation = true;
+    }
+
+    public double ProvideRawFitness()
+    {
+        return rawFitness;
+    }
+
+    public void SetRawFitness(double rawFitness)
+    {
+        this.rawFitness = rawFitness;
     }
 
     #endregion Interface

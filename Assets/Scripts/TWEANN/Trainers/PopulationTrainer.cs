@@ -1,16 +1,25 @@
-﻿using Assets.Scripts.NeuralNet;
-using UnityEngine;
+﻿using Assets.Scripts.Descriptors;
 
 namespace Assets.Scripts.TWEANN
 {
     public abstract class PopulationTrainer
     {
-        [Space(5)]
-        [Header("Predefined Topology")]
-        [SerializeField] private TopologyDescriptor descriptor;
+        private DescriptorsWrapper.TopologyDescriptor descriptor;
 
-        public TopologyDescriptor GetPredefinedTopologyDescriptor()
+        /// <summary>
+        ///   Get the predefined topology, in this case the input layer densely connected to the output layer
+        /// </summary>
+        /// <returns> </returns>
+        public DescriptorsWrapper.TopologyDescriptor GetPredefinedTopologyDescriptor()
         {
+            descriptor = new DescriptorsWrapper.TopologyDescriptor(5, 0, 2);
+            for (int i = 1; i < descriptor.inputCount + 1; i++)
+            {
+                for (int j = descriptor.inputCount + 1; j < descriptor.inputCount + 1 + descriptor.outputCount; j++)
+                {
+                    descriptor.links.Add(new DescriptorsWrapper.LinkDescriptor(i, j));
+                }
+            }
             //descriptor = new TopologyDescriptor(5, 16, 2);
 
             //for (int i = 1; i < 6; i++)
@@ -49,7 +58,7 @@ namespace Assets.Scripts.TWEANN
         /// </param>
         /// <param name="breedingParameters"> The breeding parameters to use during crossover and mutation </param>
         /// <returns> Next generation of NeuralNetworks </returns>
-        public abstract NeuralNetwork[] Train(Biocenosis biocenosis);
+        public abstract DescriptorsWrapper.OffspringDescriptor[] Train(Biocenosis biocenosis);
 
         public abstract void Initialize();
     }

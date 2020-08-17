@@ -15,7 +15,7 @@ namespace Assets.Scripts.TUtils.ObjectPooling
             return instance;
         }
 
-        [SerializeField] private PoolCategory[] poolsCategory;
+        [SerializeField] private PoolCategory[] poolsCategory = null;
 
         private void Awake()
         {
@@ -91,8 +91,8 @@ namespace Assets.Scripts.TUtils.ObjectPooling
         [System.Serializable]
         private class PoolCategory
         {
-            public string name;
-            public Pool[] pools;
+            public string name = null;
+            public Pool[] pools = null;
             public Dictionary<string, Queue<GameObject>> poolsDictionary;
 
             /// <summary>
@@ -118,9 +118,7 @@ namespace Assets.Scripts.TUtils.ObjectPooling
             }
 
             /// <summary>
-            ///   <para>
-            ///     Spawn a GameObject from a specified pool, if poolTag is null the object will be selected based on the pool probability
-            ///   </para>
+            ///   <para> Spawn a GameObject from a specified pool, if poolTag is null the object will be selected based on the pool probability </para>
             ///   Returns: the pooled object
             /// </summary>
             public GameObject SpawnFromPool(string poolTag, Vector3 position, Quaternion rotation)

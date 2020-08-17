@@ -73,7 +73,7 @@ namespace Assets.Scripts.TWEANN
             double sum = 0;
             foreach (IIndividual individual in individuals)
             {
-                sum += individual.ProvideFitness();
+                sum += individual.ProvideAdjustedFitness();
             }
             return sum;
         }
@@ -95,9 +95,9 @@ namespace Assets.Scripts.TWEANN
             IIndividual best = null;
             foreach (IIndividual individual in individuals)
             {
-                if (maxFitness <= individual.ProvideFitness())
+                if (maxFitness <= individual.ProvideAdjustedFitness())
                 {
-                    maxFitness = individual.ProvideFitness();
+                    maxFitness = individual.ProvideAdjustedFitness();
                     best = individual;
                 }
             }

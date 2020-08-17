@@ -72,7 +72,7 @@ namespace Assets.Scripts.TWEANN
             {
                 foreach (IIndividual individual in species.GetIndividuals())
                 {
-                    individual.SetFitness(individual.ProvideFitness() / species.GetIndividualCount());
+                    individual.AdjustFitness(individual.ProvideRawFitness() / species.GetIndividualCount());
                 }
             }
             double sum = 0;
@@ -127,10 +127,10 @@ namespace Assets.Scripts.TWEANN
             foreach (Species species in speciesList)
             {
                 IIndividual current = species.GetChamp();
-                if (current != null && current.ProvideFitness() > max)
+                if (current != null && current.ProvideAdjustedFitness() > max)
                 {
                     fittest = species.GetChamp();
-                    max = fittest.ProvideFitness();
+                    max = fittest.ProvideAdjustedFitness();
                 }
             }
             return fittest;
