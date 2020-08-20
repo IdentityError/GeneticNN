@@ -3,6 +3,7 @@ using Assets.Scripts.Descriptors;
 using Assets.Scripts.NeuralNet;
 using Assets.Scripts.Stores;
 using Assets.Scripts.TUtils.ObjectPooling;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,10 +12,27 @@ namespace Assets.Scripts.TWEANN
 {
     public class PopulationManager : MonoBehaviour
     {
+        [System.Serializable]
+        public struct EnabledOperators
+        {
+            public bool uniformEnabled;
+            public bool singlePointEnabled;
+            public bool kPointEnabled;
+            public bool averageEnabled;
+
+            public EnabledOperators(bool uniformEnabled, bool singlePointEnabled, bool kPointEnabled, bool averageEnabled)
+            {
+                this.uniformEnabled = uniformEnabled;
+                this.singlePointEnabled = singlePointEnabled;
+                this.kPointEnabled = kPointEnabled;
+                this.averageEnabled = averageEnabled;
+            }
+        }
+
         public List<ISimulatingIndividual> populationList;
         private float averageThrottle = 1;
         [SerializeField] private Biocenosis biocenosis;
-        [SerializeField] private BreedingParameters breedingParameters;
+        [SerializeField] private EnabledOperators enabledOperators;
         private int currentSimulating;
         private Genotype fittestGenotype;
         private int generationCount = 0;
@@ -33,11 +51,10 @@ namespace Assets.Scripts.TWEANN
         [SerializeField] private float timeScale = 1F;
         [SerializeField] private Track track;
 
-        [Header("Training")]
-        [SerializeField] private PopulationTrainerProvider trainerProvider;
+        private TrainerNEAT trainerNEAT;
 
         private UIManager uiManager;
-        private List<DescriptorsWrapper.CrossoverOperationDescriptor> operationsDescriptors = null;
+        private List<Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, IIndividual>> operationsDescriptors = null;
 
         /// <summary>
         ///   Force the end of the simulation
@@ -101,12 +118,11 @@ namespace Assets.Scripts.TWEANN
         {
             if (operationsDescriptors == null)
             {
-                operationsDescriptors = new List<DescriptorsWrapper.CrossoverOperationDescriptor>();
+                operationsDescriptors = new List<Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, IIndividual>>();
             }
             else
             {
-                TrainerNEAT neat = trainerProvider.ProvideTrainer() as TrainerNEAT;
-                neat.UpdateCrossoverOperatorsProgressions(operationsDescriptors);
+                trainerNEAT.UpdateCrossoverOperatorsProgressions(operationsDescriptors);
             }
             operationsDescriptors.Clear();
 
@@ -118,21 +134,21 @@ namespace Assets.Scripts.TWEANN
             {
                 IIndividual champ = species.GetChamp();
                 double maxFitness = champ.ProvideAdjustedFitness();
-                double averageFitness = species.GetFitnessSum() / species.GetIndividualCount();
+                double averageFitness = species.GetAdjustedFitnessSum() / species.GetIndividualCount();
                 double value = 1D - ((maxFitness - averageFitness) / maxFitness);
-                species.breedingParameters.mutationProbability = (float)(value);
+                species.SetMutationRate((float)(value));
                 //species.breedingParameters.crossoverProbability = 1 - species.breedingParameters.mutationProbability;
             }
 
             ISimulatingIndividual fittest = GetFittest();
-            uiManager.UpdateTextBox1("Highest fitness: " + fittest.ProvideAdjustedFitness() + "\n" + "Average fitness: " + biocenosis.GetAverageFitness());
+            uiManager.UpdateTextBox1("Highest fitness: " + fittest.ProvideRawFitness() + "\n" + "Average fitness: " + biocenosis.GetAverageFitness());
             //Debug.Log(fittest.ToString() + "\n" + fittest.ProvideNeuralNet().GetGenotype().ToString());
-            uiManager.AppendToLog("Biocenosis:" + biocenosis.ToString());
+            //uiManager.AppendToLog("Biocenosis:" + biocenosis.ToString());
             //UpdateFittest(fittest.ProvideNeuralNet().GetGenotype(), fittest.ProvideFitness());
             //breedingParameters.crossoverProbability = parameter;
 
             // Retrieve a new trained Network population
-            DescriptorsWrapper.OffspringDescriptor[] pop = trainerProvider.ProvideTrainer().Train(biocenosis);
+            Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, Genotype>[] pop = trainerNEAT.Train(biocenosis);
 
             // Destroy all the objects
             foreach (ISimulatingIndividual individual in populationList)
@@ -144,9 +160,9 @@ namespace Assets.Scripts.TWEANN
             // Instantiate new population
             for (int i = 0; i < pop.Length; i++)
             {
-                ISimulatingIndividual childInd = InstantiateIndividual(new NeuralNetwork(pop[i].childGen), i.ToString());
+                ISimulatingIndividual childInd = InstantiateIndividual(new NeuralNetwork(pop[i].Item2), i.ToString());
                 populationList.Add(childInd);
-                operationsDescriptors.Add(new DescriptorsWrapper.CrossoverOperationDescriptor(pop[i].parent, pop[i].parent1, childInd, pop[i].operatorUsed));
+                operationsDescriptors.Add(new Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, IIndividual>(pop[i].Item1, childInd));
             }
 
             generationCount++;
@@ -200,11 +216,11 @@ namespace Assets.Scripts.TWEANN
         {
             for (int i = 0; i < initialPopulationNumber; i++)
             {
-                populationList.Add(InstantiateIndividual(new NeuralNetwork(new Genotype(trainerProvider.ProvideTrainer().GetPredefinedTopologyDescriptor())), i.ToString()));
+                populationList.Add(InstantiateIndividual(new NeuralNetwork(trainerNEAT.GetPredefinedGenotype()), i.ToString()));
             }
             generationCount++;
             currentSimulating = initialPopulationNumber;
-            GlobalParams.InitializeGlobalInnovationNumber(trainerProvider.ProvideTrainer().GetPredefinedTopologyDescriptor());
+            GlobalParams.InitializeGlobalInnovationNumber(trainerNEAT.GetPredefinedGenotype());
             //foreach (IIndividual ind in population)
             //{
             //    Debug.Log(ind.ProvideNeuralNet().GetGenotype().ToString());
@@ -247,13 +263,27 @@ namespace Assets.Scripts.TWEANN
 
         private void Start()
         {
+            List<CrossoverOperator> crossoverOperators = new List<CrossoverOperator>();
+            if (enabledOperators.uniformEnabled) crossoverOperators.Add(new UniformCrossoverOperator());
+            if (enabledOperators.singlePointEnabled) crossoverOperators.Add(new SinglePointCrossover());
+            if (enabledOperators.kPointEnabled) crossoverOperators.Add(new KPointsCrossoverOperator());
+            if (enabledOperators.averageEnabled) crossoverOperators.Add(new AverageCrossoverOperator());
+
+            if (crossoverOperators.Count < 1)
+            {
+                throw new System.Exception("There is no Crossover operator!");
+            }
+
+            trainerNEAT = new TrainerNEAT(new Breeding(0.5F, 1F, crossoverOperators));
+
+            Debug.Log(trainerNEAT.breeding.crossoverOperators.Count);
+
             uiManager = FindObjectOfType<UIManager>();
             uiManager?.UpdateTrackLength(track.Length());
             //uiManager?.DrawNetUI(trainerProvider.ProvideTrainer().GetPredefinedTopologyDescriptor());
-            trainerProvider.ProvideTrainer().Initialize();
             ShouldRestart_C = CheckAverageThrottle();
             populationList = new List<ISimulatingIndividual>();
-            biocenosis = new Biocenosis(sharingThreshold, breedingParameters);
+            biocenosis = new Biocenosis(sharingThreshold, trainerNEAT.breeding.rates.crossoverRate, trainerNEAT.breeding.rates.mutationRate);
             InitializeAncestors();
         }
 

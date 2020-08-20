@@ -1,25 +1,36 @@
 ﻿using Assets.Scripts.Descriptors;
+using Assets.Scripts.NeuralNet;
+using Assets.Scripts.TUtils.Utils;
+using System;
+using UnityEditor.Experimental.GraphView;
 
 namespace Assets.Scripts.TWEANN
 {
     public abstract class PopulationTrainer
     {
-        private DescriptorsWrapper.TopologyDescriptor descriptor;
+        private Genotype predefinedGenotype;
 
         /// <summary>
         ///   Get the predefined topology, in this case the input layer densely connected to the output layer
         /// </summary>
         /// <returns> </returns>
-        public DescriptorsWrapper.TopologyDescriptor GetPredefinedTopologyDescriptor()
+        public Genotype GetPredefinedGenotype()
         {
-            descriptor = new DescriptorsWrapper.TopologyDescriptor(5, 0, 2);
-            for (int i = 1; i < descriptor.inputCount + 1; i++)
+            predefinedGenotype = new Genotype();
+            for (int i = 1; i < 6; i++)
             {
-                for (int j = descriptor.inputCount + 1; j < descriptor.inputCount + 1 + descriptor.outputCount; j++)
+                for (int j = 0; j < 3; j++)
                 {
-                    descriptor.links.Add(new DescriptorsWrapper.LinkDescriptor(i, j));
+                    predefinedGenotype.AddLinkAndNodes(new LinkGene(new NodeGene(i, TMath.Tanh), new NodeGene(j, TMath.Tanh)));
                 }
             }
+            //for (int i = 1; i < descriptor.inputCount + 1; i++)
+            //{
+            //    for (int j = descriptor.inputCount + 1; j < descriptor.inputCount + 1 + descriptor.outputCount; j++)
+            //    {
+            //        descriptor.links.Add(new DescriptorsWrapper.LinkDescriptor(i, j));
+            //    }
+            //}
             //descriptor = new TopologyDescriptor(5, 16, 2);
 
             //for (int i = 1; i < 6; i++)
@@ -44,7 +55,7 @@ namespace Assets.Scripts.TWEANN
             //        descriptor.links.Add(new LinkDescriptor(i, j));
             //    }
             //}
-            return descriptor;
+            return predefinedGenotype;
         }
 
         /// <summary>
@@ -58,8 +69,6 @@ namespace Assets.Scripts.TWEANN
         /// </param>
         /// <param name="breedingParameters"> The breeding parameters to use during crossover and mutation </param>
         /// <returns> Next generation of NeuralNetworks </returns>
-        public abstract DescriptorsWrapper.OffspringDescriptor[] Train(Biocenosis biocenosis);
-
-        public abstract void Initialize();
+        public abstract Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, Genotype>[] Train(Biocenosis biocenosis);
     }
 }

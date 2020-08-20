@@ -1,7 +1,8 @@
 ﻿using Assets.Scripts.Descriptors;
 using Assets.Scripts.NeuralNet;
-using Assets.Scripts.TUtils.Interfaces;
+using Assets.Scripts.Stores;
 using Assets.Scripts.TUtils.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -11,43 +12,19 @@ namespace Assets.Scripts.TWEANN
     [System.Serializable]
     public class TrainerNEAT : PopulationTrainer
     {
-        [Header("Crossover Operators")]
-        [SerializeField] private bool unifom;
-        [SerializeField] private bool singlePoint;
-        [SerializeField] private bool KPoint;
-        [SerializeField] private bool average;
-        [Space(5)]
-        private List<CrossoverOperator> crossoverOperators;
+        public Breeding breeding;
 
-        [Header("Mutation Operators")]
-        [SerializeField] private bool swap;
-
-        public override void Initialize()
+        public TrainerNEAT(Breeding breeding)
         {
-            int crossoverOperatorsN = 0;
-            crossoverOperatorsN += unifom ? 1 : 0;
-            crossoverOperatorsN += singlePoint ? 1 : 0;
-            crossoverOperatorsN += KPoint ? 1 : 0;
-            crossoverOperatorsN += average ? 1 : 0;
-            crossoverOperators = new List<CrossoverOperator>();
-            if (unifom) crossoverOperators.Add(new UniformCrossoverOperator());
-            if (singlePoint) crossoverOperators.Add(new SinglePointCrossover());
-            if (KPoint) crossoverOperators.Add(new KPointsCrossoverOperator());
-            if (average) crossoverOperators.Add(new AverageCrossoverOperator());
-            //Debug.Log(crossoverOperators.Count);
-            foreach (CrossoverOperator @operator in crossoverOperators)
-            {
-                @operator.SetSelectProbability(1F / crossoverOperators.Count);
-                //Debug.Log(@operator.ProvideSelectProbability());
-            }
+            this.breeding = breeding;
         }
 
-        public override DescriptorsWrapper.OffspringDescriptor[] Train(Biocenosis biocenosis)
+        public override Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, Genotype>[] Train(Biocenosis biocenosis)
         {
             GlobalParams.ResetGenerationMutations();
 
             int expectedIndividualCount = biocenosis.GetExpectedIndividualNumber();
-            DescriptorsWrapper.OffspringDescriptor[] pop = new DescriptorsWrapper.OffspringDescriptor[expectedIndividualCount];
+            Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, Genotype>[] pop1 = new Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, Genotype>[expectedIndividualCount];
             CrossoverOperator operatorToApply = null;
             int currentIndex = 0;
             foreach (Species current in biocenosis.GetSpeciesList())
@@ -56,14 +33,14 @@ namespace Assets.Scripts.TWEANN
                 {
                     (IIndividual, IIndividual) parents = SelectionFromSpecies(current);
                     Genotype childGen = null;
-                    if (Random.Range(0F, 1F) <= current.breedingParameters.crossoverProbability)
+                    if (UnityEngine.Random.Range(0F, 1F) <= current.GetCrossoverRate())
                     {
-                        operatorToApply = GetRandomOperator();
+                        operatorToApply = breeding.GetRandomOperator();
                         childGen = operatorToApply.Apply(parents.Item1, parents.Item2);
                     }
                     else
                     {
-                        if (Random.Range(0F, 1F) < 0.5F)
+                        if (UnityEngine.Random.Range(0F, 1F) < 0.5F)
                         {
                             childGen = parents.Item1.ProvideNeuralNet().GetGenotype();
                         }
@@ -73,13 +50,15 @@ namespace Assets.Scripts.TWEANN
                         }
                     }
 
-                    childGen.Mutate(current.breedingParameters);
-                    pop[currentIndex] = new DescriptorsWrapper.OffspringDescriptor(parents.Item1, parents.Item2, childGen, operatorToApply);
+                    childGen.Mutate(current.GetMutationRate());
+                    pop1[currentIndex] = new Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, Genotype>(
+                        new DescriptorsWrapper.CrossoverOperationDescriptor(parents.Item1.ProvideRawFitness(), parents.Item2.ProvideRawFitness(), operatorToApply),
+                        childGen);
                     //Debug.Log("Child: " + childGen.ToString());
                     currentIndex++;
                 }
             }
-            return pop;
+            return pop1;
         }
 
         /// <summary>
@@ -146,14 +125,7 @@ namespace Assets.Scripts.TWEANN
             }
         }
 
-        private CrossoverOperator GetRandomOperator()
-        {
-            List<IProbSelectable> sel = new List<IProbSelectable>(crossoverOperators);
-            CrossoverOperator op = TUtilsProvider.SelectWithProbability<CrossoverOperator>(sel);
-            return op;
-        }
-
-        public void UpdateCrossoverOperatorsProgressions(List<DescriptorsWrapper.CrossoverOperationDescriptor> descriptors)
+        public void UpdateCrossoverOperatorsProgressions(List<Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, IIndividual>> descriptors)
         {
             double singlePointSum = 0;
             int singlePointCount = 0;
@@ -167,29 +139,29 @@ namespace Assets.Scripts.TWEANN
             double uniformSum = 0;
             int uniformCount = 0;
 
-            foreach (DescriptorsWrapper.CrossoverOperationDescriptor descriptor in descriptors)
+            foreach (Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, IIndividual> descriptor in descriptors)
             {
-                //Debug.Log("P(" + ((MonoBehaviour)descriptor.parent).name + "): " + descriptor.parent.ProvideRawFitness() + ", P1(" + ((MonoBehaviour)descriptor.parent1).name + "): " + descriptor.parent1.ProvideRawFitness() + ", C(" + ((MonoBehaviour)descriptor.child).name + "): " + descriptor.child.ProvideRawFitness() + "OP: " + descriptor.operatorUsed.ToString());
-                double value = descriptor.child.ProvideRawFitness() - ((descriptor.parent.ProvideRawFitness() + descriptor.parent1.ProvideRawFitness()) / 2F);
-
-                if (descriptor.operatorUsed is UniformCrossoverOperator)
+                double max = TMath.Max(descriptor.Item2.ProvideRawFitness(), descriptor.Item1.parentFitness, descriptor.Item1.parent1Fitness);
+                double value = max - ((descriptor.Item1.parentFitness + descriptor.Item1.parent1Fitness) / 2F);
+                //Debug.Log(descriptor.parentFitness + ", " + descriptor.parent1Fitness + ", C: " + descriptor.child.ProvideRawFitness() + "OP: " + descriptor.operatorUsed.ToString() + "V: " + value);
+                if (descriptor.Item1.operatorUsed is UniformCrossoverOperator)
                 {
                     uniformSum += value;
                     uniformCount++;
                     //Debug.Log("Uniform: " + value);
                 }
-                else if (descriptor.operatorUsed is SinglePointCrossover)
+                else if (descriptor.Item1.operatorUsed is SinglePointCrossover)
                 {
                     singlePointSum += value;
                     singlePointCount++;
                     //Debug.Log("Single: " + value);
                 }
-                else if (descriptor.operatorUsed is KPointsCrossoverOperator)
+                else if (descriptor.Item1.operatorUsed is KPointsCrossoverOperator)
                 {
                     kPointSum += value;
                     kPointCount++;
                 }
-                else if (descriptor.operatorUsed is AverageCrossoverOperator)
+                else if (descriptor.Item1.operatorUsed is AverageCrossoverOperator)
                 {
                     avgSum += value;
                     avgCount++;
@@ -201,45 +173,38 @@ namespace Assets.Scripts.TWEANN
             uniformSum = uniformCount > 0 ? uniformSum / uniformCount : 0;
             avgSum = avgCount > 0 ? avgSum / avgCount : 0;
 
-            //Debug.Log("SUM: " + totalSum);
-            //Debug.Log("SPC: " + singlePointCount + "UC: " + uniformCount + "KPC:" + kPointCount + "AVGC: " + avgCount);
+            double total = singlePointSum + kPointSum + uniformSum + avgSum;
+            Debug.Log("SUM: " + total);
+            Debug.Log("SPC: " + singlePointSum + "UC: " + uniformSum + "KPC:" + kPointSum + "AVGC: " + avgSum);
 
-            UniformCrossoverOperator uniformCrossoverOp = (UniformCrossoverOperator)crossoverOperators.Find((x) => x is UniformCrossoverOperator);
-            SinglePointCrossover singleCrossoverOp = (SinglePointCrossover)crossoverOperators.Find((x) => x is SinglePointCrossover);
-            KPointsCrossoverOperator kPointsCrossoverOp = (KPointsCrossoverOperator)crossoverOperators.Find((x) => x is KPointsCrossoverOperator);
-            AverageCrossoverOperator averageCrossoverOp = (AverageCrossoverOperator)crossoverOperators.Find((x) => x is AverageCrossoverOperator);
+            UniformCrossoverOperator uniformCrossoverOp = breeding.GetOperatorOfType<UniformCrossoverOperator>();
+            SinglePointCrossover singleCrossoverOp = breeding.GetOperatorOfType<SinglePointCrossover>();
+            KPointsCrossoverOperator kPointsCrossoverOp = breeding.GetOperatorOfType<KPointsCrossoverOperator>();
+            AverageCrossoverOperator averageCrossoverOp = breeding.GetOperatorOfType<AverageCrossoverOperator>();
 
-            uniformCrossoverOp.SetCurrentProgression((float)(uniformSum));
-            singleCrossoverOp.SetCurrentProgression((float)(singlePointSum));
-            kPointsCrossoverOp.SetCurrentProgression((float)(kPointSum));
-            averageCrossoverOp.SetCurrentProgression((float)(avgSum));
+            uniformCrossoverOp?.SetCurrentProgression((float)uniformSum);
+            singleCrossoverOp?.SetCurrentProgression((float)singlePointSum);
+            kPointsCrossoverOp?.SetCurrentProgression((float)kPointSum);
+            averageCrossoverOp?.SetCurrentProgression((float)avgSum);
 
-            Debug.Log("SP: " + singleCrossoverOp.currentProgression + "U: " + uniformSum + "KP:" + kPointSum + "AVG: " + avgSum);
-            crossoverOperators = crossoverOperators.OrderByDescending(x => x.currentProgression).ToList();
-            string rank = "Operators ranking: \n";
-            foreach (CrossoverOperator @operator in crossoverOperators)
+            float minRate = 0.01F;
+
+            uniformCrossoverOp?.SetSelectProbability((float)(uniformSum / total * (1 - breeding.OperatorsCount * minRate) + minRate));
+            singleCrossoverOp?.SetSelectProbability((float)(singlePointSum / total * (1 - breeding.OperatorsCount * minRate) + minRate));
+            kPointsCrossoverOp?.SetSelectProbability((float)(kPointSum / total * (1 - breeding.OperatorsCount * minRate) + minRate));
+            averageCrossoverOp?.SetSelectProbability((float)(avgSum / total * (1 - breeding.OperatorsCount * minRate) + minRate));
+
+            //Debug.Log("SP: " + uniformSum + "U: " + uniformSum + "KP:" + kPointSum + "AVG: " + avgSum);
+            breeding.crossoverOperators = breeding.crossoverOperators.OrderByDescending(x => x.GetCurrentProgression()).ToList();
+            string rank = "Operators ranking\n";
+            foreach (CrossoverOperator @operator in breeding.crossoverOperators)
             {
                 rank += @operator.ToString() + "\n";
             }
             Debug.Log(rank);
 
-            //Debug.Log("Ordered crossovers operators: " + crossoverOperators);
-
-            int influence = crossoverOperators.Count;
-            float normalization = 0F;
-            for (int i = 0; i < crossoverOperators.Count; i++)
-            {
-                normalization += influence-- * crossoverOperators[i].ProvideSelectProbability();
-            }
-            //Debug.Log("Normalization: " + normalization);
-            influence = crossoverOperators.Count;
-            for (int i = 0; i < crossoverOperators.Count; i++)
-            {
-                crossoverOperators[i].SetSelectProbability((influence-- * crossoverOperators[i].ProvideSelectProbability()) / normalization);
-            }
-
-            rank = "Current crossover probabilities: \n";
-            foreach (CrossoverOperator @operator in crossoverOperators)
+            rank = "Operators probabilities\n";
+            foreach (CrossoverOperator @operator in breeding.crossoverOperators)
             {
                 rank += @operator.ToString() + ", " + @operator.ProvideSelectProbability() + "\n";
             }

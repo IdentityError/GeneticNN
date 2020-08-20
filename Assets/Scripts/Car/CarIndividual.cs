@@ -6,7 +6,6 @@ using UnityEngine;
 
 public class CarIndividual : MonoBehaviour, ISimulatingIndividual, IPooledObject
 {
-    //TODO Fix the bug that cause the cars to not be initializated correctly
     //endedSimulation is set as true and never set as false again, maybe some error when copying arrays or resetting them, think about returning a fresh new population of Genotype on the train method
 
     [HideInInspector] public Vector3 lastPosition;

@@ -23,9 +23,9 @@ namespace Assets.Scripts.NeuralNet
             }
         }
 
-        public static void InitializeGlobalInnovationNumber(DescriptorsWrapper.TopologyDescriptor descriptor)
+        public static void InitializeGlobalInnovationNumber(Genotype predefinedGenotype)
         {
-            globalInnovationNumber = descriptor.links.Count + 1;
+            globalInnovationNumber = predefinedGenotype.LinkCount + 1;
         }
 
         public static void ResetGenerationMutations()

@@ -134,5 +134,59 @@ namespace Assets.Scripts.TUtils.Utils
         {
             return value > 0 ? value : -value;
         }
+
+        /// <summary>
+        ///   Return the max value between an arbitrary number of integers
+        /// </summary>
+        /// <param name="data"> </param>
+        /// <returns> </returns>
+        public static int Max(params int[] data)
+        {
+            int max = int.MinValue;
+            for (int i = 0; i < data.Length; i++)
+            {
+                if (data[i] > max)
+                {
+                    max = data[i];
+                }
+            }
+            return max;
+        }
+
+        /// <summary>
+        ///   Return the max value between an arbitrary number of floats
+        /// </summary>
+        /// <param name="data"> </param>
+        /// <returns> </returns>
+        public static float Max(params float[] data)
+        {
+            float max = float.MinValue;
+            for (int i = 0; i < data.Length; i++)
+            {
+                if (data[i] > max)
+                {
+                    max = data[i];
+                }
+            }
+            return max;
+        }
+
+        /// <summary>
+        ///   Return the max value between an arbitrary number of doubles
+        /// </summary>
+        /// <param name="data"> </param>
+        /// <returns> </returns>
+        public static double Max(params double[] data)
+        {
+            double max = double.MinValue;
+            for (int i = 0; i < data.Length; i++)
+            {
+                if (data[i] > max)
+                {
+                    max = data[i];
+                }
+            }
+            return max;
+        }
     }
 }

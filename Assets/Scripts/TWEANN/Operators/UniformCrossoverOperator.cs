@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 namespace Assets.Scripts.TWEANN
 {
+    [System.Serializable]
     /// <summary>
     ///   The Uniform Crossover operator selects each matching gene with an equal probability between the two parents. Disjoint genes are
     ///   all imported from the fittest parent

@@ -1103,23 +1103,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   biocenosis:
     speciesList: []
-  breedingParameters:
-    mutationProbability: 0
-    crossoverProbability: 1
+  enabledOperators:
+    uniformEnabled: 1
+    singlePointEnabled: 0
+    kPointEnabled: 1
+    averageEnabled: 0
   individualPrefab: {fileID: 6791551976333570425, guid: dda260aae5911af48a27564e8179e873,
     type: 3}
   initialPopulationNumber: 150
   sharingThreshold: 1
   timeScale: 1
   track: {fileID: 2111517136}
-  trainerProvider:
-    trainingParadigm: 0
-    gaTrainer:
-      unifom: 1
-      singlePoint: 1
-      KPoint: 1
-      average: 1
-      swap: 0
 --- !u!114 &6509384906705858488
 MonoBehaviour:
   m_ObjectHideFlags: 0

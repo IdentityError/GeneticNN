@@ -1,5 +1,4 @@
 ﻿using Assets.Scripts.Descriptors;
-using Assets.Scripts.Stores;
 using Assets.Scripts.TUtils.Utils;
 using System;
 using System.Collections.Generic;
@@ -44,34 +43,6 @@ namespace Assets.Scripts.NeuralNet
         }
 
         #endregion Properties
-
-        public Genotype(DescriptorsWrapper.TopologyDescriptor descriptor) : this()
-        {
-            int lenght = descriptor.inputCount + descriptor.hiddenCount + descriptor.outputCount;
-            for (int i = 0; i < lenght; i++)
-            {
-                NodeGene current = new NodeGene(-i - 1, TMath.Tanh);
-                if (i < descriptor.inputCount)
-                {
-                    current.SetType(NodeType.INPUT);
-                }
-                else if (i > lenght - descriptor.outputCount - 1)
-                {
-                    current.SetType(NodeType.OUTPUT);
-                }
-                else
-                {
-                    current.SetType(NodeType.HIDDEN);
-                }
-                AddNode(current);
-            }
-
-            int linkN = 1;
-            foreach (DescriptorsWrapper.LinkDescriptor link in descriptor.links)
-            {
-                AddLink(new DescriptorsWrapper.LinkDescriptor(-link.fromId, -link.toId), linkN++, UnityEngine.Random.Range(-1F, 1F));
-            }
-        }
 
         public Genotype()
         {
@@ -174,9 +145,9 @@ namespace Assets.Scripts.NeuralNet
         ///   Mutate this genotype based on the specified probabilities
         /// </summary>
         /// <param name="mutation"> </param>
-        public void Mutate(BreedingParameters mutation)
+        public void Mutate(float mutationRate)
         {
-            if (UnityEngine.Random.Range(0F, 1F) < mutation.mutationProbability)
+            if (UnityEngine.Random.Range(0F, 1F) < mutationRate)
             {
                 // 1. Select a random link to be mutated
                 // 2. Create a new node
@@ -203,7 +174,7 @@ namespace Assets.Scripts.NeuralNet
                 AddNode(newNode);
                 AddLinkAndNodes(newLink);
             }
-            if (UnityEngine.Random.Range(0F, 1F) < mutation.mutationProbability)
+            if (UnityEngine.Random.Range(0F, 1F) < mutationRate)
             {
                 // Create a list of all nodes except the output nodes and select the random From node
                 List<NodeGene> temp = new List<NodeGene>(inputs);
@@ -239,7 +210,7 @@ namespace Assets.Scripts.NeuralNet
             // For each link of this genotype try to mutate it
             foreach (LinkGene gene in links)
             {
-                if (UnityEngine.Random.Range(0F, 1F) < (mutation.mutationProbability / links.Count))
+                if (UnityEngine.Random.Range(0F, 1F) < (mutationRate / links.Count))
                 {
                     int random = UnityEngine.Random.Range(0, LinkCount);
                     links[random].SetWeight(UnityEngine.Random.Range(-1F, 1F));
@@ -264,40 +235,6 @@ namespace Assets.Scripts.NeuralNet
                 }
             }
             return output;
-        }
-
-        /// <summary>
-        ///   Add a link described by a link descriptor only if the two nodes involved are present
-        /// </summary>
-        /// <param name="link"> </param>
-        /// <param name="innovationNumber"> </param>
-        /// <param name="weight"> </param>
-        /// <returns> </returns>
-        private LinkGene AddLink(DescriptorsWrapper.LinkDescriptor link, int innovationNumber, double weight)
-        {
-            LinkGene newLink = null;
-            NodeGene from = null;
-            NodeGene to = null;
-            foreach (NodeGene node in all)
-            {
-                if (node.id.Equals(link.fromId))
-                {
-                    from = node;
-                }
-                if (node.id.Equals(link.toId))
-                {
-                    to = node;
-                }
-                if (from != null && to != null) break;
-            }
-            if (to != null && from != null)
-            {
-                newLink = new LinkGene(from, to, weight, innovationNumber);
-                to.AddIncomingLink(newLink);
-                from.AddOutgoingLink(newLink);
-                links.Add(newLink);
-            }
-            return newLink;
         }
     }
 }

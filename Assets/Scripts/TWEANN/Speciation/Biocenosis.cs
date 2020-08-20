@@ -1,5 +1,4 @@
-﻿using Assets.Scripts.Stores;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Scripts.TWEANN
@@ -9,11 +8,14 @@ namespace Assets.Scripts.TWEANN
     {
         [SerializeField] private List<Species> speciesList;
         private float speciesSharingThreshold;
-        private BreedingParameters defaultBreedingParameters;
 
-        public Biocenosis(float speciesSharingThreshold, BreedingParameters defaultBreedingParameters)
+        private float defaultCrossoverRate;
+        private float defaultMutationRate;
+
+        public Biocenosis(float speciesSharingThreshold, float defaultCrossoverRate, float defaultMutationRate)
         {
-            this.defaultBreedingParameters = defaultBreedingParameters;
+            this.defaultCrossoverRate = defaultCrossoverRate;
+            this.defaultMutationRate = defaultMutationRate;
             speciesList = new List<Species>();
             this.speciesSharingThreshold = speciesSharingThreshold;
         }
@@ -50,7 +52,7 @@ namespace Assets.Scripts.TWEANN
                     return;
                 }
             }
-            Species newSpecies = new Species(defaultBreedingParameters);
+            Species newSpecies = new Species(defaultMutationRate, defaultCrossoverRate);
             newSpecies.AddToSpecies(individual);
             AddSpecies(newSpecies);
         }
@@ -78,14 +80,14 @@ namespace Assets.Scripts.TWEANN
             double sum = 0;
             foreach (Species species in speciesList)
             {
-                sum += species.GetFitnessSum();
+                sum += species.GetAdjustedFitnessSum();
             }
 
             double averageFitness = sum / GetTotalIndividualNumber();
 
             foreach (Species species in speciesList)
             {
-                species.SetNewExpectedIndividualCount(Mathf.RoundToInt((float)(species.GetFitnessSum() / averageFitness)));
+                species.SetNewExpectedIndividualCount(Mathf.RoundToInt((float)(species.GetAdjustedFitnessSum() / averageFitness)));
             }
             Purge();
         }
@@ -127,10 +129,10 @@ namespace Assets.Scripts.TWEANN
             foreach (Species species in speciesList)
             {
                 IIndividual current = species.GetChamp();
-                if (current != null && current.ProvideAdjustedFitness() > max)
+                if (current != null && current.ProvideRawFitness() > max)
                 {
-                    fittest = species.GetChamp();
-                    max = fittest.ProvideAdjustedFitness();
+                    fittest = current;
+                    max = fittest.ProvideRawFitness();
                 }
             }
             return fittest;
@@ -141,7 +143,7 @@ namespace Assets.Scripts.TWEANN
             double avg = 0F;
             foreach (Species species in speciesList)
             {
-                avg += species.GetFitnessSum() / species.GetIndividualCount();
+                avg += species.GetRawFitnessSum() / species.GetIndividualCount();
             }
             avg /= speciesList.Count;
             return avg;

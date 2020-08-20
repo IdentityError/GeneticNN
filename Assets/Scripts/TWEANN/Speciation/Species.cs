@@ -1,5 +1,4 @@
-﻿using Assets.Scripts.Stores;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Scripts.TWEANN
@@ -12,11 +11,14 @@ namespace Assets.Scripts.TWEANN
         private List<IIndividual> individuals;
         private IIndividual representative = null;
         private bool initializated;
-        public BreedingParameters breedingParameters = null;
 
-        public Species(BreedingParameters breedingParameters) : this()
+        private float mutationRate;
+        private float crossoverRate;
+
+        public Species(float mutationRate, float crossoverRate) : this()
         {
-            this.breedingParameters = new BreedingParameters(breedingParameters.mutationProbability, breedingParameters.crossoverProbability);
+            this.mutationRate = mutationRate;
+            this.crossoverRate = crossoverRate;
         }
 
         public Species()
@@ -68,12 +70,22 @@ namespace Assets.Scripts.TWEANN
             initializated = true;
         }
 
-        public double GetFitnessSum()
+        public double GetAdjustedFitnessSum()
         {
             double sum = 0;
             foreach (IIndividual individual in individuals)
             {
                 sum += individual.ProvideAdjustedFitness();
+            }
+            return sum;
+        }
+
+        public double GetRawFitnessSum()
+        {
+            double sum = 0;
+            foreach (IIndividual individual in individuals)
+            {
+                sum += individual.ProvideRawFitness();
             }
             return sum;
         }
@@ -102,6 +114,26 @@ namespace Assets.Scripts.TWEANN
                 }
             }
             return best;
+        }
+
+        public void SetMutationRate(float mutationRate)
+        {
+            this.mutationRate = mutationRate;
+        }
+
+        public float GetMutationRate()
+        {
+            return mutationRate;
+        }
+
+        public void SetCrossoverRate(float crossoverRate)
+        {
+            this.crossoverRate = crossoverRate;
+        }
+
+        public float GetCrossoverRate()
+        {
+            return crossoverRate;
         }
     }
 }

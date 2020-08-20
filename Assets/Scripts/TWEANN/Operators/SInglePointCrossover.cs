@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 namespace Assets.Scripts.TWEANN
 {
+    [System.Serializable]
     /// <summary>
     ///   The Single point Crossover operator splits the matching genes in two sub strings and copied them alternately into the child dna.
     ///   Disjoint genes are all imported from the fittest parent

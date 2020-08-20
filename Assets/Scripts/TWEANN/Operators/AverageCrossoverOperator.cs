@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 namespace Assets.Scripts.TWEANN
 {
+    [System.Serializable]
     /// <summary>
     ///   The Average Crossover operator set the children corresponding gene to the average of the parents genes. Disjoint genes are all
     ///   imported from the fittest parent

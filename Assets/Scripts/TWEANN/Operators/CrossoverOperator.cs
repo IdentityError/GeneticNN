@@ -3,13 +3,14 @@ using Assets.Scripts.TUtils.Interfaces;
 
 namespace Assets.Scripts.TWEANN
 {
+    [System.Serializable]
     /// <summary>
     ///   Represent the abstract class of a generic Crossover operator
     /// </summary>
     public abstract class CrossoverOperator : IProbSelectable
     {
         private float selectProbability;
-        public float currentProgression;
+        private float currentProgression;
 
         public CrossoverOperator()
         {
@@ -35,6 +36,11 @@ namespace Assets.Scripts.TWEANN
         public void SetCurrentProgression(float currentProgression)
         {
             this.currentProgression = currentProgression;
+        }
+
+        public float GetCurrentProgression()
+        {
+            return currentProgression;
         }
     }
 }
