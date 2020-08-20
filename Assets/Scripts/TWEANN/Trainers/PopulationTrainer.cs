@@ -2,7 +2,6 @@
 using Assets.Scripts.NeuralNet;
 using Assets.Scripts.TUtils.Utils;
 using System;
-using UnityEditor.Experimental.GraphView;
 
 namespace Assets.Scripts.TWEANN
 {
@@ -19,7 +18,7 @@ namespace Assets.Scripts.TWEANN
             predefinedGenotype = new Genotype();
             for (int i = 1; i < 6; i++)
             {
-                for (int j = 0; j < 3; j++)
+                for (int j = 1; j < 3; j++)
                 {
                     predefinedGenotype.AddLinkAndNodes(new LinkGene(new NodeGene(i, TMath.Tanh), new NodeGene(j, TMath.Tanh)));
                 }
