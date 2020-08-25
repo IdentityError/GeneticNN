@@ -64,6 +64,8 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual, IPooledObject
         {
             steering = (float)neuralNetOutput[0];
             throttle = (float)neuralNetOutput[1];
+            //if (throttle < 0)
+            //    EndIndividualSimulation();
         }
         if (steering > 0)
         {
@@ -146,7 +148,7 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual, IPooledObject
             else
             {
                 neuralNetInput[i] = 1F;
-                Debug.DrawRay(transform.position, sensesDirections[i] * length, Color.green);
+                Debug.DrawRay(transform.position, sensesDirections[i] * length, Color.red);
             }
         }
         neuralNetInput[neuralNet.GetGenotype().InputCount - 1] = throttle;
@@ -192,9 +194,9 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual, IPooledObject
 
     public double EvaluateFitnessFunction()
     {
-        float speedInfluence = populationManager.GetGenerationCount() / 2;
-        float distanceInfluence = 4F;
-        return (3F * (stats.averageThrottle + 1) * (stats.averageThrottle + 1)) + (distanceInfluence * stats.distance);
+        float speedInfluence = 5.25F;
+        float distanceInfluence = 4.25F;
+        return (speedInfluence * (stats.averageThrottle + 1) * (stats.averageThrottle + 1)) + (distanceInfluence * stats.distance);
     }
 
     public bool IsSimulating()

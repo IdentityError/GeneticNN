@@ -31,25 +31,30 @@ namespace Assets.Scripts.TWEANN
 
         public List<ISimulatingIndividual> populationList;
         private float averageThrottle = 1;
-        [SerializeField] private Biocenosis biocenosis;
-        [SerializeField] private EnabledOperators enabledOperators;
         private int currentSimulating;
         private Genotype fittestGenotype;
         private int generationCount = 0;
         private double generationMaxFitness = 0;
 
+        [SerializeField] private Biocenosis biocenosis;
+        [SerializeField] private EnabledOperators enabledOperators;
+        [Space(15)]
+        [SerializeField] private float timeScale = 1F;
+
         [Header("References")]
         [SerializeField] private GameObject individualPrefab;
+        [SerializeField] private Track track;
 
         [Header("Parameters")]
-        [SerializeField] private int initialPopulationNumber;
-
+        [SerializeField] private int populationNumber;
+        [SerializeField] private float maxMutationRate;
+        [SerializeField] private float minCrossoverRatio;
         [SerializeField] private float sharingThreshold;
-        private IEnumerator ShouldRestart_C;
+
+        private IEnumerator CheckSimStat_C;
         private bool simulating = false;
         private float simulationTime = 0;
-        [SerializeField] private float timeScale = 1F;
-        [SerializeField] private Track track;
+        private bool shouldRestart;
 
         private TrainerNEAT trainerNEAT;
 
@@ -71,6 +76,7 @@ namespace Assets.Scripts.TWEANN
             }
             currentSimulating = 0;
             SimulationEnded();
+            shouldRestart = false;
         }
 
         /// <summary>
@@ -112,7 +118,7 @@ namespace Assets.Scripts.TWEANN
         ///   Advance to the next generation with the following steps: <br> </br>
         ///   1. Speciation <br> </br>
         ///   2. Training <br> </br>
-        ///   3. Instantiate new population <br> </br>
+        ///   3. Substitute population <br> </br>
         /// </summary>
         private void AdvanceGeneration()
         {
@@ -126,44 +132,30 @@ namespace Assets.Scripts.TWEANN
             }
             operationsDescriptors.Clear();
 
-            //! Speciation
-            biocenosis.Speciate(populationList.ToArray());
-            //uiManager.AppendToLog("Current biocenosis: \n" + biocenosis.ToString());
+            IIndividual fittest = biocenosis.GetCurrentFittest();
+            uiManager.UpdateTextBox1("Generation: " + generationCount + "\nHighest fitness: " + fittest.ProvideRawFitness() + "\n" + "Average fitness: " + biocenosis.GetAverageFitness());
 
-            foreach (Species species in biocenosis.GetSpeciesList())
+            if (biocenosis.GetAverageFitness() >= 1400)
             {
-                IIndividual champ = species.GetChamp();
-                double maxFitness = champ.ProvideAdjustedFitness();
-                double averageFitness = species.GetAdjustedFitnessSum() / species.GetIndividualCount();
-                double value = 1D - ((maxFitness - averageFitness) / maxFitness);
-                species.SetMutationRate((float)(value));
-                //species.breedingParameters.crossoverProbability = 1 - species.breedingParameters.mutationProbability;
+                uiManager.AppendToLog("Goal fitness reached, generations needed: " + generationCount);
             }
-
-            ISimulatingIndividual fittest = GetFittest();
-            uiManager.UpdateTextBox1("Highest fitness: " + fittest.ProvideRawFitness() + "\n" + "Average fitness: " + biocenosis.GetAverageFitness());
-            //Debug.Log(fittest.ToString() + "\n" + fittest.ProvideNeuralNet().GetGenotype().ToString());
-            //uiManager.AppendToLog("Biocenosis:" + biocenosis.ToString());
-            //UpdateFittest(fittest.ProvideNeuralNet().GetGenotype(), fittest.ProvideFitness());
-            //breedingParameters.crossoverProbability = parameter;
-
-            // Retrieve a new trained Network population
+            //! Training
             Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, Genotype>[] pop = trainerNEAT.Train(biocenosis);
 
-            // Destroy all the objects
+            //! Substitute population
             foreach (ISimulatingIndividual individual in populationList)
             {
                 PoolManager.GetInstance().DeactivateObject(((MonoBehaviour)individual).gameObject);
             }
             populationList.Clear();
 
-            // Instantiate new population
             for (int i = 0; i < pop.Length; i++)
             {
                 ISimulatingIndividual childInd = InstantiateIndividual(new NeuralNetwork(pop[i].Item2), i.ToString());
                 populationList.Add(childInd);
                 operationsDescriptors.Add(new Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, IIndividual>(pop[i].Item1, childInd));
             }
+            biocenosis.Speciate(populationList.ToArray());
 
             generationCount++;
             currentSimulating = pop.Length;
@@ -172,61 +164,20 @@ namespace Assets.Scripts.TWEANN
             uiManager.UpdateGenerationCount(generationCount);
         }
 
-        private IEnumerator CheckAverageThrottle()
-        {
-            //TODO fix the problem that sometimes restarts too quickly
-            yield return new WaitForSeconds(1F);
-            while (true)
-            {
-                averageThrottle = 0;
-                float sum = 0;
-                foreach (ISimulatingIndividual individual in populationList)
-                {
-                    if (individual.IsSimulating())
-                    {
-                        sum += individual.ProvideSimulationStats().averageThrottle;
-                    }
-                }
-
-                averageThrottle = sum / initialPopulationNumber;
-                //Debug.Log(averageThrottle);
-                yield return new WaitForSeconds(2F);
-            }
-        }
-
-        private ISimulatingIndividual GetFittest()
-        {
-            double max = 0;
-            ISimulatingIndividual best = null;
-            foreach (ISimulatingIndividual individual in populationList)
-            {
-                if (individual.ProvideRawFitness() > max)
-                {
-                    best = individual;
-                    max = individual.ProvideRawFitness();
-                }
-            }
-            return best;
-        }
-
         /// <summary>
         ///   Initialize the first population, used only one time at the start
         /// </summary>
         private void InitializeAncestors()
         {
-            for (int i = 0; i < initialPopulationNumber; i++)
+            for (int i = 0; i < populationNumber; i++)
             {
                 populationList.Add(InstantiateIndividual(new NeuralNetwork(trainerNEAT.GetPredefinedGenotype()), i.ToString()));
             }
             generationCount++;
-            currentSimulating = initialPopulationNumber;
+            currentSimulating = populationNumber;
             GlobalParams.InitializeGlobalInnovationNumber(trainerNEAT.GetPredefinedGenotype());
-            //foreach (IIndividual ind in population)
-            //{
-            //    Debug.Log(ind.ProvideNeuralNet().GetGenotype().ToString());
-            //}
-            //StartCoroutine(ShouldRestart_C);
             simulating = true;
+            biocenosis.Speciate(populationList.ToArray());
         }
 
         /// <summary>
@@ -274,55 +225,49 @@ namespace Assets.Scripts.TWEANN
                 throw new System.Exception("There is no Crossover operator!");
             }
 
-            trainerNEAT = new TrainerNEAT(new Breeding(0.5F, 1F, crossoverOperators));
-
-            Debug.Log(trainerNEAT.breeding.crossoverOperators.Count);
+            trainerNEAT = new TrainerNEAT(new Breeding(0.5F, 1F, crossoverOperators), maxMutationRate, minCrossoverRatio);
 
             uiManager = FindObjectOfType<UIManager>();
             uiManager?.UpdateTrackLength(track.Length());
             //uiManager?.DrawNetUI(trainerProvider.ProvideTrainer().GetPredefinedTopologyDescriptor());
-            ShouldRestart_C = CheckAverageThrottle();
+            CheckSimStat_C = CheckSimulationState();
+            StartCoroutine(CheckSimStat_C);
             populationList = new List<ISimulatingIndividual>();
-            biocenosis = new Biocenosis(sharingThreshold, trainerNEAT.breeding.rates.crossoverRate, trainerNEAT.breeding.rates.mutationRate);
+            biocenosis = new Biocenosis(sharingThreshold);
             InitializeAncestors();
         }
 
         private void Update()
         {
             Time.timeScale = this.timeScale;
-            //if (simulating)
-            //{
-            //    simulationTime += Time.deltaTime;
-            //    if (simulationTime > 2.5F && averageThrottle < 0.016)
-            //    {
-            //        Debug.LogError("SHOULD");
-            //        ForceSimulationEnd();
-            //    }
-            //}
+            if (simulating)
+            {
+                simulationTime += Time.deltaTime;
+                if (simulationTime > 2.5F && shouldRestart)
+                {
+                    ForceSimulationEnd();
+                }
+            }
         }
 
-        private void UpdateFittest(Genotype candidate, double fitness)
+        private IEnumerator CheckSimulationState()
         {
-            //IndividualData newBest = null;
-            //SaveObject obj = TSaveManager.LoadPersistentData(TSaveManager.BEST_INDIVIDUAL);
-            //if (obj != null)
-            //{
-            //    IndividualData other = obj.GetData<IndividualData>();
-            //    if (other.GetFitness() < fitness)
-            //    {
-            //        uiManager?.AppendToLog("Updating current best");
-            //        newBest = new IndividualData(candidate, fitness);
-            //    }
-            //}
-            //else
-            //{
-            //    uiManager?.AppendToLog("Initializing first best individual");
-            //    newBest = new IndividualData(candidate, fitness);
-            //}
-            //if (newBest != null)
-            //{
-            //    TSaveManager.SavePersistentData(newBest, TSaveManager.BEST_INDIVIDUAL);
-            //}
+            while (true)
+            {
+                bool shouldRestartSim = true;
+                foreach (ISimulatingIndividual individual in populationList)
+                {
+                    if (individual.IsSimulating())
+                    {
+                        if (individual.ProvideSimulationStats().lastThrottle > 0.075)
+                        {
+                            shouldRestartSim = false;
+                        }
+                    }
+                }
+                shouldRestart = shouldRestartSim;
+                yield return new WaitForSeconds(2.5F);
+            }
         }
     }
 }

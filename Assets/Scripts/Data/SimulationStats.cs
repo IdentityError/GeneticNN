@@ -7,13 +7,14 @@ public class SimulationStats
     public float averageThrottle;
     public float distance;
     public float time;
+    public float lastThrottle;
     public string trackID;
 
     private int cycles;
     private Vector3 lastPosition;
     private float throttleSum;
 
-    public SimulationStats(string track)
+    private SimulationStats(string track)
     {
         this.trackID = track;
         cycles = 0;
@@ -25,6 +26,36 @@ public class SimulationStats
         this.averageThrottle = averageThrottle;
         this.time = time;
         this.distance = distance;
+        this.lastThrottle = 0;
+    }
+
+    /// <summary>
+    ///   Update the simulation stats, <b> Call this function every update cycle </b>
+    /// </summary>
+    /// <param name="throttle"> </param>
+    /// <param name="position"> </param>
+    public void Update(float throttle, Vector3 position)
+    {
+        if (cycles == 0)
+        {
+            lastPosition = position;
+        }
+
+        if (throttle > 0 && lastThrottle > 0)
+        {
+            distance += Vector3.Distance(position, lastPosition);
+        }
+
+        lastThrottle = throttle;
+        lastPosition = position;
+
+        time += Time.deltaTime;
+        cycles++;
+        throttleSum += throttle;
+        averageThrottle = throttleSum / cycles;
+        averageThrottle = averageThrottle < 0 ? 0 : averageThrottle;
+
+        lastPosition = position;
     }
 
     /// <summary>
@@ -62,32 +93,5 @@ public class SimulationStats
              "\nAverage throttle: " + averageThrottle +
              "\nTime: " + time +
              "\nDistance: " + distance;
-    }
-
-    /// <summary>
-    ///   Update the simulation stats, <b> Call this function every update cycle </b>
-    /// </summary>
-    /// <param name="throttle"> </param>
-    /// <param name="position"> </param>
-    public void Update(float throttle, Vector3 position)
-    {
-        if (cycles == 0)
-        {
-            lastPosition = position;
-        }
-
-        if (throttle > 0)
-        {
-            distance += Vector3.Distance(position, lastPosition);
-        }
-        lastPosition = position;
-
-        time += Time.deltaTime;
-        cycles++;
-        throttleSum += throttle;
-        averageThrottle = throttleSum / cycles;
-        averageThrottle = averageThrottle < 0 ? 0 : averageThrottle;
-
-        lastPosition = position;
     }
 }

@@ -9,13 +9,8 @@ namespace Assets.Scripts.TWEANN
         [SerializeField] private List<Species> speciesList;
         private float speciesSharingThreshold;
 
-        private float defaultCrossoverRate;
-        private float defaultMutationRate;
-
-        public Biocenosis(float speciesSharingThreshold, float defaultCrossoverRate, float defaultMutationRate)
+        public Biocenosis(float speciesSharingThreshold)
         {
-            this.defaultCrossoverRate = defaultCrossoverRate;
-            this.defaultMutationRate = defaultMutationRate;
             speciesList = new List<Species>();
             this.speciesSharingThreshold = speciesSharingThreshold;
         }
@@ -34,7 +29,7 @@ namespace Assets.Scripts.TWEANN
             {
                 AddToSpeciesOrCreate(population[i]);
             }
-            SetupSpecies();
+            //Debug.Log("Speciated: " + ToString());
 
             //foreach (IIndividual individual in population)
             //{
@@ -52,7 +47,7 @@ namespace Assets.Scripts.TWEANN
                     return;
                 }
             }
-            Species newSpecies = new Species(defaultMutationRate, defaultCrossoverRate);
+            Species newSpecies = new Species();
             newSpecies.AddToSpecies(individual);
             AddSpecies(newSpecies);
         }
@@ -68,7 +63,7 @@ namespace Assets.Scripts.TWEANN
         /// <summary>
         ///   Normalize the fitness within the species, adjust the species breeding parameters and set the expected species individual count
         /// </summary>
-        private void SetupSpecies()
+        public void AdjustSpecies()
         {
             foreach (Species species in speciesList)
             {
@@ -82,12 +77,11 @@ namespace Assets.Scripts.TWEANN
             {
                 sum += species.GetAdjustedFitnessSum();
             }
-
             double averageFitness = sum / GetTotalIndividualNumber();
-
             foreach (Species species in speciesList)
             {
-                species.SetNewExpectedIndividualCount(Mathf.RoundToInt((float)(species.GetAdjustedFitnessSum() / averageFitness)));
+                species.SetExpectedOffspringsCount(Mathf.RoundToInt((float)(species.GetAdjustedFitnessSum() / averageFitness)));
+                //Debug.Log("Species sum: " + species.GetAdjustedFitnessSum() + ", adj Sum: " + sum + ", avgFitness: " + averageFitness + ", Going form " + species.GetIndividualCount() + " to " + species.GetExpectedIndividualCount());
             }
             Purge();
         }
@@ -97,7 +91,7 @@ namespace Assets.Scripts.TWEANN
             int count = 0;
             foreach (Species species in speciesList)
             {
-                count += species.GetExpectedIndividualCount();
+                count += species.GetExpectedOffpringsCount();
             }
             return count;
         }
@@ -165,7 +159,7 @@ namespace Assets.Scripts.TWEANN
         /// </summary>
         private void Purge()
         {
-            speciesList.RemoveAll((current) => current.GetExpectedIndividualCount() == 0);
+            speciesList.RemoveAll((current) => current.GetExpectedOffpringsCount() <= 0);
         }
 
         public override string ToString()

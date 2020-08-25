@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Assets.Scripts.NeuralNet
@@ -38,6 +39,7 @@ namespace Assets.Scripts.NeuralNet
             {
                 outputs.Add(node.GetActivation());
             }
+
             return outputs;
         }
 

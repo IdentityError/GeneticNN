@@ -1,5 +1,4 @@
-﻿using Assets.Scripts.Descriptors;
-using Assets.Scripts.TUtils.Utils;
+﻿using Assets.Scripts.TUtils.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -136,7 +135,7 @@ namespace Assets.Scripts.NeuralNet
                 differenceSum += TMath.Abs((float)(current.Item1.GetWeight() - current.Item2.GetWeight()));
             }
             float averageDiff = differenceSum / zippedLinks.Count;
-            float c = 1F, c2 = 0.3F;
+            float c = 1F, c2 = 0.5F;
             //Debug.Log("current diff: " + (c * genesDifference) / maxGenomes + (c2 * averageDiff));
             return (c * genesDifference) / maxGenomes + (c2 * averageDiff);
         }

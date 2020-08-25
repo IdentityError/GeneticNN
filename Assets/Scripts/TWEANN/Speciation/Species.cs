@@ -7,25 +7,13 @@ namespace Assets.Scripts.TWEANN
     public class Species
     {
         [SerializeField] private int individualCount;
-        private int expectedIndividualCount;
+        private int expectedOffspringsCount;
         private List<IIndividual> individuals;
-        private IIndividual representative = null;
-        private bool initializated;
-
-        private float mutationRate;
-        private float crossoverRate;
-
-        public Species(float mutationRate, float crossoverRate) : this()
-        {
-            this.mutationRate = mutationRate;
-            this.crossoverRate = crossoverRate;
-        }
 
         public Species()
         {
             individuals = new List<IIndividual>();
             individualCount = 0;
-            initializated = false;
         }
 
         public bool Belongs(IIndividual genotype, float sharingThreshold)
@@ -34,22 +22,14 @@ namespace Assets.Scripts.TWEANN
             {
                 return true;
             }
-            if (!initializated)
-            {
-                return representative.ProvideNeuralNet().GetGenotype().GetTopologicalDistance(genotype.ProvideNeuralNet().GetGenotype()) < sharingThreshold;
-            }
             else
             {
-                return representative.ProvideNeuralNet().GetGenotype().GetTopologicalDistance(genotype.ProvideNeuralNet().GetGenotype()) < sharingThreshold && individualCount < expectedIndividualCount;
+                return individuals[UnityEngine.Random.Range(0, individualCount)].ProvideNeuralNet().GetGenotype().GetTopologicalDistance(genotype.ProvideNeuralNet().GetGenotype()) < sharingThreshold;
             }
         }
 
         public void AddToSpecies(IIndividual genotype)
         {
-            if (representative == null)
-            {
-                representative = genotype;
-            }
             individuals.Add(genotype);
             individualCount++;
         }
@@ -62,12 +42,6 @@ namespace Assets.Scripts.TWEANN
         public List<IIndividual> GetIndividuals()
         {
             return individuals;
-        }
-
-        public void SetNewExpectedIndividualCount(int expectedIndividualCount)
-        {
-            this.expectedIndividualCount = expectedIndividualCount;
-            initializated = true;
         }
 
         public double GetAdjustedFitnessSum()
@@ -93,12 +67,18 @@ namespace Assets.Scripts.TWEANN
         public void Reset()
         {
             individualCount = 0;
+            expectedOffspringsCount = 0;
             individuals.Clear();
         }
 
-        public int GetExpectedIndividualCount()
+        public void SetExpectedOffspringsCount(int expectedOffspringsCount)
         {
-            return expectedIndividualCount;
+            this.expectedOffspringsCount = expectedOffspringsCount;
+        }
+
+        public int GetExpectedOffpringsCount()
+        {
+            return expectedOffspringsCount;
         }
 
         public IIndividual GetChamp()
@@ -107,33 +87,18 @@ namespace Assets.Scripts.TWEANN
             IIndividual best = null;
             foreach (IIndividual individual in individuals)
             {
-                if (maxFitness <= individual.ProvideAdjustedFitness())
+                if (maxFitness <= individual.ProvideRawFitness())
                 {
-                    maxFitness = individual.ProvideAdjustedFitness();
+                    maxFitness = individual.ProvideRawFitness();
                     best = individual;
                 }
             }
             return best;
         }
 
-        public void SetMutationRate(float mutationRate)
+        public override string ToString()
         {
-            this.mutationRate = mutationRate;
-        }
-
-        public float GetMutationRate()
-        {
-            return mutationRate;
-        }
-
-        public void SetCrossoverRate(float crossoverRate)
-        {
-            this.crossoverRate = crossoverRate;
-        }
-
-        public float GetCrossoverRate()
-        {
-            return crossoverRate;
+            return "Count: " + individualCount + ", Expected count: " + expectedOffspringsCount;
         }
     }
 }

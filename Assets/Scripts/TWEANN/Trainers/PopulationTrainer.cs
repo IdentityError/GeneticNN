@@ -16,13 +16,38 @@ namespace Assets.Scripts.TWEANN
         public Genotype GetPredefinedGenotype()
         {
             predefinedGenotype = new Genotype();
-            for (int i = 1; i < 6; i++)
+            for (int i = 0; i < 7; i++)
             {
-                for (int j = 1; j < 3; j++)
+                NodeGene newNode = new NodeGene(-i - 1, TMath.Tanh);
+                if (i < 5)
                 {
-                    predefinedGenotype.AddLinkAndNodes(new LinkGene(new NodeGene(i, TMath.Tanh), new NodeGene(j, TMath.Tanh)));
+                    newNode.SetType(NodeType.INPUT);
+                }
+                else if (i > 7 - 2 - 1)
+                {
+                    newNode.SetType(NodeType.OUTPUT);
+                }
+                predefinedGenotype.AddNode(newNode);
+            }
+
+            int inn = 0;
+            foreach (NodeGene input in predefinedGenotype.inputs)
+            {
+                foreach (NodeGene output in predefinedGenotype.outputs)
+                {
+                    predefinedGenotype.AddLinkAndNodes(new LinkGene(input, output, UnityEngine.Random.Range(-1F, 1F), inn++));
                 }
             }
+
+            //for (int i = 1; i < 6; i++)
+            //{
+            //    NodeGene from = new NodeGene(-i, TMath.Tanh, NodeType.INPUT);
+            //    for (int j = 6; j < 8; j++)
+            //    {
+            //        NodeGene to = new NodeGene(-j, TMath.Tanh, NodeType.OUTPUT);
+            //        predefinedGenotype.AddLinkAndNodes(new LinkGene(from, to, UnityEngine.Random.Range(-1F, 1F)));
+            //    }
+            //}
             //for (int i = 1; i < descriptor.inputCount + 1; i++)
             //{
             //    for (int j = descriptor.inputCount + 1; j < descriptor.inputCount + 1 + descriptor.outputCount; j++)

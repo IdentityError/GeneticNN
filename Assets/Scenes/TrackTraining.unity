@@ -362,7 +362,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 1.9534e-41, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 0, y: 2.0476e-41, z: 0, w: 4.90625}
   m_UseBoundingSphereOverride: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
@@ -621,13 +621,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1994164753}
-  m_LocalRotation: {x: 0.42261827, y: 0, z: 0, w: 0.9063079}
-  m_LocalPosition: {x: 0, y: 30, z: -10}
+  m_LocalRotation: {x: 0.29883623, y: -0.64085644, z: 0.29883623, w: 0.64085644}
+  m_LocalPosition: {x: 35, y: 60, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 50, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 50, y: -90, z: 0}
 --- !u!114 &1994164757
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -906,6 +906,11 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.x
       value: -650
       objectReference: {fileID: 0}
+    - target: {fileID: 4514718875247420195, guid: 1a35ae9d94187dd4b80b70e89813f56d,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4514718875459923201, guid: 1a35ae9d94187dd4b80b70e89813f56d,
         type: 3}
       propertyPath: m_SizeDelta.y
@@ -1105,15 +1110,17 @@ MonoBehaviour:
     speciesList: []
   enabledOperators:
     uniformEnabled: 1
-    singlePointEnabled: 0
+    singlePointEnabled: 1
     kPointEnabled: 1
-    averageEnabled: 0
+    averageEnabled: 1
+  timeScale: 2
   individualPrefab: {fileID: 6791551976333570425, guid: dda260aae5911af48a27564e8179e873,
     type: 3}
-  initialPopulationNumber: 150
-  sharingThreshold: 1
-  timeScale: 1
   track: {fileID: 2111517136}
+  populationNumber: 200
+  maxMutationRate: 0.725
+  minCrossoverRatio: 0.025
+  sharingThreshold: 0.75
 --- !u!114 &6509384906705858488
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1132,5 +1139,5 @@ MonoBehaviour:
     - tag: prefab
       prefab: {fileID: 6791551976333570425, guid: dda260aae5911af48a27564e8179e873,
         type: 3}
-      poolSize: 500
+      poolSize: 600
       spawnProbability: 0
