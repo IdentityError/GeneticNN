@@ -1,5 +1,4 @@
-﻿using Assets.Scripts.NeuralNet;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
@@ -10,7 +9,6 @@ public class UIManager : MonoBehaviour
     public Text savedBestTrackStats = null;
     public Text trackLengthText = null;
     private ScrollRect scroll;
-    private UINetBuilder uiNetBuilder;
 
     public void AppendToLog(string text)
     {
@@ -34,11 +32,6 @@ public class UIManager : MonoBehaviour
         {
             scroll.velocity = new Vector2(0f, -5000f);
         }
-    }
-
-    public void DrawNetUI(Genotype topology)
-    {
-        uiNetBuilder?.DrawNetUI(topology);
     }
 
     public void UpdateGenerationCount(int count)
@@ -67,7 +60,6 @@ public class UIManager : MonoBehaviour
 
     private void Awake()
     {
-        uiNetBuilder = FindObjectOfType<UINetBuilder>();
         scroll = gameObject.GetComponentInChildren<ScrollRect>();
     }
 }

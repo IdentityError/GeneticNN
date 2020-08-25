@@ -1,10 +1,10 @@
-﻿using Assets.Scripts.NeuralNet;
+﻿using Assets.Scripts.CustomBehaviour;
+using Assets.Scripts.MachineLearning.TWEANN;
 using Assets.Scripts.TUtils.ObjectPooling;
 using Assets.Scripts.TUtils.Utils;
-using Assets.Scripts.TWEANN;
 using UnityEngine;
 
-public class CarIndividual : MonoBehaviour, ISimulatingIndividual, IPooledObject
+public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject
 {
     //endedSimulation is set as true and never set as false again, maybe some error when copying arrays or resetting them, think about returning a fresh new population of Genotype on the train method
 
@@ -41,11 +41,6 @@ public class CarIndividual : MonoBehaviour, ISimulatingIndividual, IPooledObject
     private PopulationManager populationManager;
     private new Rigidbody rigidbody;
     private Vector3[] sensesDirections;
-
-    public IndividualData GetIndividualData()
-    {
-        return new IndividualData(neuralNet.GetGenotype(), ProvideAdjustedFitness());
-    }
 
     private void EndIndividualSimulation()
     {

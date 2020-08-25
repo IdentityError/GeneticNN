@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.TWEANN;
+﻿using Assets.Scripts.MachineLearning.TWEANN;
 using UnityEngine;
 
 public class InputManager : MonoBehaviour
