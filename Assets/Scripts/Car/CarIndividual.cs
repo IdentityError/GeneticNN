@@ -2,6 +2,7 @@
 using Assets.Scripts.MachineLearning.TWEANN;
 using Assets.Scripts.TUtils.ObjectPooling;
 using Assets.Scripts.TUtils.Utils;
+using System;
 using UnityEngine;
 
 public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject
@@ -162,7 +163,7 @@ public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject
 
         if (populationManager != null)
         {
-            stats.trackID = populationManager.GetTrack().GetId();
+            stats.track = populationManager.GetTrack();
         }
     }
 
@@ -189,9 +190,8 @@ public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject
 
     public double EvaluateFitnessFunction()
     {
-        float speedInfluence = 5.25F;
-        float distanceInfluence = 4.25F;
-        return (speedInfluence * (stats.averageThrottle + 1) * (stats.averageThrottle + 1)) + (distanceInfluence * stats.distance);
+        float length = populationManager.GetTrack().Length();
+        return 3D * (stats.distance) * Math.Pow(stats.averageThrottle + 1D, stats.distance / length);
     }
 
     public bool IsSimulating()

@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.TUtils.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Assets.Scripts.MachineLearning.TWEANN
@@ -173,7 +174,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                 AddNode(newNode);
                 AddLinkAndNodes(newLink);
             }
-            if (UnityEngine.Random.Range(0F, 1F) < mutationRate)
+            else if (UnityEngine.Random.Range(0F, 1F) < mutationRate)
             {
                 // Create a list of all nodes except the output nodes and select the random From node
                 List<NodeGene> temp = new List<NodeGene>(inputs);
@@ -209,7 +210,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             // For each link of this genotype try to mutate it
             foreach (LinkGene gene in links)
             {
-                if (UnityEngine.Random.Range(0F, 1F) < (mutationRate / links.Count))
+                if (UnityEngine.Random.Range(0F, 1F) < ((float)NodeCount / LinkCount * (mutationRate)))
                 {
                     int random = UnityEngine.Random.Range(0, LinkCount);
                     links[random].SetWeight(UnityEngine.Random.Range(-1F, 1F));

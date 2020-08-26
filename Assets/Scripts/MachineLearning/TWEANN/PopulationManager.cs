@@ -3,6 +3,7 @@ using Assets.Scripts.TUtils.ObjectPooling;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Assets.Scripts.MachineLearning.TWEANN
@@ -27,11 +28,8 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         }
 
         public List<ISimulatingOrganism> populationList;
-        private float averageThrottle = 1;
         private int currentSimulating;
-        private Genotype fittestGenotype;
         private int generationCount = 0;
-        private double generationMaxFitness = 0;
 
         [SerializeField] private Biocenosis biocenosis;
         [SerializeField] private EnabledOperators enabledOperators;
@@ -43,15 +41,21 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         [SerializeField] private Track track;
 
         [Header("Parameters")]
+        [Tooltip("Number of the population")]
         [SerializeField] private int populationNumber;
+        [Tooltip("Max value for the mutation rate")]
         [SerializeField] private float maxMutationRate;
+        [Tooltip("Minumum crossover ratio for a crossover operator")]
         [SerializeField] private float minCrossoverRatio;
+        [Tooltip("Top percentage of population in each species selected for breeding")]
+        [SerializeField] private float matingRatio;
+        [Tooltip("Topological distance threshold for speciation")]
         [SerializeField] private float sharingThreshold;
 
         private IEnumerator CheckSimStat_C;
         private bool simulating = false;
         private float simulationTime = 0;
-        private bool shouldRestart;
+        private bool shouldRestart = false;
 
         private TrainerNEAT trainerNEAT;
 
@@ -130,11 +134,23 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             operationsDescriptors.Clear();
 
             IOrganism fittest = biocenosis.GetCurrentFittest();
-            uiManager.UpdateTextBox1("Generation: " + generationCount + "\nHighest fitness: " + fittest.ProvideRawFitness() + "\n" + "Average fitness: " + biocenosis.GetAverageFitness());
+            uiManager.UpdateTextBox1("Generation: " + generationCount + "\nHighest fitness: " + ((MonoBehaviour)fittest).gameObject.name + ", " + fittest.ProvideRawFitness() + "\n" + "Average fitness: " + biocenosis.GetAverageFitness());
 
-            if (biocenosis.GetAverageFitness() >= 1400)
+            populationList = populationList.OrderByDescending(x => x.ProvideRawFitness()).ToList();
+            List<ISimulatingOrganism> subList = populationList.GetRange(0, populationNumber / 2);
+            bool converged = true;
+            foreach (IOrganism organism in subList)
             {
-                uiManager.AppendToLog("Goal fitness reached, generations needed: " + generationCount);
+                if (organism.ProvideRawFitness() < 1900)
+                {
+                    converged = false;
+                    break;
+                }
+            }
+
+            if (converged)
+            {
+                uiManager.AppendToLog("50% of the population has converged to 95% of the max achievable fitness in " + generationCount + " generations");
             }
             //! Training
             Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, Genotype>[] pop = trainerNEAT.Train(biocenosis);
@@ -157,7 +173,6 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             generationCount++;
             currentSimulating = pop.Length;
             simulating = true;
-            averageThrottle = 1;
             uiManager.UpdateGenerationCount(generationCount);
         }
 
@@ -205,7 +220,6 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         {
             simulating = false;
             simulationTime = 0;
-            generationMaxFitness = 0;
             AdvanceGeneration();
         }
 
@@ -222,7 +236,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                 throw new System.Exception("There is no Crossover operator!");
             }
 
-            trainerNEAT = new TrainerNEAT(new Breeding(0.5F, 1F, crossoverOperators), maxMutationRate, minCrossoverRatio);
+            trainerNEAT = new TrainerNEAT(new CrossoverOperatorsWrapper(crossoverOperators), maxMutationRate, minCrossoverRatio, matingRatio, 6F * track.Length());
 
             uiManager = FindObjectOfType<UIManager>();
             uiManager?.UpdateTrackLength(track.Length());
@@ -249,6 +263,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
 
         private IEnumerator CheckSimulationState()
         {
+            yield return new WaitForSeconds(2.5F);
             while (true)
             {
                 bool shouldRestartSim = true;

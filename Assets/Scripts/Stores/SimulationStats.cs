@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assets.Scripts.CustomBehaviour;
+using System;
 using UnityEngine;
 
 [System.Serializable]
@@ -8,20 +9,20 @@ public class SimulationStats
     public float distance;
     public float time;
     public float lastThrottle;
-    public string trackID;
+    public Track track;
 
     private int cycles;
     private Vector3 lastPosition;
     private float throttleSum;
 
-    private SimulationStats(string track)
+    private SimulationStats(Track track)
     {
-        this.trackID = track;
+        this.track = track;
         cycles = 0;
         throttleSum = 0F;
     }
 
-    public SimulationStats(float averageThrottle, float time, float distance, string track) : this(track)
+    public SimulationStats(float averageThrottle, float time, float distance, Track track) : this(track)
     {
         this.averageThrottle = averageThrottle;
         this.time = time;
@@ -46,6 +47,7 @@ public class SimulationStats
             distance += Vector3.Distance(position, lastPosition);
         }
 
+        distance = distance > track.Length() ? track.Length() : distance;
         lastThrottle = throttle;
         lastPosition = position;
 
@@ -89,7 +91,7 @@ public class SimulationStats
     /// <returns> </returns>
     public override string ToString()
     {
-        return "Track: " + trackID +
+        return "Track: " + track +
              "\nAverage throttle: " + averageThrottle +
              "\nTime: " + time +
              "\nDistance: " + distance;

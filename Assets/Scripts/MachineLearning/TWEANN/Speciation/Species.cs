@@ -8,7 +8,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
     {
         [SerializeField] private int individualCount;
         private int expectedOffspringsCount;
-        private List<IOrganism> individuals;
+        [HideInInspector] public List<IOrganism> individuals;
 
         public Species()
         {

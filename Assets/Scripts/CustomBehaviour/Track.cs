@@ -34,7 +34,7 @@ namespace Assets.Scripts.CustomBehaviour
             {
                 if (child.tag.Equals("TrackPart"))
                 {
-                    length += child.localScale.z * 30;
+                    length += child.localScale.z * 31;
                 }
             }
             length -= TMath.Abs((finishLine.transform.localPosition - startPoint.localPosition).magnitude);

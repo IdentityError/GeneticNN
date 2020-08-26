@@ -1114,14 +1114,15 @@ MonoBehaviour:
     singlePointEnabled: 1
     kPointEnabled: 1
     averageEnabled: 1
-  timeScale: 2
+  timeScale: 3
   individualPrefab: {fileID: 6791551976333570425, guid: dda260aae5911af48a27564e8179e873,
     type: 3}
   track: {fileID: 2111517136}
   populationNumber: 200
-  maxMutationRate: 0.725
+  maxMutationRate: 0.65
   minCrossoverRatio: 0.025
-  sharingThreshold: 0.75
+  matingRatio: 0.1
+  sharingThreshold: 0.7
 --- !u!114 &6509384906705858488
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -5,22 +5,8 @@ using System.Collections.Generic;
 namespace Assets.Scripts.MachineLearning.TWEANN
 {
     [System.Serializable]
-    public class Breeding
+    public class CrossoverOperatorsWrapper
     {
-        [System.Serializable]
-        public struct BreedingRates
-        {
-            public float mutationRate;
-            public float crossoverRate;
-
-            public BreedingRates(float mutationProbability, float crossoverProbability)
-            {
-                this.mutationRate = mutationProbability;
-                this.crossoverRate = crossoverProbability;
-            }
-        }
-
-        public BreedingRates rates;
         public List<CrossoverOperator> crossoverOperators;
 
         public int OperatorsCount
@@ -28,9 +14,8 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             get => crossoverOperators.Count;
         }
 
-        public Breeding(float mutationRate, float crossoverRate, List<CrossoverOperator> operators)
+        public CrossoverOperatorsWrapper(List<CrossoverOperator> operators)
         {
-            rates = new BreedingRates(mutationRate, crossoverRate);
             crossoverOperators = new List<CrossoverOperator>();
             for (int i = 0; i < operators.Count; i++)
             {
@@ -39,9 +24,9 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             }
         }
 
-        public Breeding Copy()
+        public CrossoverOperatorsWrapper Copy()
         {
-            return new Breeding(rates.mutationRate, rates.crossoverRate, this.crossoverOperators);
+            return new CrossoverOperatorsWrapper(this.crossoverOperators);
         }
 
         public CrossoverOperator GetRandomOperator()

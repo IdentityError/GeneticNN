@@ -11,46 +11,65 @@ namespace Assets.Scripts.MachineLearning.TWEANN
     {
         private float maxMutationRate;
         private float minCrossoverRatio;
+        private float matingRatio;
+        private float maxAchievableFitness;
 
-        public Breeding breeding;
+        public CrossoverOperatorsWrapper operatorsWrapper;
 
-        public TrainerNEAT(Breeding breeding, float maxMutationRate, float minCrossoverRatio)
+        public TrainerNEAT(CrossoverOperatorsWrapper breeding, float maxMutationRate, float minCrossoverRatio, float matingRatio, float maxAchievableFitness)
         {
-            this.breeding = breeding;
+            this.operatorsWrapper = breeding;
             this.maxMutationRate = maxMutationRate;
             this.minCrossoverRatio = minCrossoverRatio;
+            this.matingRatio = matingRatio;
+            this.maxAchievableFitness = maxAchievableFitness;
         }
 
         public override Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, Genotype>[] Train(Biocenosis biocenosis)
         {
+            // Reset the generation mutations list
             GlobalParams.ResetGenerationMutations();
 
-            double maxFitness = biocenosis.GetCurrentFittest().ProvideRawFitness();
-            double averageFitness = biocenosis.GetAverageFitness();
-            breeding.rates.mutationRate = (float)(maxMutationRate * ((averageFitness / maxFitness))); //Could be a power here
-            Debug.Log("AVG: " + averageFitness + ", MAX: " + maxFitness);
-            Debug.Log("M: " + breeding.rates.mutationRate + ", C: " + breeding.rates.crossoverRate);
-
+            // Adjust species offprings' numbers
             biocenosis.AdjustSpecies();
 
             int expectedIndividualCount = biocenosis.GetExpectedIndividualNumber();
+            // Array containing each new genotype and the crossover operation used for each
             Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, Genotype>[] pop = new Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, Genotype>[expectedIndividualCount];
+
             CrossoverOperator operatorToApply = null;
             int currentIndex = 0;
 
             foreach (Species current in biocenosis.GetSpeciesList())
             {
-                (IOrganism, IOrganism) parents = SelectionFromSpecies(current);
+                // Dynamically set the mutation rate for the current species
+                double maxFitness = current.GetChamp().ProvideRawFitness();
+                double averageFitness = current.GetRawFitnessSum() / current.GetIndividualCount();
+                float mutationRate = (float)(maxMutationRate * Math.Pow((averageFitness / maxFitness), 1.5D));
+                mutationRate *= (1F - (float)(averageFitness / maxAchievableFitness));
+                Debug.Log("AVG: " + averageFitness + ", MAX: " + maxFitness);
+                Debug.Log("M: " + mutationRate + ", C: " + 1);
+
+                // Order the individuals based on their fitnesses
+                current.individuals = current.individuals.OrderByDescending(x => x.ProvideRawFitness()).ToList();
+
+                // Select the top two organisms
+                (IOrganism, IOrganism) parents = SelectParents(current.individuals);
+
+                // Create a number of offsprings as expected by the species
                 for (int i = 0; i < current.GetExpectedOffpringsCount(); i++)
                 {
                     Genotype childGen = null;
-                    if (UnityEngine.Random.Range(0F, 1F) <= breeding.rates.crossoverRate)
+                    if (UnityEngine.Random.Range(0F, 1F) <= 1)
                     {
-                        operatorToApply = breeding.GetRandomOperator();
+                        // Retrieve a random available crossover operator
+                        operatorToApply = operatorsWrapper.GetRandomOperator();
+                        // Apply crossover operator
                         childGen = operatorToApply.Apply(parents.Item1, parents.Item2);
                     }
                     else
                     {
+                        // If not applying crossover, copy the genotype of the fittest parent (reinserting the same individual in the new population)
                         if (parents.Item1.ProvideRawFitness() > parents.Item2.ProvideRawFitness())
                         {
                             childGen = parents.Item1.ProvideNeuralNet().GetGenotype();
@@ -61,12 +80,13 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                         }
                     }
 
-                    childGen.Mutate(breeding.rates.mutationRate);
+                    // Mutate the child genotype based on the dynamic mutation rate
+                    childGen.Mutate(mutationRate);
 
+                    // Add the currently created genotype and its crossover operation descriptor to the array
                     pop[currentIndex] = new Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, Genotype>(
                         new DescriptorsWrapper.CrossoverOperationDescriptor(parents.Item1.ProvideRawFitness(), parents.Item2.ProvideRawFitness(), operatorToApply),
                         childGen);
-                    //Debug.Log("Child: " + childGen.ToString());
                     currentIndex++;
                 }
             }
@@ -74,45 +94,10 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             return pop;
         }
 
-        /// <summary>
-        ///   Pick the 2 fittest individuals in the species, if the species has only 1 member, it returns the member (duplicate)
-        /// </summary>
-        /// <param name="species"> </param>
-        /// <returns> </returns>
-        private (IOrganism, IOrganism) PickFittestTwoInSpecies(Species species)
+        public List<IOrganism> GetMatingSubPopulationInSpecies(Species species, float percentage)
         {
-            IOrganism first = null;
-            double firstFitness = -1F;
-            foreach (IOrganism car in species.GetIndividuals())
-            {
-                if (car.ProvideAdjustedFitness() > firstFitness)
-                {
-                    first = car;
-                    firstFitness = car.ProvideAdjustedFitness();
-                }
-            }
-            double secondFitness = -1F;
-            IOrganism second = null;
-            foreach (IOrganism car in species.GetIndividuals())
-            {
-                if (car.ProvideAdjustedFitness() > secondFitness)
-                {
-                    if (species.GetIndividualCount() > 1)
-                    {
-                        if (car != first)
-                        {
-                            second = car;
-                            secondFitness = car.ProvideAdjustedFitness();
-                        }
-                    }
-                    else
-                    {
-                        second = car;
-                        secondFitness = car.ProvideAdjustedFitness();
-                    }
-                }
-            }
-            return (first, second);
+            int number = Mathf.CeilToInt(percentage * species.GetIndividualCount());
+            return species.individuals.GetRange(0, number);
         }
 
         /// <summary>
@@ -120,17 +105,21 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         /// </summary>
         /// <param name="species"> </param>
         /// <returns> </returns>
-        private (IOrganism, IOrganism) SelectionFromSpecies(Species species)
+        private (IOrganism, IOrganism) SelectParents(List<IOrganism> organisms)
         {
-            if (species.GetIndividualCount() == 1)
+            if (organisms.Count == 1)
             {
-                IOrganism champ = species.GetChamp();
-                return (champ, champ);
+                IOrganism org = organisms[0];
+                return (org, org);
             }
-            else if (species.GetIndividualCount() > 1)
+            else if (organisms.Count > 1)
             {
-                //Debug.Log("Returning 2 ");
-                return PickFittestTwoInSpecies(species);
+                return (organisms[0], organisms[1]);
+                //int firstIndex = UnityEngine.Random.Range(0, organisms.Count);
+                //IOrganism first = organisms.ElementAt(firstIndex);
+                //organisms.RemoveAt(firstIndex);
+                //IOrganism second = organisms.ElementAt(UnityEngine.Random.Range(0, organisms.Count));
+                //return (first, second);
             }
             else
             {
@@ -188,32 +177,32 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             //Debug.Log("SUM: " + total);
             //Debug.Log("SPC: " + singlePointSum + "UC: " + uniformSum + "KPC:" + kPointSum + "AVGC: " + avgSum);
 
-            UniformCrossoverOperator uniformCrossoverOp = breeding.GetOperatorOfType<UniformCrossoverOperator>();
-            SinglePointCrossover singleCrossoverOp = breeding.GetOperatorOfType<SinglePointCrossover>();
-            KPointsCrossoverOperator kPointsCrossoverOp = breeding.GetOperatorOfType<KPointsCrossoverOperator>();
-            AverageCrossoverOperator averageCrossoverOp = breeding.GetOperatorOfType<AverageCrossoverOperator>();
+            UniformCrossoverOperator uniformCrossoverOp = operatorsWrapper.GetOperatorOfType<UniformCrossoverOperator>();
+            SinglePointCrossover singleCrossoverOp = operatorsWrapper.GetOperatorOfType<SinglePointCrossover>();
+            KPointsCrossoverOperator kPointsCrossoverOp = operatorsWrapper.GetOperatorOfType<KPointsCrossoverOperator>();
+            AverageCrossoverOperator averageCrossoverOp = operatorsWrapper.GetOperatorOfType<AverageCrossoverOperator>();
 
             uniformCrossoverOp?.SetCurrentProgression((float)uniformSum);
             singleCrossoverOp?.SetCurrentProgression((float)singlePointSum);
             kPointsCrossoverOp?.SetCurrentProgression((float)kPointSum);
             averageCrossoverOp?.SetCurrentProgression((float)avgSum);
 
-            uniformCrossoverOp?.SetSelectProbability((float)(uniformSum / total * (1 - breeding.OperatorsCount * minCrossoverRatio) + minCrossoverRatio));
-            singleCrossoverOp?.SetSelectProbability((float)(singlePointSum / total * (1 - breeding.OperatorsCount * minCrossoverRatio) + minCrossoverRatio));
-            kPointsCrossoverOp?.SetSelectProbability((float)(kPointSum / total * (1 - breeding.OperatorsCount * minCrossoverRatio) + minCrossoverRatio));
-            averageCrossoverOp?.SetSelectProbability((float)(avgSum / total * (1 - breeding.OperatorsCount * minCrossoverRatio) + minCrossoverRatio));
+            uniformCrossoverOp?.SetSelectProbability((float)(uniformSum / total * (1 - operatorsWrapper.OperatorsCount * minCrossoverRatio) + minCrossoverRatio));
+            singleCrossoverOp?.SetSelectProbability((float)(singlePointSum / total * (1 - operatorsWrapper.OperatorsCount * minCrossoverRatio) + minCrossoverRatio));
+            kPointsCrossoverOp?.SetSelectProbability((float)(kPointSum / total * (1 - operatorsWrapper.OperatorsCount * minCrossoverRatio) + minCrossoverRatio));
+            averageCrossoverOp?.SetSelectProbability((float)(avgSum / total * (1 - operatorsWrapper.OperatorsCount * minCrossoverRatio) + minCrossoverRatio));
 
             //Debug.Log("SP: " + uniformSum + "U: " + uniformSum + "KP:" + kPointSum + "AVG: " + avgSum);
-            breeding.crossoverOperators = breeding.crossoverOperators.OrderByDescending(x => x.GetCurrentProgression()).ToList();
+            operatorsWrapper.crossoverOperators = operatorsWrapper.crossoverOperators.OrderByDescending(x => x.GetCurrentProgression()).ToList();
             string rank = "Operators ranking\n";
-            foreach (CrossoverOperator @operator in breeding.crossoverOperators)
+            foreach (CrossoverOperator @operator in operatorsWrapper.crossoverOperators)
             {
                 rank += @operator.ToString() + "\n";
             }
             //Debug.Log(rank);
 
             rank = "Operators probabilities\n";
-            foreach (CrossoverOperator @operator in breeding.crossoverOperators)
+            foreach (CrossoverOperator @operator in operatorsWrapper.crossoverOperators)
             {
                 rank += @operator.ToString() + ", " + @operator.ProvideSelectProbability() + "\n";
             }
