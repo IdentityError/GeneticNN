@@ -45,7 +45,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                 // Dynamically set the mutation rate for the current species
                 double maxFitness = current.GetChamp().ProvideRawFitness();
                 double averageFitness = current.GetRawFitnessSum() / current.GetIndividualCount();
-                float mutationRate = (float)(maxMutationRate * Math.Pow((averageFitness / maxFitness), 1.5D));
+                float mutationRate = (float)(maxMutationRate * Math.Pow((averageFitness / maxFitness), 2.5D));
                 mutationRate *= (1F - (float)(averageFitness / maxAchievableFitness));
                 Debug.Log("AVG: " + averageFitness + ", MAX: " + maxFitness);
                 Debug.Log("M: " + mutationRate + ", C: " + 1);

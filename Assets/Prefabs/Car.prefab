@@ -122,13 +122,14 @@ MonoBehaviour:
   lastPosition: {x: 17.1, y: 0.8, z: 0}
   length: 10
   manualControl: 0
-  motorPower: 58000
+  motorPower: 50000
   rearTrack: 1.75
   stats:
     averageThrottle: 0.13547012
     distance: 525.11066
     time: 26.743643
-    trackID: Track02
+    lastThrottle: 0
+    track: {fileID: 0}
   steering: 0
   steeringPower: 4250
   throttle: 0
@@ -141,6 +142,7 @@ MonoBehaviour:
   - {fileID: 6791551976658705091}
   endedSimulation: 1
   fitness: 0
+  rawFitness: 0
   netInitialized: 0
 --- !u!1 &6791551976658705101
 GameObject:

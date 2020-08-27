@@ -43,12 +43,6 @@ public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject
     private new Rigidbody rigidbody;
     private Vector3[] sensesDirections;
 
-    private void EndIndividualSimulation()
-    {
-        StopSimulating();
-        populationManager?.IndividualEndedSimulation(this);
-    }
-
     private void ManageWheels()
     {
         if (manualControl)
@@ -97,7 +91,8 @@ public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject
     {
         if (!endedSimulation)
         {
-            EndIndividualSimulation();
+            StopSimulating();
+            populationManager?.IndividualEndedSimulation(this);
         }
     }
 
@@ -105,7 +100,16 @@ public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject
     {
         if (other.tag.Equals("FinishLine"))
         {
-            EndIndividualSimulation();
+            StopSimulating();
+
+            if (throttle > 0)
+            {
+                populationManager?.IndividualCompletedTrack(this);
+            }
+            else
+            {
+                populationManager?.IndividualEndedSimulation(this);
+            }
         }
     }
 

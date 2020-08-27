@@ -1119,7 +1119,7 @@ MonoBehaviour:
     type: 3}
   track: {fileID: 2111517136}
   populationNumber: 200
-  maxMutationRate: 0.65
+  maxMutationRate: 0.325
   minCrossoverRatio: 0.025
   matingRatio: 0.1
   sharingThreshold: 0.7

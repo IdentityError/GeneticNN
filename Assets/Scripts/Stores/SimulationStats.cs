@@ -42,10 +42,7 @@ public class SimulationStats
             lastPosition = position;
         }
 
-        if (throttle > 0 && lastThrottle > 0)
-        {
-            distance += Vector3.Distance(position, lastPosition);
-        }
+        distance = throttle > 0 ? distance + Vector3.Distance(position, lastPosition) : distance - Vector3.Distance(position, lastPosition);
 
         distance = distance > track.Length() ? track.Length() : distance;
         lastThrottle = throttle;

@@ -56,6 +56,8 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         private bool simulating = false;
         private float simulationTime = 0;
         private bool shouldRestart = false;
+        private int completedSimulationCount = 0;
+        private bool completedTrack = false;
 
         private TrainerNEAT trainerNEAT;
 
@@ -115,6 +117,12 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             }
         }
 
+        public void IndividualCompletedTrack(ISimulatingOrganism organism)
+        {
+            completedSimulationCount++;
+            IndividualEndedSimulation(organism);
+        }
+
         /// <summary>
         ///   Advance to the next generation with the following steps: <br> </br>
         ///   1. Speciation <br> </br>
@@ -134,7 +142,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             operationsDescriptors.Clear();
 
             IOrganism fittest = biocenosis.GetCurrentFittest();
-            uiManager.UpdateTextBox1("Generation: " + generationCount + "\nHighest fitness: " + ((MonoBehaviour)fittest).gameObject.name + ", " + fittest.ProvideRawFitness() + "\n" + "Average fitness: " + biocenosis.GetAverageFitness());
+            uiManager.UpdateTextBox1("Generation: " + generationCount + "\nHighest fitness: " + ((MonoBehaviour)fittest).gameObject.name + ", " + fittest.ProvideRawFitness() + "\n" + "Average fitness: " + biocenosis.GetAverageFitness() + "\nCT: " + completedSimulationCount);
 
             populationList = populationList.OrderByDescending(x => x.ProvideRawFitness()).ToList();
             List<ISimulatingOrganism> subList = populationList.GetRange(0, populationNumber / 2);
@@ -151,6 +159,12 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             if (converged)
             {
                 uiManager.AppendToLog("50% of the population has converged to 95% of the max achievable fitness in " + generationCount + " generations");
+            }
+
+            if (completedSimulationCount >= (int)(populationNumber * 0.9) && !completedTrack)
+            {
+                completedTrack = true;
+                uiManager.AppendToLog("50% of the population has completed the track in " + generationCount + " generations");
             }
             //! Training
             Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, Genotype>[] pop = trainerNEAT.Train(biocenosis);
@@ -173,6 +187,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             generationCount++;
             currentSimulating = pop.Length;
             simulating = true;
+            completedSimulationCount = 0;
             uiManager.UpdateGenerationCount(generationCount);
         }
 
