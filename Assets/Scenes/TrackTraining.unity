@@ -1109,20 +1109,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   biocenosis:
     speciesList: []
-  enabledOperators:
+  options:
     uniformEnabled: 1
     singlePointEnabled: 1
     kPointEnabled: 1
     averageEnabled: 1
-  timeScale: 3
+    populationNumber: 250
+    dynamicMutationRate: 1
+    rates:
+      maxWeightMutationRate: 0.5
+      maxSplitLinkRate: 0.25
+      maxAddLinkRate: 0.275
+      weightMutationRate: 0.15
+      splitLinkRate: 0.15
+      addLinkRate: 0.25
+    minCrossoverRatio: 0.05
+    sharingThreshold: 0.3
+  timeScale: 2
   individualPrefab: {fileID: 6791551976333570425, guid: dda260aae5911af48a27564e8179e873,
     type: 3}
   track: {fileID: 2111517136}
-  populationNumber: 200
-  maxMutationRate: 0.325
-  minCrossoverRatio: 0.025
-  matingRatio: 0.1
-  sharingThreshold: 0.7
 --- !u!114 &6509384906705858488
 MonoBehaviour:
   m_ObjectHideFlags: 0

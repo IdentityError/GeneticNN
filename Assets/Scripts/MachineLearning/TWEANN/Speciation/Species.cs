@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Assets.Scripts.MachineLearning.TWEANN
@@ -24,7 +25,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             }
             else
             {
-                return individuals[UnityEngine.Random.Range(0, individualCount)].ProvideNeuralNet().GetGenotype().GetTopologicalDistance(genotype.ProvideNeuralNet().GetGenotype()) < sharingThreshold;
+                return individuals.ElementAt(UnityEngine.Random.Range(0, individualCount)).ProvideNeuralNet().GetGenotype().GetTopologicalDistance(genotype.ProvideNeuralNet().GetGenotype()) < sharingThreshold;
             }
         }
 
@@ -83,7 +84,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
 
         public IOrganism GetChamp()
         {
-            double maxFitness = 0;
+            double maxFitness = double.MinValue;
             IOrganism best = null;
             foreach (IOrganism individual in individuals)
             {

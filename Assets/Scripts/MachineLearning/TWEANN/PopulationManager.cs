@@ -11,20 +11,25 @@ namespace Assets.Scripts.MachineLearning.TWEANN
     public class PopulationManager : MonoBehaviour
     {
         [System.Serializable]
-        public struct EnabledOperators
+        public struct OptionsWrapper
         {
+            [Header("Crossover operators")]
             public bool uniformEnabled;
             public bool singlePointEnabled;
             public bool kPointEnabled;
             public bool averageEnabled;
+            [Header("Parameters")]
+            [Tooltip("Number of the population")]
+            public int populationNumber;
+            [Tooltip("Indicates if the mutation is static (max mutation rate) or dynamic")]
+            public bool dynamicMutationRate;
 
-            public EnabledOperators(bool uniformEnabled, bool singlePointEnabled, bool kPointEnabled, bool averageEnabled)
-            {
-                this.uniformEnabled = uniformEnabled;
-                this.singlePointEnabled = singlePointEnabled;
-                this.kPointEnabled = kPointEnabled;
-                this.averageEnabled = averageEnabled;
-            }
+            public DescriptorsWrapper.MutationRatesDescriptor rates;
+
+            [Tooltip("Minumum crossover ratio for a crossover operator")]
+            public float minCrossoverRatio;
+            [Tooltip("Topological distance threshold for speciation")]
+            public float sharingThreshold;
         }
 
         public List<ISimulatingOrganism> populationList;
@@ -32,7 +37,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         private int generationCount = 0;
 
         [SerializeField] private Biocenosis biocenosis;
-        [SerializeField] private EnabledOperators enabledOperators;
+        [SerializeField] private OptionsWrapper options;
         [Space(15)]
         [SerializeField] private float timeScale = 1F;
 
@@ -41,17 +46,6 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         [SerializeField] private Track track;
 
         [Header("Parameters")]
-        [Tooltip("Number of the population")]
-        [SerializeField] private int populationNumber;
-        [Tooltip("Max value for the mutation rate")]
-        [SerializeField] private float maxMutationRate;
-        [Tooltip("Minumum crossover ratio for a crossover operator")]
-        [SerializeField] private float minCrossoverRatio;
-        [Tooltip("Top percentage of population in each species selected for breeding")]
-        [SerializeField] private float matingRatio;
-        [Tooltip("Topological distance threshold for speciation")]
-        [SerializeField] private float sharingThreshold;
-
         private IEnumerator CheckSimStat_C;
         private bool simulating = false;
         private float simulationTime = 0;
@@ -145,7 +139,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             uiManager.UpdateTextBox1("Generation: " + generationCount + "\nHighest fitness: " + ((MonoBehaviour)fittest).gameObject.name + ", " + fittest.ProvideRawFitness() + "\n" + "Average fitness: " + biocenosis.GetAverageFitness() + "\nCT: " + completedSimulationCount);
 
             populationList = populationList.OrderByDescending(x => x.ProvideRawFitness()).ToList();
-            List<ISimulatingOrganism> subList = populationList.GetRange(0, populationNumber / 2);
+            List<ISimulatingOrganism> subList = populationList.GetRange(0, options.populationNumber / 2);
             bool converged = true;
             foreach (IOrganism organism in subList)
             {
@@ -158,13 +152,13 @@ namespace Assets.Scripts.MachineLearning.TWEANN
 
             if (converged)
             {
-                uiManager.AppendToLog("50% of the population has converged to 95% of the max achievable fitness in " + generationCount + " generations");
+                uiManager.AppendToLog("50% of the population has converged to 90% of the max achievable fitness in " + generationCount + " generations");
             }
 
-            if (completedSimulationCount >= (int)(populationNumber * 0.9) && !completedTrack)
+            if (completedSimulationCount >= (int)(options.populationNumber * 0.9) && !completedTrack)
             {
                 completedTrack = true;
-                uiManager.AppendToLog("50% of the population has completed the track in " + generationCount + " generations");
+                uiManager.AppendToLog("90% of the population has completed the track in " + generationCount + " generations");
             }
             //! Training
             Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, Genotype>[] pop = trainerNEAT.Train(biocenosis);
@@ -196,12 +190,12 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         /// </summary>
         private void InitializeAncestors()
         {
-            for (int i = 0; i < populationNumber; i++)
+            for (int i = 0; i < options.populationNumber; i++)
             {
                 populationList.Add(InstantiateIndividual(new NeuralNetwork(trainerNEAT.GetPredefinedGenotype()), i.ToString()));
             }
             generationCount++;
-            currentSimulating = populationNumber;
+            currentSimulating = options.populationNumber;
             GlobalParams.InitializeGlobalInnovationNumber(trainerNEAT.GetPredefinedGenotype());
             simulating = true;
             biocenosis.Speciate(populationList.ToArray());
@@ -241,24 +235,24 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         private void Start()
         {
             List<CrossoverOperator> crossoverOperators = new List<CrossoverOperator>();
-            if (enabledOperators.uniformEnabled) crossoverOperators.Add(new UniformCrossoverOperator());
-            if (enabledOperators.singlePointEnabled) crossoverOperators.Add(new SinglePointCrossover());
-            if (enabledOperators.kPointEnabled) crossoverOperators.Add(new KPointsCrossoverOperator());
-            if (enabledOperators.averageEnabled) crossoverOperators.Add(new AverageCrossoverOperator());
+            if (options.uniformEnabled) crossoverOperators.Add(new UniformCrossoverOperator());
+            if (options.singlePointEnabled) crossoverOperators.Add(new SinglePointCrossover());
+            if (options.kPointEnabled) crossoverOperators.Add(new KPointsCrossoverOperator());
+            if (options.averageEnabled) crossoverOperators.Add(new AverageCrossoverOperator());
 
             if (crossoverOperators.Count < 1)
             {
                 throw new System.Exception("There is no Crossover operator!");
             }
 
-            trainerNEAT = new TrainerNEAT(new CrossoverOperatorsWrapper(crossoverOperators), maxMutationRate, minCrossoverRatio, matingRatio, 6F * track.Length());
+            trainerNEAT = new TrainerNEAT(new CrossoverOperatorsWrapper(crossoverOperators), options.minCrossoverRatio, 6F * track.Length(), options.dynamicMutationRate, options.rates);
 
             uiManager = FindObjectOfType<UIManager>();
             uiManager?.UpdateTrackLength(track.Length());
             //uiManager?.DrawNetUI(trainerProvider.ProvideTrainer().GetPredefinedTopologyDescriptor());
             CheckSimStat_C = CheckSimulationState();
             populationList = new List<ISimulatingOrganism>();
-            biocenosis = new Biocenosis(sharingThreshold);
+            biocenosis = new Biocenosis(options.sharingThreshold);
             InitializeAncestors();
             StartCoroutine(CheckSimStat_C);
         }

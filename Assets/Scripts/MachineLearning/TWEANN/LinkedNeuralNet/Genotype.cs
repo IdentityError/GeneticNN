@@ -127,7 +127,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         public float GetTopologicalDistance(Genotype from)
         {
             int maxGenomes = this.LinkCount > from.LinkCount ? this.LinkCount : from.LinkCount;
-            int genesDifference = this.LinkCount - from.LinkCount;
+            int genesDifference = TMath.Abs(this.LinkCount - from.LinkCount);
             List<Tuple<LinkGene, LinkGene>> zippedLinks = TUtilsProvider.ZipWithPredicate(links, from.links, (item1, item2) => item1.GetInnovationNumber().Equals(item2.GetInnovationNumber()));
             float differenceSum = 0;
             foreach (Tuple<LinkGene, LinkGene> current in zippedLinks)
@@ -135,7 +135,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                 differenceSum += TMath.Abs((float)(current.Item1.GetWeight() - current.Item2.GetWeight()));
             }
             float averageDiff = differenceSum / zippedLinks.Count;
-            float c = 1F, c2 = 0.5F;
+            float c = 2F, c2 = 0.31F;
             //Debug.Log("current diff: " + (c * genesDifference) / maxGenomes + (c2 * averageDiff));
             return (c * genesDifference) / maxGenomes + (c2 * averageDiff);
         }
@@ -144,9 +144,9 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         ///   Mutate this genotype based on the specified probabilities
         /// </summary>
         /// <param name="mutation"> </param>
-        public void Mutate(float mutationRate)
+        public void Mutate(DescriptorsWrapper.MutationRatesDescriptor rates)
         {
-            if (UnityEngine.Random.Range(0F, 1F) < mutationRate)
+            if (UnityEngine.Random.Range(0F, 1F) < rates.splitLinkRate)
             {
                 // 1. Select a random link to be mutated
                 // 2. Create a new node
@@ -173,7 +173,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                 AddNode(newNode);
                 AddLinkAndNodes(newLink);
             }
-            else if (UnityEngine.Random.Range(0F, 1F) < mutationRate)
+            if (UnityEngine.Random.Range(0F, 1F) < rates.addLinkRate)
             {
                 // Create a list of all nodes except the output nodes and select the random From node
                 List<NodeGene> temp = new List<NodeGene>(inputs);
@@ -209,7 +209,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             // For each link of this genotype try to mutate it
             foreach (LinkGene gene in links)
             {
-                if (UnityEngine.Random.Range(0F, 1F) < ((mutationRate / NodeCount)))
+                if (UnityEngine.Random.Range(0F, 1F) < (rates.weightMutationRate))
                 {
                     int random = UnityEngine.Random.Range(0, LinkCount);
                     links[random].SetWeight(UnityEngine.Random.Range(-1F, 1F));

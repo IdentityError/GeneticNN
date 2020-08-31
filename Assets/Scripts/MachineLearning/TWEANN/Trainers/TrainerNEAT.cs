@@ -9,19 +9,28 @@ namespace Assets.Scripts.MachineLearning.TWEANN
     [System.Serializable]
     public class TrainerNEAT : PopulationTrainer
     {
-        private float maxMutationRate;
+        private DescriptorsWrapper.MutationRatesDescriptor rates;
         private float minCrossoverRatio;
-        private float matingRatio;
         private float maxAchievableFitness;
+        private bool dynamicMutationRate;
 
         public CrossoverOperatorsWrapper operatorsWrapper;
 
-        public TrainerNEAT(CrossoverOperatorsWrapper breeding, float maxMutationRate, float minCrossoverRatio, float matingRatio, float maxAchievableFitness)
+        /// <summary>
+        ///   If dynamic mutation rate is not enabled, use a static mutation rate indicated by the max mutation rate
+        /// </summary>
+        /// <param name="breeding"> </param>
+        /// <param name="minCrossoverRatio"> </param>
+        /// <param name="maxAchievableFitness"> </param>
+        /// <param name="dynamicMutationRate"> </param>
+        /// <param name="maxMutationRate"> </param>
+        public TrainerNEAT(CrossoverOperatorsWrapper breeding, float minCrossoverRatio, float maxAchievableFitness, bool dynamicMutationRate, DescriptorsWrapper.MutationRatesDescriptor rates)
         {
+            //Debug.Log("TrainerNEAT initialized:\nDynamic mutation rate: " + dynamicMutationRate + "\nMax mutation rate: " + maxMutationRate + "\nMin crossover ratio: " + minCrossoverRatio + "\nMax achievable fitness: " + maxAchievableFitness);
             this.operatorsWrapper = breeding;
-            this.maxMutationRate = maxMutationRate;
+            this.dynamicMutationRate = dynamicMutationRate;
+            this.rates = rates;
             this.minCrossoverRatio = minCrossoverRatio;
-            this.matingRatio = matingRatio;
             this.maxAchievableFitness = maxAchievableFitness;
         }
 
@@ -42,13 +51,27 @@ namespace Assets.Scripts.MachineLearning.TWEANN
 
             foreach (Species current in biocenosis.GetSpeciesList())
             {
-                // Dynamically set the mutation rate for the current species
                 double maxFitness = current.GetChamp().ProvideRawFitness();
                 double averageFitness = current.GetRawFitnessSum() / current.GetIndividualCount();
-                float mutationRate = (float)(maxMutationRate * Math.Pow((averageFitness / maxFitness), 2.5D));
-                mutationRate *= (1F - (float)(averageFitness / maxAchievableFitness));
-                Debug.Log("AVG: " + averageFitness + ", MAX: " + maxFitness);
-                Debug.Log("M: " + mutationRate + ", C: " + 1);
+                if (dynamicMutationRate)
+                {
+                    // Dynamically set the mutation rate for the current species
+                    rates.weightMutationRate = (float)(rates.maxWeightMutationRate * Math.Pow((averageFitness / maxFitness), 2.75D));
+                    rates.weightMutationRate *= (1F - (float)(averageFitness / maxAchievableFitness));
+                    rates.splitLinkRate = (float)(rates.maxSplitLinkRate * Math.Pow((averageFitness / maxFitness), 2.75D));
+                    rates.splitLinkRate *= (1F - (float)(averageFitness / maxAchievableFitness));
+                    rates.addLinkRate = (float)(rates.maxAddLinkRate * Math.Pow((averageFitness / maxFitness), 2.75D));
+                    rates.addLinkRate *= (1F - (float)(averageFitness / maxAchievableFitness));
+                }
+                else
+                {
+                    rates.weightMutationRate = rates.maxWeightMutationRate;
+                    rates.splitLinkRate = rates.maxSplitLinkRate;
+                    rates.addLinkRate = rates.maxAddLinkRate;
+                }
+
+                //Debug.Log("AVG: " + averageFitness + ", MAX: " + maxFitness);
+                Debug.Log(rates.ToString());
 
                 // Order the individuals based on their fitnesses
                 current.individuals = current.individuals.OrderByDescending(x => x.ProvideRawFitness()).ToList();
@@ -81,13 +104,12 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                     }
 
                     // Mutate the child genotype based on the dynamic mutation rate
-                    childGen.Mutate(mutationRate);
-
+                    childGen.Mutate(rates);
+                    //Debug.Log("species: " + current.GetIndividualCount() + ", exp: " + current.GetExpectedOffpringsCount() + ": " + currentIndex);
                     // Add the currently created genotype and its crossover operation descriptor to the array
-                    pop[currentIndex] = new Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, Genotype>(
+                    pop[currentIndex++] = new Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, Genotype>(
                         new DescriptorsWrapper.CrossoverOperationDescriptor(parents.Item1.ProvideRawFitness(), parents.Item2.ProvideRawFitness(), operatorToApply),
                         childGen);
-                    currentIndex++;
                 }
             }
 
@@ -129,6 +151,9 @@ namespace Assets.Scripts.MachineLearning.TWEANN
 
         public void UpdateCrossoverOperatorsProgressions(List<Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, IOrganism>> descriptors)
         {
+            // If there is only one operator, skip this passage
+            if (operatorsWrapper.crossoverOperators.Count < 2) return;
+
             double singlePointSum = 0;
             int singlePointCount = 0;
 

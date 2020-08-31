@@ -69,7 +69,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             {
                 foreach (IOrganism individual in species.GetIndividuals())
                 {
-                    individual.AdjustFitness(individual.ProvideRawFitness() / species.GetIndividualCount());
+                    individual.AdjustFitness(Mathf.Round((float)individual.ProvideRawFitness() / species.GetIndividualCount()));
                 }
             }
             double sum = 0;
@@ -77,13 +77,69 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             {
                 sum += species.GetAdjustedFitnessSum();
             }
-            double averageFitness = sum / GetTotalIndividualNumber();
+            Debug.Log("sum: " + sum);
+            int count = 0;
             foreach (Species species in speciesList)
             {
-                species.SetExpectedOffspringsCount(Mathf.RoundToInt((float)(species.GetAdjustedFitnessSum() / averageFitness)));
-                //Debug.Log("Species sum: " + species.GetAdjustedFitnessSum() + ", adj Sum: " + sum + ", avgFitness: " + averageFitness + ", Going form " + species.GetIndividualCount() + " to " + species.GetExpectedIndividualCount());
+                Debug.Log("spec sum: " + species.GetAdjustedFitnessSum());
+                float val = (float)(species.GetAdjustedFitnessSum() * GetTotalIndividualNumber() / sum);
+                species.SetExpectedOffspringsCount(Mathf.RoundToInt(Mathf.Floor(val)));
+                count += Mathf.RoundToInt(Mathf.Floor(val));
             }
+            int rest = GetTotalIndividualNumber() - count;
+            Species spec = null;
+            if (rest > 0)
+            {
+                spec = GetFittestSpecies();
+            }
+            else
+            {
+                spec = GetLeastFitSpecies();
+            }
+            spec.SetExpectedOffspringsCount(spec.GetExpectedOffpringsCount() + rest);
             Purge();
+            int c = 0;
+            foreach (Species species1 in speciesList)
+            {
+                for (int i = 0; i < species1.GetExpectedOffpringsCount(); i++)
+                {
+                    c++;
+                }
+            }
+            Debug.Log(c);
+            Debug.Log("EXPadj: " + GetExpectedIndividualNumber());
+        }
+
+        public Species GetFittestSpecies()
+        {
+            Species fittest = null;
+            double val = 0;
+            foreach (Species current in speciesList)
+            {
+                double sum = current.GetAdjustedFitnessSum();
+                if (sum > val)
+                {
+                    fittest = current;
+                    val = sum;
+                }
+            }
+            return fittest;
+        }
+
+        public Species GetLeastFitSpecies()
+        {
+            Species worse = null;
+            double val = double.MaxValue;
+            foreach (Species current in speciesList)
+            {
+                double sum = current.GetAdjustedFitnessSum();
+                if (sum < val)
+                {
+                    worse = current;
+                    val = sum;
+                }
+            }
+            return worse;
         }
 
         public int GetExpectedIndividualNumber()
@@ -159,7 +215,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         /// </summary>
         private void Purge()
         {
-            speciesList.RemoveAll((current) => current.GetExpectedOffpringsCount() <= 0);
+            speciesList.RemoveAll((current) => current.GetIndividuals().Count <= 0 && current.GetExpectedOffpringsCount() <= 0);
         }
 
         public override string ToString()
