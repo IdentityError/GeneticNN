@@ -195,7 +195,9 @@ public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject
     public double EvaluateFitnessFunction()
     {
         float length = populationManager.GetTrack().Length();
-        return 3D * (stats.distance) * Math.Pow(stats.averageThrottle + 1D, stats.distance / length);
+        double fitness = 3D * (stats.distance) * Math.Pow(stats.averageThrottle + 1D, stats.distance / length);
+        if (fitness > 0) return fitness;
+        else return 0;
     }
 
     public bool IsSimulating()

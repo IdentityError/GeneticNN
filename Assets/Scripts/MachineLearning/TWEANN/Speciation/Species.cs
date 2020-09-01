@@ -10,22 +10,26 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         [SerializeField] private int individualCount;
         private int expectedOffspringsCount;
         [HideInInspector] public List<IOrganism> individuals;
+        private Genotype representative;
+        public int atRiskGenerations;
 
         public Species()
         {
             individuals = new List<IOrganism>();
             individualCount = 0;
+            atRiskGenerations = 0;
         }
 
         public bool Belongs(IOrganism genotype, float sharingThreshold)
         {
-            if (individualCount == 0)
+            if (representative == null)
             {
+                representative = genotype.ProvideNeuralNet().GetGenotype();
                 return true;
             }
             else
             {
-                return individuals.ElementAt(UnityEngine.Random.Range(0, individualCount)).ProvideNeuralNet().GetGenotype().GetTopologicalDistance(genotype.ProvideNeuralNet().GetGenotype()) < sharingThreshold;
+                return representative.GetTopologicalDistance(genotype.ProvideNeuralNet().GetGenotype()) < sharingThreshold;
             }
         }
 

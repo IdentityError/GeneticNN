@@ -1,8 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Scripts.MachineLearning.TWEANN
 {
+    /// <summary>
+    ///   Represents the Biocenosis of the population, that is the set of all species present in the population
+    /// </summary>
     [System.Serializable]
     public class Biocenosis
     {
@@ -29,6 +33,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             {
                 AddToSpeciesOrCreate(population[i]);
             }
+            Purge(s => s.GetIndividualCount() <= 0);
             //Debug.Log("Speciated: " + ToString());
 
             //foreach (IIndividual individual in population)
@@ -61,53 +66,47 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         }
 
         /// <summary>
-        ///   Normalize the fitness within the species, adjust the species breeding parameters and set the expected species individual count
+        ///   Normalize the fitness within the species, adjust the species breeding parameters and set the expected species individual
+        ///   count, extinct eventual bad performing species
         /// </summary>
         public void AdjustSpecies()
         {
+            int popSize = GetTotalIndividualNumber();
+            int c = speciesList.Count;
+            foreach (Species species1 in speciesList)
+            {
+                if (species1.GetIndividualCount() <= popSize * 0.1)
+                {
+                    species1.atRiskGenerations++;
+                }
+                else
+                {
+                    species1.atRiskGenerations = 0;
+                }
+            }
+
+            double sum = 0;
             foreach (Species species in speciesList)
             {
                 foreach (IOrganism individual in species.GetIndividuals())
                 {
                     individual.AdjustFitness(Mathf.Round((float)individual.ProvideRawFitness() / species.GetIndividualCount()));
                 }
-            }
-            double sum = 0;
-            foreach (Species species in speciesList)
-            {
                 sum += species.GetAdjustedFitnessSum();
             }
-            Debug.Log("sum: " + sum);
+            Purge(s => s.atRiskGenerations >= 3);
+
             int count = 0;
             foreach (Species species in speciesList)
             {
-                Debug.Log("spec sum: " + species.GetAdjustedFitnessSum());
-                float val = (float)(species.GetAdjustedFitnessSum() * GetTotalIndividualNumber() / sum);
-                species.SetExpectedOffspringsCount(Mathf.RoundToInt(Mathf.Floor(val)));
-                count += Mathf.RoundToInt(Mathf.Floor(val));
+                int val = Mathf.RoundToInt(Mathf.Floor((float)(species.GetAdjustedFitnessSum() * popSize / sum)));
+                species.SetExpectedOffspringsCount(val);
+                count += val;
             }
-            int rest = GetTotalIndividualNumber() - count;
-            Species spec = null;
-            if (rest > 0)
-            {
-                spec = GetFittestSpecies();
-            }
-            else
-            {
-                spec = GetLeastFitSpecies();
-            }
+            int rest = popSize - count;
+            Species spec = GetFittestSpecies();
             spec.SetExpectedOffspringsCount(spec.GetExpectedOffpringsCount() + rest);
-            Purge();
-            int c = 0;
-            foreach (Species species1 in speciesList)
-            {
-                for (int i = 0; i < species1.GetExpectedOffpringsCount(); i++)
-                {
-                    c++;
-                }
-            }
-            Debug.Log(c);
-            Debug.Log("EXPadj: " + GetExpectedIndividualNumber());
+            Debug.Log("EXP: " + GetExpectedIndividualNumber());
         }
 
         public Species GetFittestSpecies()
@@ -124,22 +123,6 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                 }
             }
             return fittest;
-        }
-
-        public Species GetLeastFitSpecies()
-        {
-            Species worse = null;
-            double val = double.MaxValue;
-            foreach (Species current in speciesList)
-            {
-                double sum = current.GetAdjustedFitnessSum();
-                if (sum < val)
-                {
-                    worse = current;
-                    val = sum;
-                }
-            }
-            return worse;
         }
 
         public int GetExpectedIndividualNumber()
@@ -160,11 +143,6 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                 count += species.GetIndividualCount();
             }
             return count;
-        }
-
-        public float GetSharingTreshold()
-        {
-            return speciesSharingThreshold;
         }
 
         public List<Species> GetSpeciesList()
@@ -211,11 +189,11 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         }
 
         /// <summary>
-        ///   Remove all the extinct species
+        ///   Remove all the species matching the predicate
         /// </summary>
-        private void Purge()
+        private void Purge(Predicate<Species> match)
         {
-            speciesList.RemoveAll((current) => current.GetIndividuals().Count <= 0 && current.GetExpectedOffpringsCount() <= 0);
+            speciesList.RemoveAll(match);
         }
 
         public override string ToString()

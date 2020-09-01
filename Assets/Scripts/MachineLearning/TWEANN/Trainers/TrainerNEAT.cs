@@ -56,7 +56,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                 if (dynamicMutationRate)
                 {
                     // Dynamically set the mutation rate for the current species
-                    rates.weightMutationRate = (float)(rates.maxWeightMutationRate * Math.Pow((averageFitness / maxFitness), 2.75D));
+                    rates.weightMutationRate = (float)(rates.maxWeightMutationRate * Math.Pow((averageFitness / maxFitness), 2D));
                     rates.weightMutationRate *= (1F - (float)(averageFitness / maxAchievableFitness));
                     rates.splitLinkRate = (float)(rates.maxSplitLinkRate * Math.Pow((averageFitness / maxFitness), 2.75D));
                     rates.splitLinkRate *= (1F - (float)(averageFitness / maxAchievableFitness));

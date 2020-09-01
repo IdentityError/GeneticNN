@@ -1124,7 +1124,7 @@ MonoBehaviour:
       splitLinkRate: 0.15
       addLinkRate: 0.25
     minCrossoverRatio: 0.05
-    sharingThreshold: 0.3
+    sharingThreshold: 0.35
   timeScale: 2
   individualPrefab: {fileID: 6791551976333570425, guid: dda260aae5911af48a27564e8179e873,
     type: 3}
