@@ -106,7 +106,6 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             int rest = popSize - count;
             Species spec = GetFittestSpecies();
             spec.SetExpectedOffspringsCount(spec.GetExpectedOffpringsCount() + rest);
-            Debug.Log("EXP: " + GetExpectedIndividualNumber());
         }
 
         public Species GetFittestSpecies()
@@ -152,7 +151,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
 
         public IOrganism GetCurrentFittest()
         {
-            double max = 0;
+            double max = -1;
             IOrganism fittest = null;
             foreach (Species species in speciesList)
             {

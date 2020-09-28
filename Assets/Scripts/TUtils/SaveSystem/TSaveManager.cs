@@ -1,5 +1,6 @@
 ﻿// Copyright (c) 2020 Matteo Beltrame
 
+using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
@@ -18,7 +19,7 @@ namespace Assets.Scripts.TUtils.SaveSystem
         ///   Save a generic type of data in the application persisten data path.
         ///   <para> Returns: a SaveObject instance, null on error </para>
         /// </summary>
-        public static SaveObject SavePersistentData<T>(T data, string path)
+        public static SaveObject SavePersistentObjectData<T>(T data, string path)
         {
             SaveObject saveObject = new SaveObject(data);
             BinaryFormatter formatter = new BinaryFormatter();
@@ -34,7 +35,7 @@ namespace Assets.Scripts.TUtils.SaveSystem
         ///     Return a SaveObject. Use saveObject.GetData() to retrieve data. If the data is not present a null SaveObject will be returned
         ///   </para>
         /// </summary>
-        public static SaveObject LoadPersistentData(string path)
+        public static SaveObject LoadPersistentObjectData(string path)
         {
             SaveObject saveObject;
             if (File.Exists(path))
@@ -64,9 +65,24 @@ namespace Assets.Scripts.TUtils.SaveSystem
             }
         }
 
-        public static void DeleteData(string path)
+        public static void DeleteObjectData(string path)
         {
-            File.Delete(path);
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
+
+        public static void SerializeToFile(string path, string data, bool append)
+        {
+            if (append)
+            {
+                File.AppendAllText(path, data + Environment.NewLine);
+            }
+            else
+            {
+                File.WriteAllText(path, data + Environment.NewLine);
+            }
         }
     }
 }

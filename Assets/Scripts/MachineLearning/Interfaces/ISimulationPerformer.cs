@@ -16,10 +16,5 @@
         /// </summary>
         /// <returns> </returns>
         bool IsSimulating();
-
-        /// <summary>
-        ///   Stop the simulation for this performer
-        /// </summary>
-        void StopSimulating();
     }
 }

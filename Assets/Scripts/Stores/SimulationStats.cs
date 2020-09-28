@@ -58,21 +58,6 @@ public class SimulationStats
     }
 
     /// <summary>
-    ///   Compare two different simulation stats
-    /// </summary>
-    /// <param name="other"> </param>
-    /// <returns> </returns>
-    [Obsolete]
-    public bool BetterThan(SimulationStats other)
-    {
-        if (other == null)
-        {
-            return true;
-        }
-        return this.distance > other.distance && this.averageThrottle > other.averageThrottle;
-    }
-
-    /// <summary>
     ///   Resets the stats values
     /// </summary>
     public void Reset()

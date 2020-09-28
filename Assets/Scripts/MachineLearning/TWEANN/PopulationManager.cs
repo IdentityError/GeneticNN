@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.CustomBehaviour;
 using Assets.Scripts.TUtils.ObjectPooling;
+using Assets.Scripts.TUtils.SaveSystem;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -58,19 +59,32 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         private UIManager uiManager;
         private List<Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, IOrganism>> operationsDescriptors = null;
 
+        private event Action ForceEnded;
+
+        public void SubscribeToForceEnded(Action func)
+        {
+            ForceEnded += func;
+        }
+
+        public void UnsubscribeToForceEnded(Action func)
+        {
+            ForceEnded -= func;
+        }
+
         /// <summary>
         ///   Force the end of the simulation
         /// </summary>
         public void ForceSimulationEnd()
         {
-            foreach (ISimulatingOrganism individual in populationList)
-            {
-                if (individual.IsSimulating())
-                {
-                    individual.StopSimulating();
-                }
-                individual.SetRawFitness(individual.EvaluateFitnessFunction());
-            }
+            ForceEnded();
+            //foreach (ISimulatingOrganism individual in populationList)
+            //{
+            //    if (individual.IsSimulating())
+            //    {
+            //        individual.StopSimulating();
+            //    }
+            //    individual.SetRawFitness(individual.EvaluateFitnessFunction());
+            //}
             currentSimulating = 0;
             SimulationEnded();
             shouldRestart = false;
@@ -100,21 +114,17 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         ///   force ending simulation, the manager calls that function and it takes care of restarting the simulation
         /// </summary>
         /// <param name="subject"> </param>
-        public void IndividualEndedSimulation(ISimulatingOrganism subject)
+        public void IndividualEndedSimulation(ISimulatingOrganism subject, bool completedTrack)
         {
-            //subject.SetFitness(FitnessFunction(subject.ProvideSimulationStats()));
+            if (completedTrack)
+            {
+                completedSimulationCount++;
+            }
             currentSimulating--;
-            subject.SetRawFitness(subject.EvaluateFitnessFunction());
             if (currentSimulating <= 0 && simulating)
             {
                 SimulationEnded();
             }
-        }
-
-        public void IndividualCompletedTrack(ISimulatingOrganism organism)
-        {
-            completedSimulationCount++;
-            IndividualEndedSimulation(organism);
         }
 
         /// <summary>
@@ -136,7 +146,9 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             operationsDescriptors.Clear();
 
             IOrganism fittest = biocenosis.GetCurrentFittest();
-            uiManager.UpdateTextBox1("Generation: " + generationCount + "\nHighest fitness: " + ((MonoBehaviour)fittest).gameObject.name + ", " + fittest.ProvideRawFitness() + "\n" + "Average fitness: " + biocenosis.GetAverageFitness() + "\nCT: " + completedSimulationCount);
+            Debug.Log("Generation: " + generationCount + "\nHighest fitness: " + ((MonoBehaviour)fittest).gameObject.name + ", " + fittest.ProvideRawFitness() + "\n" + "Average fitness: " + biocenosis.GetAverageFitness() + "\nCT: " + completedSimulationCount);
+
+            TSaveManager.SerializeToFile("simulation.csv", generationCount + ";" + biocenosis.GetAverageFitness(), true);
 
             populationList = populationList.OrderByDescending(x => x.ProvideRawFitness()).ToList();
             List<ISimulatingOrganism> subList = populationList.GetRange(0, options.populationNumber / 2);
@@ -164,17 +176,12 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, Genotype>[] pop = trainerNEAT.Train(biocenosis);
 
             //! Substitute population
-            foreach (ISimulatingOrganism individual in populationList)
+            for (int i = 0; i < populationList.Count; i++)
             {
-                PoolManager.GetInstance().DeactivateObject(((MonoBehaviour)individual).gameObject);
-            }
-            populationList.Clear();
-
-            for (int i = 0; i < pop.Length; i++)
-            {
+                PoolManager.GetInstance().DeactivateObject(((MonoBehaviour)populationList.ElementAt(i)).gameObject);
                 ISimulatingOrganism childInd = InstantiateIndividual(new NeuralNetwork(pop[i].Item2), i.ToString());
-                populationList.Add(childInd);
                 operationsDescriptors.Add(new Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, IOrganism>(pop[i].Item1, childInd));
+                populationList[i] = childInd;
             }
             biocenosis.Speciate(populationList.ToArray());
 
@@ -255,6 +262,8 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             biocenosis = new Biocenosis(options.sharingThreshold);
             InitializeAncestors();
             StartCoroutine(CheckSimStat_C);
+
+            TSaveManager.DeleteObjectData("simulation.csv");
         }
 
         private void Update()

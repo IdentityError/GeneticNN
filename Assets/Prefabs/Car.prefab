@@ -125,9 +125,9 @@ MonoBehaviour:
   motorPower: 50000
   rearTrack: 1.75
   stats:
-    averageThrottle: 0.13547012
-    distance: 525.11066
-    time: 26.743643
+    averageThrottle: 0
+    distance: 0
+    time: 0
     lastThrottle: 0
     track: {fileID: 0}
   steering: 0

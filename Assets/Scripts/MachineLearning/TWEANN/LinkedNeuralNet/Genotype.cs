@@ -135,7 +135,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                 differenceSum += TMath.Abs((float)(current.Item1.GetWeight() - current.Item2.GetWeight()));
             }
             float averageDiff = differenceSum / zippedLinks.Count;
-            float c = 2F, c2 = 0.31F;
+            float c = 1.75F, c2 = 0.3F;
             //Debug.Log("current diff: " + (c * genesDifference) / maxGenomes + (c2 * averageDiff));
             return (c * genesDifference) / maxGenomes + (c2 * averageDiff);
         }
@@ -215,6 +215,16 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                     links[random].SetWeight(UnityEngine.Random.Range(-1F, 1F));
                 }
             }
+        }
+
+        public Genotype Copy()
+        {
+            Genotype genotype = new Genotype();
+            foreach (LinkGene link in links)
+            {
+                genotype.AddLinkAndNodes(link.Copy());
+            }
+            return genotype;
         }
 
         /// <summary>

@@ -1117,14 +1117,15 @@ MonoBehaviour:
     populationNumber: 250
     dynamicMutationRate: 1
     rates:
-      maxWeightMutationRate: 0.5
-      maxSplitLinkRate: 0.25
-      maxAddLinkRate: 0.275
+      maxWeightMutationRate: 0.085
+      maxSplitLinkRate: 0.06
+      maxAddLinkRate: 0.07
+      crossoverRatio: 0
       weightMutationRate: 0.15
       splitLinkRate: 0.15
       addLinkRate: 0.25
-    minCrossoverRatio: 0.05
-    sharingThreshold: 0.35
+    minCrossoverRatio: 0.06
+    sharingThreshold: 0.425
   timeScale: 2
   individualPrefab: {fileID: 6791551976333570425, guid: dda260aae5911af48a27564e8179e873,
     type: 3}

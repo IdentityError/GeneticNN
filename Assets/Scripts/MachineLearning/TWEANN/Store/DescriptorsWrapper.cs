@@ -24,6 +24,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             public float maxWeightMutationRate;
             public float maxSplitLinkRate;
             public float maxAddLinkRate;
+            [HideInInspector] public float crossoverRatio;
             [HideInInspector] public float weightMutationRate;
             [HideInInspector] public float splitLinkRate;
             [HideInInspector] public float addLinkRate;
@@ -32,7 +33,8 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             {
                 return "Weights\nCurrent: " + weightMutationRate + ", Max: " + maxWeightMutationRate + "\n" +
                     "Split Link\nCurrent: " + splitLinkRate + ", Max: " + maxSplitLinkRate + "\n" +
-                    "Add Link\nCurrent: " + addLinkRate + ", Max: " + maxAddLinkRate + "\n";
+                    "Add Link\nCurrent: " + addLinkRate + ", Max: " + maxAddLinkRate + "\n" +
+                    "Crossover rate: " + crossoverRatio + "\n";
             }
         }
     }
