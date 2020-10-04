@@ -11,9 +11,12 @@ namespace Assets.Scripts.TUtils.Utils
     public class TUtilsUI
     {
         /// <summary>
-        ///   <para> Coroutine that fills an image in a specified time. (Image has to be set to filled image) </para>
-        ///   Returns: the IEnumerator's reference
+        ///   Coroutine that fills an image in a specified time. (Image has to be set to filled image)
         /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="image"> </param>
+        /// <param name="duration"> </param>
+        /// <returns> IEnumerator reference </returns>
         public static IEnumerator FillImage(MonoBehaviour context, Image image, float duration)
         {
             IEnumerator coroutine = FillImage_C(image, duration);
@@ -34,12 +37,16 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   <para>
-        ///     Coroutine that fills an image in a specified time and calls a specified delegate at the end of the coroutine (Image has to
-        ///     be set to filled image)
-        ///   </para>
-        ///   Returns: the IEnumerator's reference
+        ///   Coroutine that fills an image in a specified time and calls a specified delegate at the end of the coroutine (Image has to be
+        ///   set to filled image)
         /// </summary>
+        /// <typeparam name="T"> </typeparam>
+        /// <param name="context"> </param>
+        /// <param name="image"> </param>
+        /// <param name="duration"> </param>
+        /// <param name="funcToCall"> </param>
+        /// <param name="funcParameter"> </param>
+        /// <returns> IEnumerator reference </returns>
         public static IEnumerator FillImage<T>(MonoBehaviour context, Image image, float duration, Action<T> funcToCall, T funcParameter)
         {
             IEnumerator coroutine = FillImage_C<T>(image, duration, funcToCall, funcParameter);
@@ -64,9 +71,12 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   <para> Coroutine that unfills an image in a specified time. (Image has to be set to filled image) </para>
-        ///   Returns: the IEnumerator's reference
+        ///   Coroutine that unfills an image in a specified time. (Image has to be set to filled image)
         /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="image"> </param>
+        /// <param name="duration"> </param>
+        /// <returns> IEnumerator reference </returns>
         public static IEnumerator UnfillImage(MonoBehaviour context, Image image, float duration)
         {
             IEnumerator coroutine = UnfillImage_C(image, duration);
@@ -87,12 +97,16 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   <para>
-        ///     Coroutine that unfills an image in a specified time and calls a specified delegate at the end of the coroutine (Image has to
-        ///     be set to filled image)
-        ///   </para>
-        ///   Returns: the IEnumerator's reference
+        ///   Coroutine that unfills an image in a specified time and calls a specified delegate at the end of the coroutine (Image has to
+        ///   be set to filled image)
         /// </summary>
+        /// <typeparam name="T"> </typeparam>
+        /// <param name="context"> </param>
+        /// <param name="image"> </param>
+        /// <param name="duration"> </param>
+        /// <param name="funcToCall"> </param>
+        /// <param name="funcParameter"> </param>
+        /// <returns> IEnumerator reference </returns>
         public static IEnumerator UnfillImage<T>(MonoBehaviour context, Image image, float duration, Action<T> funcToCall, T funcParameter)
         {
             IEnumerator coroutine = UnfillImage_C<T>(image, duration, funcToCall, funcParameter);
@@ -165,27 +179,28 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   Returns the formatted string "h:m:s" calculated from seconds
         /// </summary>
-        public static string GetTimeStringFromSeconds(float _seconds)
+        /// <param name="seconds"> </param>
+        /// <returns> The formatted string in the form: <b> H:M:S </b> </returns>
+        public static string GetTimeStringFromSeconds(float seconds)
         {
             int hours = 0;
             int minutes = 0;
-            while (_seconds / 3600 >= 1)
+            while (seconds / 3600 >= 1)
             {
                 hours++;
-                _seconds -= 3600;
+                seconds -= 3600;
             }
-            while (_seconds / 60 >= 1)
+            while (seconds / 60 >= 1)
             {
                 minutes++;
-                _seconds -= 60;
+                seconds -= 60;
             }
             return new StringBuilder().Append(hours.ToString())
                                       .Append("h : ")
                                       .Append(minutes.ToString())
                                       .Append("m : ")
-                                      .Append(_seconds.ToString("0.0"))
+                                      .Append(seconds.ToString("0.0"))
                                       .Append("s").ToString();
         }
     }

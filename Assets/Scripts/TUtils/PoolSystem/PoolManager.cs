@@ -36,8 +36,13 @@ namespace Assets.Scripts.TUtils.ObjectPooling
         }
 
         /// <summary>
-        ///   Spawn from the specified pool inside the specified category
+        ///   Spawn from the specified category and pool
         /// </summary>
+        /// <param name="categoryName"> </param>
+        /// <param name="poolTag"> </param>
+        /// <param name="position"> </param>
+        /// <param name="rotation"> </param>
+        /// <returns> The spawned instance </returns>
         public GameObject Spawn(string categoryName, string poolTag, Vector3 position, Quaternion rotation)
         {
             PoolCategory poolCategory = Array.Find(poolsCategory, category => category.name == categoryName);
@@ -49,8 +54,12 @@ namespace Assets.Scripts.TUtils.ObjectPooling
         }
 
         /// <summary>
-        ///   Spawn from a random Pool inside the specified category based on Pools spawn probability
+        ///   Spawn from a category from a random pool selected based on its probability
         /// </summary>
+        /// <param name="categoryName"> </param>
+        /// <param name="position"> </param>
+        /// <param name="rotation"> </param>
+        /// <returns> The spawned instance </returns>
         public GameObject Spawn(string categoryName, Vector3 position, Quaternion rotation)
         {
             PoolCategory poolCategory = Array.Find(poolsCategory, category => category.name == categoryName);
@@ -62,8 +71,9 @@ namespace Assets.Scripts.TUtils.ObjectPooling
         }
 
         /// <summary>
-        ///   Returns: a random poolTag from a specified category
         /// </summary>
+        /// <param name="categoryName"> </param>
+        /// <returns> A random pool tag inside a specified category </returns>
         public string GetRandomCategoryPoolTag(string categoryName)
         {
             PoolCategory poolCategory = Array.Find(poolsCategory, category => category.name == categoryName);
@@ -75,19 +85,19 @@ namespace Assets.Scripts.TUtils.ObjectPooling
         }
 
         /// <summary>
-        ///   Deactivate a object instead of destroying it. Super important in the Object Pooling paradigm
+        ///   Deactivate a game object
         /// </summary>
+        /// <param name="objectToDeactivate"> </param>
         public void DeactivateObject(GameObject objectToDeactivate)
         {
             objectToDeactivate.SetActive(false);
         }
 
         /// <summary>
-        ///   Retrieve the selected prefab
         /// </summary>
         /// <param name="categoryName"> </param>
         /// <param name="poolTag"> </param>
-        /// <returns> </returns>
+        /// <returns> The prefab instance </returns>
         public GameObject GetPrefab(string categoryName, string poolTag)
         {
             PoolCategory poolCategory = Array.Find(poolsCategory, category => category.name == categoryName);

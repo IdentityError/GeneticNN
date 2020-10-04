@@ -11,9 +11,6 @@ namespace Assets.Scripts.TUtils.SceneManagement
     /// </summary>
     public class SceneLoader : MonoBehaviour
     {
-        /// <summary>
-        ///   Load a scene
-        /// </summary>
         public void LoadScene(string name)
         {
             int index = SceneUtility.GetBuildIndexByScenePath(name);
@@ -24,16 +21,12 @@ namespace Assets.Scripts.TUtils.SceneManagement
         }
 
         /// <summary>
-        ///   Load a scene asynchronously
-        /// </summary>
+
         public void LoadSceneAsynchronously(string name)
         {
             SceneUtil.LoadSceneAsynchronously(name);
         }
 
-        /// <summary>
-        ///   Reload the current active scene asynchronously
-        /// </summary>
         public void ReloadCurrentSceneAsynchronously()
         {
             SceneUtil.ReloadCurrentSceneAsynchronously();

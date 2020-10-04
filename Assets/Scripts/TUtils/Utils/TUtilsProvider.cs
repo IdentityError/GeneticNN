@@ -75,7 +75,7 @@ namespace Assets.Scripts.TUtils.Utils
         /// <param name="first"> </param>
         /// <param name="second"> </param>
         /// <param name="predicate"> </param>
-        /// <returns> </returns>
+        /// <returns> The zipped list </returns>
         public static List<Tuple<Type1, Type2>> ZipWithFirstPredicateMatching<Type1, Type2>(List<Type1> first, List<Type2> second, Func<Type1, Type2, bool> predicate)
         {
             List<Tuple<Type1, Type2>> res = new List<Tuple<Type1, Type2>>();
@@ -97,7 +97,7 @@ namespace Assets.Scripts.TUtils.Utils
         ///   Select an item based on its probability (interface)
         /// </summary>
         /// <param name="set"> </param>
-        /// <returns> </returns>
+        /// <returns> The selecte item </returns>
         public static T SelectWithProbability<T>(List<T> set) where T : IProbSelectable
         {
             int index = -1;

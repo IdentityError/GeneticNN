@@ -1112,9 +1112,9 @@ MonoBehaviour:
   options:
     populationNumber: 250
     rates:
-      maxWeightMutationRate: 0.045
-      maxSplitLinkRate: 0.05
-      maxAddLinkRate: 0.0825
+      maxWeightMutationRate: 0.09
+      maxSplitLinkRate: 0.065
+      maxAddLinkRate: 0.1
       crossoverRatio: 0
       weightMutationRate: 0.15
       splitLinkRate: 0.15
@@ -1122,13 +1122,13 @@ MonoBehaviour:
     preferences:
       minCrossoverRatio: 0.0875
       sharingThreshold: 0.425
-      dynamicRates: 0
-      enhancedSelectionOperator: 0
+      dynamicRates: 1
+      enhancedSelectionOperator: 1
       maxAchievableFitness: 0
       uniformEnabled: 1
-      singlePointEnabled: 0
-      kPointEnabled: 0
-      averageEnabled: 0
+      singlePointEnabled: 1
+      kPointEnabled: 1
+      averageEnabled: 1
   timeScale: 2
   individualPrefab: {fileID: 6791551976333570425, guid: dda260aae5911af48a27564e8179e873,
     type: 3}

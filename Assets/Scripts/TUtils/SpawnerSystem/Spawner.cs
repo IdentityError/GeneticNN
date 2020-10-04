@@ -48,9 +48,13 @@ namespace Assets.Scripts.TUtils.Spawner
         }
 
         /// <summary>
-        ///   <para> Create a persistent spawnException </para>
-        ///   Returns: the created spawnException
+        ///   Create a persistent spawn Exception
         /// </summary>
+        /// <param name="centre"> </param>
+        /// <param name="width"> </param>
+        /// <param name="height"> </param>
+        /// <param name="depth"> </param>
+        /// <returns> The exception instance </returns>
         public SpawnException CreateSpawnException(Vector3 centre, float width, float height, float depth)
         {
             if (spawnException != null)
@@ -63,9 +67,15 @@ namespace Assets.Scripts.TUtils.Spawner
         }
 
         /// <summary>
-        ///   <para> Create a timed spawnException </para>
-        ///   Returns: the created spawnException
+        ///   Create a timed spawn Exception
         /// </summary>
+        /// <param name="centre"> </param>
+        /// <param name="width"> </param>
+        /// <param name="height"> </param>
+        /// <param name="depth"> </param>
+        /// <param name="duration"> </param>
+        /// <param name="startNow"> </param>
+        /// <returns> The exception instance </returns>
         public SpawnException CreateSpawnException(Vector3 centre, float width, float height, float depth, float duration, bool startNow)
         {
             if (spawnException != null)
@@ -78,9 +88,12 @@ namespace Assets.Scripts.TUtils.Spawner
         }
 
         /// <summary>
-        ///   <para> Create a spawn timer with a fixed spawn rate </para>
-        ///   Returns: the created spawnerTimer
+        ///   Create a timer with a fixed spawn rate
         /// </summary>
+        /// <param name="fixedSpawnRate"> </param>
+        /// <param name="startNow"> </param>
+        /// <param name="functionToSub"> </param>
+        /// <returns> The Spawn Timer instance </returns>
         public SpawnTimer CreateSpawnTimer(int fixedSpawnRate, bool startNow, Action functionToSub = null)
         {
             spawnTimer = new SpawnTimer(context, fixedSpawnRate, startNow);
@@ -89,9 +102,12 @@ namespace Assets.Scripts.TUtils.Spawner
         }
 
         /// <summary>
-        ///   <para> Create a spawn timer with a bounded spawner rate </para>
-        ///   Returns: the created spawnerTimer
+        ///   Create a timer with a bounded spawn rate
         /// </summary>
+        /// <param name="fixedSpawnRate"> </param>
+        /// <param name="startNow"> </param>
+        /// <param name="functionToSub"> </param>
+        /// <returns> The Spawn Timer instance </returns>
         public SpawnTimer CreateSpawnTimer(Vector2 spawnRateRange, bool startNow, Action functionToSub = null)
         {
             spawnTimer = new SpawnTimer(context, spawnRateRange, startNow);
@@ -100,9 +116,12 @@ namespace Assets.Scripts.TUtils.Spawner
         }
 
         /// <summary>
-        ///   <para> Create a spawn timer with a scale over time function </para>
-        ///   Returns: the created spawnerTimer
+        ///   Create a timer with a scale over time rate
         /// </summary>
+        /// <param name="fixedSpawnRate"> </param>
+        /// <param name="startNow"> </param>
+        /// <param name="functionToSub"> </param>
+        /// <returns> The Spawn Timer instance </returns>
         public SpawnTimer CreateSpawnTimer(Func<int, float> scaleOverTimeFunc, bool startNow, Action functionToSub = null)
         {
             spawnTimer = new SpawnTimer(context, scaleOverTimeFunc, startNow);
@@ -111,9 +130,12 @@ namespace Assets.Scripts.TUtils.Spawner
         }
 
         /// <summary>
-        ///   Use this function to spawn your objects since it keep track of the actives spawnExceptions
-        ///   <para> Returns: the position </para>
+        ///   Return an available position taking care of eventually active spawn exceptions
         /// </summary>
+        /// <param name="fixedSpawnRate"> </param>
+        /// <param name="startNow"> </param>
+        /// <param name="functionToSub"> </param>
+        /// <returns> Available position </returns>
         public Vector3 GetSpawnPosition()
         {
             if (isFixedPos)
@@ -134,15 +156,15 @@ namespace Assets.Scripts.TUtils.Spawner
         }
 
         /// <summary>
-        ///   Returns: if the excpetion is currently active
         /// </summary>
+        /// <returns> Whether an excpetion is active </returns>
         public bool IsExceptionActive()
         {
             return spawnException.IsActive();
         }
 
         /// <summary>
-        ///   Kill the spawnTimer
+        ///   Kill the spawn timer
         /// </summary>
         public void KillSpawnTimer()
         {
@@ -192,6 +214,7 @@ namespace Assets.Scripts.TUtils.Spawner
         /// <summary>
         ///   Subscribe a function to be called whenever the spawnTimer fires
         /// </summary>
+        /// <param name="functionToSub"> </param>
         public void SubscribeToSpawnEvent(Action functionToSub)
         {
             if (functionToSub != null)
@@ -203,6 +226,7 @@ namespace Assets.Scripts.TUtils.Spawner
         /// <summary>
         ///   Unsubscribe a function from the spawnTimer
         /// </summary>
+        /// <param name="functionToUnsub"> </param>
         public void UnsubscribeToSpawnEvent(Action functionToUnsub)
         {
             spawnTimer.UnsubscribeFunction(functionToUnsub);

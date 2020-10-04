@@ -81,16 +81,13 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         }
 
         /// <summary>
-        ///   <b> Train a new population </b><br> </br> The Biocenosis needs to be speciated since it will be used for the intra-species
-        ///   selection, be sure to call
-        ///   <code>Biocenosis.Speciate([]) </code>
-        ///   before passing it
+        ///   <b> Train a new population </b>
         /// </summary>
         /// <param name="biocenosis">
         ///   The biocenosis of the population. Note that the biocenosis needs to be speciated before passing it to this function
         /// </param>
         /// <param name="breedingParameters"> The breeding parameters to use during crossover and mutation </param>
-        /// <returns> Next generation of NeuralNetworks </returns>
+        /// <returns> Next generation of Genotypes </returns>
         public abstract Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, Genotype>[] Train(Biocenosis biocenosis);
     }
 }

@@ -69,14 +69,14 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                     rates.addLinkRate = rates.maxAddLinkRate;
                     rates.crossoverRatio = 1F;
                 }
-                Debug.Log("WM: " + rates.weightMutationRate);
+                //Debug.Log("WM: " + rates.weightMutationRate);
                 // Order the individuals based on their fitnesses
                 current.individuals = current.individuals.OrderByDescending(x => x.ProvideRawFitness()).ToList();
                 List<IOrganism> top = GetMatingSubPopulationInSpecies(current, 0.2F);
                 // Select the top two organisms
                 (IOrganism, IOrganism) parents = SelectParents(top);
 
-                Debug.Log("CR: " + rates.crossoverRatio);
+                //Debug.Log("CR: " + rates.crossoverRatio);
                 // Create a number of offsprings as expected by the specie
                 for (int i = 0; i < current.GetExpectedOffpringsCount(); i++)
                 {

@@ -17,8 +17,11 @@ namespace Assets.Scripts.TUtils.SaveSystem
 
         /// <summary>
         ///   Save a generic type of data in the application persisten data path.
-        ///   <para> Returns: a SaveObject instance, null on error </para>
         /// </summary>
+        /// <typeparam name="T"> </typeparam>
+        /// <param name="data"> </param>
+        /// <param name="path"> </param>
+        /// <returns> SaveObject instance, null on error </returns>
         public static SaveObject SavePersistentData<T>(T data, string path)
         {
             SaveObject saveObject = new SaveObject(data);
@@ -30,11 +33,14 @@ namespace Assets.Scripts.TUtils.SaveSystem
         }
 
         /// <summary>
-        ///   Load a SaveObject that contains the type of data in the selected path.
-        ///   <para>
-        ///     Return a SaveObject. Use saveObject.GetData() to retrieve data. If the data is not present a null SaveObject will be returned
-        ///   </para>
+        ///   Load data from the specified path
         /// </summary>
+        /// <param name="path"> </param>
+        /// <returns>
+        ///   A SaveObject instance. Use
+        ///   <code>saveObject.GetData() </code>
+        ///   to retrieve data. If the data is not present a null SaveObject will be returned
+        /// </returns>
         public static SaveObject LoadPersistentData(string path)
         {
             SaveObject saveObject;
@@ -65,6 +71,10 @@ namespace Assets.Scripts.TUtils.SaveSystem
             }
         }
 
+        /// <summary>
+        ///   Delete data
+        /// </summary>
+        /// <param name="path"> </param>
         public static void DeleteObjectData(string path)
         {
             if (File.Exists(path))
@@ -73,6 +83,12 @@ namespace Assets.Scripts.TUtils.SaveSystem
             }
         }
 
+        /// <summary>
+        ///   Serialize a string to a file
+        /// </summary>
+        /// <param name="path"> </param>
+        /// <param name="data"> </param>
+        /// <param name="append"> </param>
         public static void SerializeToFile(string path, string data, bool append)
         {
             System.IO.Directory.CreateDirectory("data");

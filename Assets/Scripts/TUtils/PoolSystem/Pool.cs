@@ -4,11 +4,8 @@ using UnityEngine;
 
 namespace Assets.Scripts.TUtils.ObjectPooling
 {
-    /// <summary>
-    ///   Class representing a pool
-    /// </summary>
     [System.Serializable]
-    public class Pool
+    public abstract class Pool
     {
         public string tag;
         public GameObject prefab;

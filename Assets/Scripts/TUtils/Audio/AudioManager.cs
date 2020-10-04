@@ -87,9 +87,12 @@ namespace Assets.Scripts.TUtils.Audio
         }
 
         /// <summary>
-        ///   <para> Smooth in a sound in a specified time with specified stride chunks </para>
-        ///   Returns: the smoothed sound
+        ///   Smooth in a sound in a specified time with specified stride chunks
         /// </summary>
+        /// <param name="name"> </param>
+        /// <param name="stride"> </param>
+        /// <param name="duration"> </param>
+        /// <returns> The sound smoothed in </returns>
         public Sound SmoothInSound(string name, float stride, float duration)
         {
             if (!audioActive)
@@ -122,9 +125,10 @@ namespace Assets.Scripts.TUtils.Audio
         }
 
         /// <summary>
-        ///   <para> Play a sound </para>
-        ///   Returns: the sound instance
+        ///   Play a sound
         /// </summary>
+        /// <param name="name"> </param>
+        /// <returns> Sound instance </returns>
         public Sound PlaySound(string name)
         {
             if (!audioActive)
@@ -144,14 +148,16 @@ namespace Assets.Scripts.TUtils.Audio
         /// <summary>
         ///   Stop a specified sound
         /// </summary>
+        /// <param name="s"> </param>
         public void StopSound(Sound s)
         {
             s.source.Stop();
         }
 
         /// <summary>
-        ///   Stop a specified sound with the name
+        ///   Stop a sound specified by its name
         /// </summary>
+        /// <param name="name"> </param>
         public void StopSound(string name)
         {
             Sound s = Array.Find(sounds, sound => sound.name == name);
@@ -162,8 +168,9 @@ namespace Assets.Scripts.TUtils.Audio
         }
 
         /// <summary>
-        ///   Notify the audio state to the manager (Enable disable sound)
+        ///   Toggle the audio
         /// </summary>
+        /// <param name="audioActive"> </param>
         public void ToggleAudio(bool audioActive)
         {
             if (!audioActive)

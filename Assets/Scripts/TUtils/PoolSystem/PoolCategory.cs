@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-///   Class representing a pool category
-/// </summary>
 [System.Serializable]
 public class PoolCategory
 {
@@ -15,6 +12,7 @@ public class PoolCategory
     /// <summary>
     ///   Initialize the pools
     /// </summary>
+    /// <param name="position"> </param>
     public void InitializePools(Vector3 position)
     {
         poolsDictionary = new Dictionary<string, Queue<GameObject>>();
@@ -35,9 +33,12 @@ public class PoolCategory
     }
 
     /// <summary>
-    ///   <para> Spawn a GameObject from a specified pool, if poolTag is null the object will be selected based on the pool probability </para>
-    ///   Returns: the pooled object
+    ///   Spawn a GameObject from a specified pool, if poolTag is null the object will be selected based on the pool probability
     /// </summary>
+    /// <param name="poolTag"> </param>
+    /// <param name="position"> </param>
+    /// <param name="rotation"> </param>
+    /// <returns> The spawned object reference </returns>
     public GameObject SpawnFromPool(string poolTag, Vector3 position, Quaternion rotation)
     {
         if (poolTag == null)
@@ -73,8 +74,8 @@ public class PoolCategory
     }
 
     /// <summary>
-    ///   Returns: a random poolTag based on pools probabilities
     /// </summary>
+    /// <returns> A random pool tag based on pools probabilities </returns>
     public string GetRandomPoolTag()
     {
         int index = -1;

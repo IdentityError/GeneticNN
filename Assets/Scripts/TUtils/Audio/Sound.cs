@@ -4,9 +4,6 @@ using UnityEngine;
 
 namespace Assets.Scripts.TUtils.Audio
 {
-    /// <summary>
-    ///   Class representing a sound
-    /// </summary>
     [System.Serializable]
     public class Sound
     {

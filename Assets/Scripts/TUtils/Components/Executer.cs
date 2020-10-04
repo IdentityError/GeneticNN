@@ -15,10 +15,10 @@ namespace Assets.Scripts.TUtils.Components
 
         private static Executer instance;
 
-        /// <summary>
-        ///   Get the Executer singleton instance
-        /// </summary>
-        public static Executer GetInstance() { return instance; }
+        public static Executer GetInstance()
+        {
+            return instance;
+        }
 
         private void Awake()
         {
@@ -50,6 +50,7 @@ namespace Assets.Scripts.TUtils.Components
         ///   Enqueue a job to be performed, the job must have the following declaration:
         ///   <code>void F() </code>
         /// </summary>
+        /// <param name="job"> </param>
         public void AddJob(Action job)
         {
             jobs.Enqueue(job);

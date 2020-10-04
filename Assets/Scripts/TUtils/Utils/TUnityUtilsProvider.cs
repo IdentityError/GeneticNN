@@ -26,8 +26,12 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   Returns first matching Type component in a child that has the specified tag
         /// </summary>
+        /// <typeparam name="Type"> </typeparam>
+        /// <param name="parent"> </param>
+        /// <param name="tag"> </param>
+        /// <param name="inactive"> </param>
+        /// <returns> First matching Type component in a child that has the specified tag </returns>
         public static Type GetFirstComponentInChildrenWithTag<Type>(GameObject parent, string tag, bool inactive)
         {
             Transform[] transforms = parent.GetComponentsInChildren<Transform>(inactive);
@@ -47,8 +51,12 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   Returns first matching Type component in a parent that has the specified tag
         /// </summary>
+        /// <typeparam name="Type"> </typeparam>
+        /// <param name="parent"> </param>
+        /// <param name="tag"> </param>
+        /// <param name="inactive"> </param>
+        /// <returns> First matching Type component in a parent that has the specified tag </returns>
         public static Type GetFirstComponentInParentsWithTag<Type>(GameObject parent, string tag, bool inactive)
         {
             Transform[] transforms = parent.GetComponentsInParent<Transform>(inactive);
@@ -67,8 +75,10 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   Returns first child GameObject that has a matching type component
         /// </summary>
+        /// <typeparam name="Type"> </typeparam>
+        /// <param name="parent"> </param>
+        /// <returns> First child GameObject that has a matching type component </returns>
         public static GameObject GetFirstChildWithComponent<Type>(GameObject parent)
         {
             Type parentComponent = parent.GetComponent<Type>(), childComponent;
@@ -84,8 +94,11 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   Returns list of all children GameObjects with the specified tag, parent excluded
         /// </summary>
+        /// <param name="parent"> </param>
+        /// <param name="tag"> </param>
+        /// <param name="inactive"> </param>
+        /// <returns> List of all children GameObjects with the specified tag, parent excluded </returns>
         public static List<GameObject> GetGameObjectsInChildrenWithTag(GameObject parent, string tag, bool inactive)
         {
             List<GameObject> objs = new List<GameObject>();
@@ -101,8 +114,11 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   Returns list of all parents GameObjects with the specified tag
         /// </summary>
+        /// <param name="parent"> </param>
+        /// <param name="tag"> </param>
+        /// <param name="inactive"> </param>
+        /// <returns> List of all parents GameObjects with the specified tag </returns>
         public static List<GameObject> GetGameObjectsInParentsWithTag(GameObject parent, string tag, bool inactive)
         {
             List<GameObject> objs = new List<GameObject>();
@@ -118,8 +134,11 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   Returns first occurence of a parent with the selected tag
         /// </summary>
+        /// <param name="parent"> </param>
+        /// <param name="tag"> </param>
+        /// <param name="inactive"> </param>
+        /// <returns> First occurence of a parent with the selected tag </returns>
         public static GameObject GetFirstGameObjectInParentWithTag(GameObject parent, string tag, bool inactive)
         {
             Transform[] transforms = parent.GetComponentsInParent<Transform>(inactive);
@@ -134,8 +153,11 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   Returns first occurence of a child with the selected tag
         /// </summary>
+        /// <param name="parent"> </param>
+        /// <param name="tag"> </param>
+        /// <param name="inactive"> </param>
+        /// <returns> First occurence of a child with the selected tag </returns>
         public static GameObject GetFirstGameObjectInChildrenWithTag(GameObject parent, string tag, bool inactive)
         {
             Transform[] transforms = parent.GetComponentsInChildren<Transform>(inactive);
@@ -150,13 +172,12 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   Returns the first Component retrieved from the first occurrece of a child with a matching name
         /// </summary>
         /// <typeparam name="Type"> </typeparam>
         /// <param name="parent"> </param>
         /// <param name="name"> </param>
         /// <param name="inactive"> </param>
-        /// <returns> </returns>
+        /// <returns> First Component retrieved from the first occurrece of a child with a matching name </returns>
         public static Type GetFirstComponentInChildrenWithName<Type>(GameObject parent, string name, bool inactive)
         {
             Transform[] transforms = parent.GetComponentsInChildren<Transform>(inactive);
@@ -175,13 +196,12 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   Returns the first Component retrieved from the first occurrece of a parent with a matching name
         /// </summary>
         /// <typeparam name="Type"> </typeparam>
         /// <param name="parent"> </param>
         /// <param name="name"> </param>
         /// <param name="inactive"> </param>
-        /// <returns> </returns>
+        /// <returns> First Component retrieved from the first occurrece of a parent with a matching name </returns>
         public static Type GetFirstComponentInParentWithName<Type>(GameObject parent, string name, bool inactive)
         {
             Transform[] transforms = parent.GetComponentsInParent<Transform>(inactive);
@@ -219,9 +239,8 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   Returns true if either the mouse or a touch are overlapping a game object
         /// </summary>
-        /// <returns> </returns>
+        /// <returns> Whether the mouse or a touch are overlapping a game object </returns>
         public static bool IsAnyPointerOverGameObject()
         {
             PointerEventData eventDataCurrentPosition = new PointerEventData(EventSystem.current);

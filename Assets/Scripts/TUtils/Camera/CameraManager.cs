@@ -62,6 +62,10 @@ namespace Assets.Scripts.TUtils.CameraManager
         ///   Smooth in and then out a camera FOV to a target FOV in transitionDuration time, for duration time. If cameraID is null, all
         ///   the cameras will be affected
         /// </summary>
+        /// <param name="cameraID"> </param>
+        /// <param name="targetFOV"> </param>
+        /// <param name="transitionDuration"> </param>
+        /// <param name="duration"> </param>
         public void SmoothInAndOutFOV(string cameraID, float targetFOV, float transitionDuration, float duration)
         {
             if (cameraID == null)
@@ -132,6 +136,10 @@ namespace Assets.Scripts.TUtils.CameraManager
         ///   Smooth a camera FOV to a target FOV in transitionDuration time, for duration time. If cameraID is null, all the cameras will
         ///   be affected
         /// </summary>
+        /// <param name="cameraID"> </param>
+        /// <param name="targetFOV"> </param>
+        /// <param name="transitionDuration"> </param>
+        /// <param name="delay"> </param>
         public void SmoothFOV(string cameraID, float targetFOV, float transitionDuration, float delay)
         {
             if (cameraID == null)
@@ -180,6 +188,7 @@ namespace Assets.Scripts.TUtils.CameraManager
         /// <summary>
         ///   Reset the FOV of a camera, if passed null all cameras will be affected
         /// </summary>
+        /// <param name="cameraID"> </param>
         public void ResetFOV(string cameraID)
         {
             if (cameraID == null)
@@ -197,6 +206,11 @@ namespace Assets.Scripts.TUtils.CameraManager
             }
         }
 
+        /// <summary>
+        ///   Get the specified camera
+        /// </summary>
+        /// <param name="cameraID"> </param>
+        /// <returns> The camera instance </returns>
         public Camera GetCamera(string cameraID)
         {
             Camera camera = Array.Find(cameras, c => c.id == cameraID).camera;

@@ -12,8 +12,9 @@ namespace Assets.Scripts.TUtils.SaveSystem
         }
 
         /// <summary>
-        ///   Returns: casted Type data
         /// </summary>
+        /// <typeparam name="T"> </typeparam>
+        /// <returns> The T casted type of data </returns>
         public T GetData<T>()
         {
             return (T)data;
