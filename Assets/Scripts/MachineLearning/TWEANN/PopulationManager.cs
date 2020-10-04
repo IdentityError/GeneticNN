@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.CustomBehaviour;
 using Assets.Scripts.TUtils.ObjectPooling;
 using Assets.Scripts.TUtils.SaveSystem;
+using Assets.Scripts.TUtils.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,23 +15,11 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         [System.Serializable]
         public struct OptionsWrapper
         {
-            [Header("Crossover operators")]
-            public bool uniformEnabled;
-            public bool singlePointEnabled;
-            public bool kPointEnabled;
-            public bool averageEnabled;
             [Header("Parameters")]
             [Tooltip("Number of the population")]
             public int populationNumber;
-            [Tooltip("Indicates if the mutation is static (max mutation rate) or dynamic")]
-            public bool dynamicMutationRate;
-
             public DescriptorsWrapper.MutationRatesDescriptor rates;
-
-            [Tooltip("Minumum crossover ratio for a crossover operator")]
-            public float minCrossoverRatio;
-            [Tooltip("Topological distance threshold for speciation")]
-            public float sharingThreshold;
+            public DescriptorsWrapper.TrainerPreferences preferences;
         }
 
         public List<ISimulatingOrganism> populationList;
@@ -146,10 +135,12 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             operationsDescriptors.Clear();
 
             IOrganism fittest = biocenosis.GetCurrentFittest();
-            Debug.Log("Generation: " + generationCount + "\nHighest fitness: " + ((MonoBehaviour)fittest).gameObject.name + ", " + fittest.ProvideRawFitness() + "\n" + "Average fitness: " + biocenosis.GetAverageFitness() + "\nCT: " + completedSimulationCount);
+            //Debug.Log("Generation: " + generationCount + "\nHighest fitness: " + ((MonoBehaviour)fittest).gameObject.name + ", " + fittest.ProvideRawFitness() + "\n" + "Average fitness: " + biocenosis.GetAverageFitness() + "\nCT: " + completedSimulationCount);
 
-            TSaveManager.SerializeToFile("simulation.csv", generationCount + ";" + biocenosis.GetAverageFitness(), true);
+            TSaveManager.SerializeToFile("data/averageFitness.csv", biocenosis.GetAverageFitness().ToString(), true);
+            TSaveManager.SerializeToFile("data/completedTrack.csv", completedSimulationCount.ToString(), true);
 
+            uiManager.UpdateTextBox1(completedSimulationCount.ToString());
             populationList = populationList.OrderByDescending(x => x.ProvideRawFitness()).ToList();
             List<ISimulatingOrganism> subList = populationList.GetRange(0, options.populationNumber / 2);
             bool converged = true;
@@ -241,29 +232,37 @@ namespace Assets.Scripts.MachineLearning.TWEANN
 
         private void Start()
         {
+            //string c = "";
+            //for (int i = 0; i < 1000; i++)
+            //{
+            //    c += TMath.RandomGen.NextGaussian(0, 0.25) + "\n";
+            //}
+            //Debug.Log(c);
+
             List<CrossoverOperator> crossoverOperators = new List<CrossoverOperator>();
-            if (options.uniformEnabled) crossoverOperators.Add(new UniformCrossoverOperator());
-            if (options.singlePointEnabled) crossoverOperators.Add(new SinglePointCrossover());
-            if (options.kPointEnabled) crossoverOperators.Add(new KPointsCrossoverOperator());
-            if (options.averageEnabled) crossoverOperators.Add(new AverageCrossoverOperator());
+            if (options.preferences.uniformEnabled) crossoverOperators.Add(new UniformCrossoverOperator());
+            if (options.preferences.singlePointEnabled) crossoverOperators.Add(new SinglePointCrossover());
+            if (options.preferences.kPointEnabled) crossoverOperators.Add(new KPointsCrossoverOperator());
+            if (options.preferences.averageEnabled) crossoverOperators.Add(new AverageCrossoverOperator());
 
             if (crossoverOperators.Count < 1)
             {
                 throw new System.Exception("There is no Crossover operator!");
             }
-
-            trainerNEAT = new TrainerNEAT(new CrossoverOperatorsWrapper(crossoverOperators), options.minCrossoverRatio, 6F * track.Length(), options.dynamicMutationRate, options.rates);
+            options.preferences.maxAchievableFitness = 6F * track.Length();
+            trainerNEAT = new TrainerNEAT(new CrossoverOperatorsWrapper(crossoverOperators), options.preferences, options.rates);
 
             uiManager = FindObjectOfType<UIManager>();
             uiManager?.UpdateTrackLength(track.Length());
             //uiManager?.DrawNetUI(trainerProvider.ProvideTrainer().GetPredefinedTopologyDescriptor());
             CheckSimStat_C = CheckSimulationState();
             populationList = new List<ISimulatingOrganism>();
-            biocenosis = new Biocenosis(options.sharingThreshold);
+            biocenosis = new Biocenosis(options.preferences.sharingThreshold);
             InitializeAncestors();
             StartCoroutine(CheckSimStat_C);
 
-            TSaveManager.DeleteObjectData("simulation.csv");
+            TSaveManager.DeleteObjectData("data/averageFitness.csv");
+            TSaveManager.DeleteObjectData("data/completedTrack.csv");
         }
 
         private void Update()

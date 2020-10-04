@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.TUtils.Utils;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Assets.Scripts.MachineLearning.TWEANN
 {
@@ -21,9 +22,9 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             List<LinkGene> remaining = new List<LinkGene>(firstGen.links);
             List<LinkGene> partnerRemaining = new List<LinkGene>(secondGen.links);
             // Zip togheter the links that have the same innovation number
-            List<Tuple<LinkGene, LinkGene>> zippedLinks = TUtilsProvider.ZipWithPredicate(firstGen.links, secondGen.links, (item1, item2) => item1.GetInnovationNumber().Equals(item2.GetInnovationNumber()));
+            List<Tuple<LinkGene, LinkGene>> zippedLinks = TUtilsProvider.ZipWithFirstPredicateMatching(firstGen.links, secondGen.links, (item1, item2) => item1.GetInnovationNumber().Equals(item2.GetInnovationNumber()));
 
-            int stride = zippedLinks.Count / UnityEngine.Random.Range(1, zippedLinks.Count);
+            int stride = Mathf.CeilToInt((float)zippedLinks.Count / UnityEngine.Random.Range(1, zippedLinks.Count));
             //Add to che child all the matching genes(links)
             int i = 0;
             bool importFromFirst = true;

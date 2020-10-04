@@ -21,7 +21,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             List<LinkGene> remaining = new List<LinkGene>(firstGen.links);
             List<LinkGene> partnerRemaining = new List<LinkGene>(secondGen.links);
             // Zip togheter the links that have the same innovation number
-            List<Tuple<LinkGene, LinkGene>> zippedLinks = TUtilsProvider.ZipWithPredicate(firstGen.links, secondGen.links, (item1, item2) => item1.GetInnovationNumber().Equals(item2.GetInnovationNumber()));
+            List<Tuple<LinkGene, LinkGene>> zippedLinks = TUtilsProvider.ZipWithFirstPredicateMatching(firstGen.links, secondGen.links, (item1, item2) => item1.GetInnovationNumber().Equals(item2.GetInnovationNumber()));
 
             //Add to che child all the matching genes(links)
             foreach (Tuple<LinkGene, LinkGene> gene in zippedLinks)

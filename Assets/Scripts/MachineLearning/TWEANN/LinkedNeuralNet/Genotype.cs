@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace Assets.Scripts.MachineLearning.TWEANN
 {
@@ -128,7 +129,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         {
             int maxGenomes = this.LinkCount > from.LinkCount ? this.LinkCount : from.LinkCount;
             int genesDifference = TMath.Abs(this.LinkCount - from.LinkCount);
-            List<Tuple<LinkGene, LinkGene>> zippedLinks = TUtilsProvider.ZipWithPredicate(links, from.links, (item1, item2) => item1.GetInnovationNumber().Equals(item2.GetInnovationNumber()));
+            List<Tuple<LinkGene, LinkGene>> zippedLinks = TUtilsProvider.ZipWithFirstPredicateMatching(links, from.links, (item1, item2) => item1.GetInnovationNumber().Equals(item2.GetInnovationNumber()));
             float differenceSum = 0;
             foreach (Tuple<LinkGene, LinkGene> current in zippedLinks)
             {
@@ -212,7 +213,9 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                 if (UnityEngine.Random.Range(0F, 1F) < (rates.weightMutationRate))
                 {
                     int random = UnityEngine.Random.Range(0, LinkCount);
-                    links[random].SetWeight(UnityEngine.Random.Range(-1F, 1F));
+                    double value = links[random].GetWeight() + TMath.RandomGen.NextGaussian(0F, 0.25F);
+                    value = Mathf.Clamp((float)value, -1F, 1F);
+                    links[random].SetWeight(value);
                 }
             }
         }

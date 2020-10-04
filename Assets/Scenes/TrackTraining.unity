@@ -1110,22 +1110,25 @@ MonoBehaviour:
   biocenosis:
     speciesList: []
   options:
-    uniformEnabled: 1
-    singlePointEnabled: 1
-    kPointEnabled: 1
-    averageEnabled: 1
     populationNumber: 250
-    dynamicMutationRate: 1
     rates:
-      maxWeightMutationRate: 0.085
-      maxSplitLinkRate: 0.06
-      maxAddLinkRate: 0.07
+      maxWeightMutationRate: 0.045
+      maxSplitLinkRate: 0.05
+      maxAddLinkRate: 0.0825
       crossoverRatio: 0
       weightMutationRate: 0.15
       splitLinkRate: 0.15
       addLinkRate: 0.25
-    minCrossoverRatio: 0.06
-    sharingThreshold: 0.425
+    preferences:
+      minCrossoverRatio: 0.0875
+      sharingThreshold: 0.425
+      dynamicRates: 0
+      enhancedSelectionOperator: 0
+      maxAchievableFitness: 0
+      uniformEnabled: 1
+      singlePointEnabled: 0
+      kPointEnabled: 0
+      averageEnabled: 0
   timeScale: 2
   individualPrefab: {fileID: 6791551976333570425, guid: dda260aae5911af48a27564e8179e873,
     type: 3}

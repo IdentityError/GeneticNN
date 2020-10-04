@@ -31,8 +31,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
 
         public CrossoverOperator GetRandomOperator()
         {
-            List<IProbSelectable> sel = new List<IProbSelectable>(crossoverOperators);
-            CrossoverOperator op = TUtilsProvider.SelectWithProbability<CrossoverOperator>(sel);
+            CrossoverOperator op = TUtilsProvider.SelectWithProbability(crossoverOperators);
             return op;
         }
 

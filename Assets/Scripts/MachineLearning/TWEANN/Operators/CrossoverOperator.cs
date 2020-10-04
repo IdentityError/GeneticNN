@@ -41,5 +41,10 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         {
             return currentProgression;
         }
+
+        public override string ToString()
+        {
+            return base.ToString() + " - Progression: " + currentProgression + ", P: " + selectProbability;
+        }
     }
 }

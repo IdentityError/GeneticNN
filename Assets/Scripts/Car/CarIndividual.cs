@@ -41,6 +41,8 @@ public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject
     private new Rigidbody rigidbody;
     private Vector3[] sensesDirections;
 
+    private float prob;
+
     private void Start()
     {
         lastPosition = transform.position;
@@ -255,6 +257,16 @@ public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject
     public void SetRawFitness(double rawFitness)
     {
         this.rawFitness = rawFitness;
+    }
+
+    public float ProvideSelectProbability()
+    {
+        return prob;
+    }
+
+    public void SetSelectProbability(float prob)
+    {
+        this.prob = prob;
     }
 
     #endregion Interface

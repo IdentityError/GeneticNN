@@ -37,5 +37,22 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                     "Crossover rate: " + crossoverRatio + "\n";
             }
         }
+
+        [System.Serializable]
+        public struct TrainerPreferences
+        {
+            public float minCrossoverRatio;
+            public float sharingThreshold;
+            public bool dynamicRates;
+            public bool enhancedSelectionOperator;
+
+            [HideInInspector] public float maxAchievableFitness;
+
+            [Header("Crossover operators")]
+            public bool uniformEnabled;
+            public bool singlePointEnabled;
+            public bool kPointEnabled;
+            public bool averageEnabled;
+        }
     }
 }

@@ -75,6 +75,7 @@ namespace Assets.Scripts.TUtils.SaveSystem
 
         public static void SerializeToFile(string path, string data, bool append)
         {
+            System.IO.Directory.CreateDirectory("data");
             if (append)
             {
                 File.AppendAllText(path, data + Environment.NewLine);

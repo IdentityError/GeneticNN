@@ -76,7 +76,7 @@ namespace Assets.Scripts.TUtils.Utils
         /// <param name="second"> </param>
         /// <param name="predicate"> </param>
         /// <returns> </returns>
-        public static List<Tuple<Type1, Type2>> ZipWithPredicate<Type1, Type2>(List<Type1> first, List<Type2> second, Func<Type1, Type2, bool> predicate)
+        public static List<Tuple<Type1, Type2>> ZipWithFirstPredicateMatching<Type1, Type2>(List<Type1> first, List<Type2> second, Func<Type1, Type2, bool> predicate)
         {
             List<Tuple<Type1, Type2>> res = new List<Tuple<Type1, Type2>>();
             foreach (Type1 elem in first)
@@ -98,7 +98,7 @@ namespace Assets.Scripts.TUtils.Utils
         /// </summary>
         /// <param name="set"> </param>
         /// <returns> </returns>
-        public static T SelectWithProbability<T>(List<IProbSelectable> set)
+        public static T SelectWithProbability<T>(List<T> set) where T : IProbSelectable
         {
             int index = -1;
             float r = UnityEngine.Random.Range(0F, 1F);
@@ -107,6 +107,24 @@ namespace Assets.Scripts.TUtils.Utils
                 r -= set.ElementAt(++index).ProvideSelectProbability();
             }
             return (T)set.ElementAt(index);
+        }
+
+        /// <summary>
+        ///   Normalize the select probabilities using the <b> float value(T:IProbSelectable) </b> function
+        /// </summary>
+        /// <param name="set"> </param>
+        /// <returns> </returns>
+        public static void NormalizeProbabilities<T>(List<T> set, Func<T, float> value) where T : IProbSelectable
+        {
+            float sum = 0;
+            foreach (T elem in set)
+            {
+                sum += value(elem);
+            }
+            foreach (T elem1 in set)
+            {
+                elem1.SetSelectProbability(value(elem1) / sum);
+            }
         }
     }
 }

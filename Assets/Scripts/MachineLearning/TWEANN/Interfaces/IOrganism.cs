@@ -1,6 +1,8 @@
-﻿namespace Assets.Scripts.MachineLearning.TWEANN
+﻿using Assets.Scripts.TUtils.Interfaces;
+
+namespace Assets.Scripts.MachineLearning.TWEANN
 {
-    public interface IOrganism : INeuralNetHolder
+    public interface IOrganism : INeuralNetHolder, IProbSelectable
     {
         /// <summary>
         ///   Set the Population manager of this performer

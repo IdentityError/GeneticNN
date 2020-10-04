@@ -1,6 +1,7 @@
 ﻿// Copyright (c) 2020 Matteo Beltrame
 
 using System;
+using UnityEngine;
 
 namespace Assets.Scripts.TUtils.Utils
 {
@@ -241,6 +242,40 @@ namespace Assets.Scripts.TUtils.Utils
                 }
             }
             return min;
+        }
+
+        public static class RandomGen
+        {
+            private static bool nextGaussianAvailable;
+            private static double nextGaussian;
+
+            public static double NextGaussian(double mean, double stdv)
+            {
+                double amplitude = 1F / Math.Sqrt(2F * Math.PI * stdv * stdv);
+                if (nextGaussianAvailable)
+                {
+                    nextGaussianAvailable = false;
+                    return nextGaussian;
+                }
+                else
+                {
+                    double u1 = UnityEngine.Random.Range(0F, 1F);
+                    double u2 = UnityEngine.Random.Range(0F, 1F);
+                    double x = 0;
+                    double y = 0;
+                    if (u1 != 0)
+                    {
+                        x = amplitude * (mean + stdv * (Math.Sqrt(-2F * Math.Log(u1))) * Math.Cos(2F * Math.PI * u2));
+                    }
+                    if (u2 != 0)
+                    {
+                        y = amplitude * (mean + stdv * (Math.Sqrt(-2F * Math.Log(u1))) * Math.Sin(2F * Math.PI * u2));
+                    }
+                    nextGaussianAvailable = true;
+                    nextGaussian = y;
+                    return x;
+                }
+            }
         }
     }
 }
