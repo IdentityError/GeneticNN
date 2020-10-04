@@ -1,7 +1,5 @@
 ﻿// Copyright (c) 2020 Matteo Beltrame
-
 using System;
-using UnityEngine;
 
 namespace Assets.Scripts.TUtils.Utils
 {
@@ -242,6 +240,81 @@ namespace Assets.Scripts.TUtils.Utils
                 }
             }
             return min;
+        }
+
+        /// <summary>
+        ///   Returns the average of an arbitrary number of floats
+        /// </summary>
+        /// <param name="data"> </param>
+        /// <returns> </returns>
+        public static float Avg(params float[] data)
+        {
+            float sum = 0;
+            for (int i = 0; i < data.Length; i++)
+            {
+                sum += data[i];
+            }
+            return sum / data.Length;
+        }
+
+        /// <summary>
+        ///   Returns the average of an arbitrary number of doubles
+        /// </summary>
+        /// <param name="data"> </param>
+        /// <returns> </returns>
+        public static double Avg(params double[] data)
+        {
+            double sum = 0;
+            for (int i = 0; i < data.Length; i++)
+            {
+                sum += data[i];
+            }
+            return sum / data.Length;
+        }
+
+        /// <summary>
+        ///   Returns the sum of an arbitrary number of doubles
+        /// </summary>
+        /// <param name="data"> </param>
+        /// <returns> </returns>
+        public static double Sum(params double[] data)
+        {
+            double sum = 0;
+            for (int i = 0; i < data.Length; i++)
+            {
+                sum += data[i];
+            }
+            return sum;
+        }
+
+        /// <summary>
+        ///   Returns the sum of an arbitrary number of floats
+        /// </summary>
+        /// <param name="data"> </param>
+        /// <returns> </returns>
+        public static float Sum(params float[] data)
+        {
+            float sum = 0;
+            for (int i = 0; i < data.Length; i++)
+            {
+                sum += data[i];
+            }
+            return sum;
+        }
+
+        /// <summary>
+        ///   Returns the sum of an arbitrary number of ints
+        /// </summary>
+        /// <param name="data"> </param>
+        /// <returns> </returns>
+        public static int Sum(params int[] data)
+        {
+            int sum = 0;
+            for (int i = 0; i < data.Length; i++)
+            {
+                sum += data[i];
+            }
+            return sum;
         }
 
         public static class RandomGen

@@ -196,5 +196,11 @@ namespace Assets.Scripts.TUtils.CameraManager
                 cameraInfo.camera.fieldOfView = cameraInfo.initFOV;
             }
         }
+
+        public Camera GetCamera(string cameraID)
+        {
+            Camera camera = Array.Find(cameras, c => c.id == cameraID).camera;
+            return camera;
+        }
     }
 }

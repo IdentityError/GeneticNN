@@ -23,7 +23,7 @@ namespace Assets.Scripts.TUtils.Spawner
 
         private Func<int, float> scaleFunc;
 
-        public SpawnTimer(MonoBehaviour context, int fixedSpawnRate, bool startNow)
+        public SpawnTimer(MonoBehaviour context, float fixedSpawnRate, bool startNow)
         {
             routineActive = false;
             this.context = context;
@@ -84,9 +84,14 @@ namespace Assets.Scripts.TUtils.Spawner
             routineActive = false;
         }
 
-        public void PauseSpawnRoutine(bool state)
+        public void Pause()
         {
-            isPaused = state;
+            isPaused = true;
+        }
+
+        public void Resume()
+        {
+            isPaused = false;
         }
 
         private IEnumerator SpawnCoroutine()

@@ -19,11 +19,14 @@ namespace Assets.Scripts.TUtils.Spawner
     {
         public readonly Vector2 areaHorizontalRange, areaVerticalRange, areaDepthRange;
         private MonoBehaviour context;
+        private bool isFixedPos = false;
+        private Vector3 pos;
         private SpawnException spawnException = null;
         private SpawnTimer spawnTimer = null;
 
         public Spawner(MonoBehaviour context, Vector2 horizontalRange, Vector2 verticalRange, Vector2 depthRange)
         {
+            isFixedPos = false;
             this.context = context;
             this.areaHorizontalRange = horizontalRange;
             this.areaVerticalRange = verticalRange;
@@ -35,6 +38,13 @@ namespace Assets.Scripts.TUtils.Spawner
             {
                 throw new System.Exception("Spawner area is not valid, check that it is indeed a volume\n(can't be 0 of thickness in a certain direction: horizontal.x != horizontal.y for every range, vertial and depth");
             }
+        }
+
+        public Spawner(MonoBehaviour context, Vector3 pos)
+        {
+            this.context = context;
+            isFixedPos = true;
+            this.pos = pos;
         }
 
         /// <summary>
@@ -71,9 +81,10 @@ namespace Assets.Scripts.TUtils.Spawner
         ///   <para> Create a spawn timer with a fixed spawn rate </para>
         ///   Returns: the created spawnerTimer
         /// </summary>
-        public SpawnTimer CreateSpawnTimer(int fixedSpawnRate, bool startNow)
+        public SpawnTimer CreateSpawnTimer(int fixedSpawnRate, bool startNow, Action functionToSub = null)
         {
             spawnTimer = new SpawnTimer(context, fixedSpawnRate, startNow);
+            SubscribeToSpawnEvent(functionToSub);
             return spawnTimer;
         }
 
@@ -81,9 +92,10 @@ namespace Assets.Scripts.TUtils.Spawner
         ///   <para> Create a spawn timer with a bounded spawner rate </para>
         ///   Returns: the created spawnerTimer
         /// </summary>
-        public SpawnTimer CreateSpawnTimer(Vector2 spawnRateRange, bool startNow)
+        public SpawnTimer CreateSpawnTimer(Vector2 spawnRateRange, bool startNow, Action functionToSub = null)
         {
             spawnTimer = new SpawnTimer(context, spawnRateRange, startNow);
+            SubscribeToSpawnEvent(functionToSub);
             return spawnTimer;
         }
 
@@ -91,9 +103,10 @@ namespace Assets.Scripts.TUtils.Spawner
         ///   <para> Create a spawn timer with a scale over time function </para>
         ///   Returns: the created spawnerTimer
         /// </summary>
-        public SpawnTimer CreateSpawnTimer(Func<int, float> scaleOverTimeFunc, bool startNow)
+        public SpawnTimer CreateSpawnTimer(Func<int, float> scaleOverTimeFunc, bool startNow, Action functionToSub = null)
         {
             spawnTimer = new SpawnTimer(context, scaleOverTimeFunc, startNow);
+            SubscribeToSpawnEvent(functionToSub);
             return spawnTimer;
         }
 
@@ -103,13 +116,20 @@ namespace Assets.Scripts.TUtils.Spawner
         /// </summary>
         public Vector3 GetSpawnPosition()
         {
-            if (spawnException != null && spawnException.IsActive())
+            if (isFixedPos)
             {
-                return spawnException.GetNextPosition();
+                return pos;
             }
             else
             {
-                return new Vector3(UnityEngine.Random.Range(areaHorizontalRange.x, areaHorizontalRange.y), UnityEngine.Random.Range(areaVerticalRange.x, areaVerticalRange.y), UnityEngine.Random.Range(areaDepthRange.x, areaDepthRange.y));
+                if (spawnException != null && spawnException.IsActive())
+                {
+                    return spawnException.GetNextPosition();
+                }
+                else
+                {
+                    return new Vector3(UnityEngine.Random.Range(areaHorizontalRange.x, areaHorizontalRange.y), UnityEngine.Random.Range(areaVerticalRange.x, areaVerticalRange.y), UnityEngine.Random.Range(areaDepthRange.x, areaDepthRange.y));
+                }
             }
         }
 
@@ -132,9 +152,17 @@ namespace Assets.Scripts.TUtils.Spawner
         /// <summary>
         ///   Pause the spawnTimer
         /// </summary>
-        public void PauseSpawnTimer(bool state)
+        public void PauseSpawnTimer()
         {
-            spawnTimer.PauseSpawnRoutine(state);
+            spawnTimer.Pause();
+        }
+
+        /// <summary>
+        ///   Resume the spawnTimer
+        /// </summary>
+        public void ResumeSpawnTimer()
+        {
+            spawnTimer.Resume();
         }
 
         /// <summary>
@@ -166,7 +194,10 @@ namespace Assets.Scripts.TUtils.Spawner
         /// </summary>
         public void SubscribeToSpawnEvent(Action functionToSub)
         {
-            spawnTimer.SubscribeFunction(functionToSub);
+            if (functionToSub != null)
+            {
+                spawnTimer.SubscribeFunction(functionToSub);
+            }
         }
 
         /// <summary>

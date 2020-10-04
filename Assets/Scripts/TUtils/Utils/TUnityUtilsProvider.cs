@@ -3,6 +3,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
 namespace Assets.Scripts.TUtils.Utils
@@ -25,14 +26,15 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   Returns: first matching Type component in a child that has the specified tag
+        ///   Returns first matching Type component in a child that has the specified tag
         /// </summary>
         public static Type GetFirstComponentInChildrenWithTag<Type>(GameObject parent, string tag, bool inactive)
         {
             Transform[] transforms = parent.GetComponentsInChildren<Transform>(inactive);
+
             for (int i = 1; i < transforms.Length; i++)
             {
-                if (transforms[i].tag == tag)
+                if (transforms[i].tag.Equals(tag))
                 {
                     Type component = transforms[i].gameObject.GetComponent<Type>();
                     if (component != null)
@@ -45,14 +47,14 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   Returns: first matching Type component in a parent that has the specified tag
+        ///   Returns first matching Type component in a parent that has the specified tag
         /// </summary>
         public static Type GetFirstComponentInParentsWithTag<Type>(GameObject parent, string tag, bool inactive)
         {
             Transform[] transforms = parent.GetComponentsInParent<Transform>(inactive);
             for (int i = 1; i < transforms.Length; i++)
             {
-                if (transforms[i].tag == tag)
+                if (transforms[i].tag.Equals(tag))
                 {
                     Type component = transforms[i].gameObject.GetComponent<Type>();
                     if (component != null)
@@ -65,7 +67,7 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   Returns: first child GameObject that has a matching type component
+        ///   Returns first child GameObject that has a matching type component
         /// </summary>
         public static GameObject GetFirstChildWithComponent<Type>(GameObject parent)
         {
@@ -82,7 +84,7 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   Returns: list of all children GameObjects with the specified tag, parent excluded
+        ///   Returns list of all children GameObjects with the specified tag, parent excluded
         /// </summary>
         public static List<GameObject> GetGameObjectsInChildrenWithTag(GameObject parent, string tag, bool inactive)
         {
@@ -99,7 +101,7 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   Returns: list of all parents GameObjects with the specified tag
+        ///   Returns list of all parents GameObjects with the specified tag
         /// </summary>
         public static List<GameObject> GetGameObjectsInParentsWithTag(GameObject parent, string tag, bool inactive)
         {
@@ -116,7 +118,7 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   Returns: first occurence of a parent with the selected tag
+        ///   Returns first occurence of a parent with the selected tag
         /// </summary>
         public static GameObject GetFirstGameObjectInParentWithTag(GameObject parent, string tag, bool inactive)
         {
@@ -132,7 +134,7 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   Returns: first occurence of a child with the selected tag
+        ///   Returns first occurence of a child with the selected tag
         /// </summary>
         public static GameObject GetFirstGameObjectInChildrenWithTag(GameObject parent, string tag, bool inactive)
         {
@@ -145,6 +147,56 @@ namespace Assets.Scripts.TUtils.Utils
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        ///   Returns the first Component retrieved from the first occurrece of a child with a matching name
+        /// </summary>
+        /// <typeparam name="Type"> </typeparam>
+        /// <param name="parent"> </param>
+        /// <param name="name"> </param>
+        /// <param name="inactive"> </param>
+        /// <returns> </returns>
+        public static Type GetFirstComponentInChildrenWithName<Type>(GameObject parent, string name, bool inactive)
+        {
+            Transform[] transforms = parent.GetComponentsInChildren<Transform>(inactive);
+            for (int i = 0; i < transforms.Length; i++)
+            {
+                if (transforms[i].name.Equals(name))
+                {
+                    Type component = transforms[i].gameObject.GetComponent<Type>();
+                    if (component != null)
+                    {
+                        return component;
+                    }
+                }
+            }
+            return default(Type);
+        }
+
+        /// <summary>
+        ///   Returns the first Component retrieved from the first occurrece of a parent with a matching name
+        /// </summary>
+        /// <typeparam name="Type"> </typeparam>
+        /// <param name="parent"> </param>
+        /// <param name="name"> </param>
+        /// <param name="inactive"> </param>
+        /// <returns> </returns>
+        public static Type GetFirstComponentInParentWithName<Type>(GameObject parent, string name, bool inactive)
+        {
+            Transform[] transforms = parent.GetComponentsInParent<Transform>(inactive);
+            for (int i = 0; i < transforms.Length; i++)
+            {
+                if (transforms[i].name.Equals(name))
+                {
+                    Type component = transforms[i].gameObject.GetComponent<Type>();
+                    if (component != null)
+                    {
+                        return component;
+                    }
+                }
+            }
+            return default(Type);
         }
 
         /// <summary>
@@ -164,6 +216,19 @@ namespace Assets.Scripts.TUtils.Utils
                     renderer.enabled = state;
                 }
             }
+        }
+
+        /// <summary>
+        ///   Returns true if either the mouse or a touch are overlapping a game object
+        /// </summary>
+        /// <returns> </returns>
+        public static bool IsAnyPointerOverGameObject()
+        {
+            PointerEventData eventDataCurrentPosition = new PointerEventData(EventSystem.current);
+            eventDataCurrentPosition.position = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
+            List<RaycastResult> results = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(eventDataCurrentPosition, results);
+            return results.Count > 0;
         }
     }
 }

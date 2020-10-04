@@ -60,7 +60,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                     rates.addLinkRate *= (1F - (float)(averageFitness / preferences.maxAchievableFitness));
                     //rates.crossoverRatio = (1F - Mathf.Pow(((float)(averageFitness / preferences.maxAchievableFitness)), 3.75F));
                     //rates.crossoverRatio *= (1F - (float)(averageFitness / preferences.maxAchievableFitness));
-                    rates.crossoverRatio = 1F - rates.weightMutationRate;
+                    rates.crossoverRatio = 1F - TMath.Avg(rates.weightMutationRate, rates.splitLinkRate, rates.addLinkRate);
                 }
                 else
                 {
@@ -173,9 +173,11 @@ namespace Assets.Scripts.MachineLearning.TWEANN
 
             foreach (Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, IOrganism> descriptor in descriptors)
             {
-                double max = TMath.Max(descriptor.Item2.ProvideRawFitness(), descriptor.Item1.parentFitness, descriptor.Item1.parent1Fitness);
-                double value = max - ((descriptor.Item1.parentFitness + descriptor.Item1.parent1Fitness) / 2F);
-                value = value < 0 ? 0 : value;
+                List<double> values = new List<double> { descriptor.Item2.ProvideRawFitness(), descriptor.Item1.parentFitness, descriptor.Item1.parent1Fitness };
+                values.OrderByDescending(x => x);
+                double S = values[0] + values[1];
+                //double max = TMath.Max(descriptor.Item2.ProvideRawFitness(), descriptor.Item1.parentFitness, descriptor.Item1.parent1Fitness);
+                double value = S - (descriptor.Item1.parentFitness + descriptor.Item1.parent1Fitness);
                 //Debug.Log(descriptor.parentFitness + ", " + descriptor.parent1Fitness + ", C: " + descriptor.child.ProvideRawFitness() + "OP: " + descriptor.operatorUsed.ToString() + "V: " + value);
                 if (descriptor.Item1.operatorUsed is UniformCrossoverOperator)
                 {

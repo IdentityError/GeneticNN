@@ -54,9 +54,20 @@ namespace Assets.Scripts.TUtils.Spawner
             spawnTimer.KillSpawnRoutine();
         }
 
-        public void PauseSpawnTimer(bool state)
+        /// <summary>
+        ///   Pause the spawnTimer
+        /// </summary>
+        public void PauseSpawnTimer()
         {
-            spawnTimer.PauseSpawnRoutine(state);
+            spawnTimer.Pause();
+        }
+
+        /// <summary>
+        ///   Resume the spawnTimer
+        /// </summary>
+        public void ResumeSpawnTimer()
+        {
+            spawnTimer.Resume();
         }
 
         public void SubscribeToSpawnEvent(Action functionToSub)

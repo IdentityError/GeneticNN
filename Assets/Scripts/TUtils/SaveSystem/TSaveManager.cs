@@ -19,7 +19,7 @@ namespace Assets.Scripts.TUtils.SaveSystem
         ///   Save a generic type of data in the application persisten data path.
         ///   <para> Returns: a SaveObject instance, null on error </para>
         /// </summary>
-        public static SaveObject SavePersistentObjectData<T>(T data, string path)
+        public static SaveObject SavePersistentData<T>(T data, string path)
         {
             SaveObject saveObject = new SaveObject(data);
             BinaryFormatter formatter = new BinaryFormatter();
@@ -35,7 +35,7 @@ namespace Assets.Scripts.TUtils.SaveSystem
         ///     Return a SaveObject. Use saveObject.GetData() to retrieve data. If the data is not present a null SaveObject will be returned
         ///   </para>
         /// </summary>
-        public static SaveObject LoadPersistentObjectData(string path)
+        public static SaveObject LoadPersistentData(string path)
         {
             SaveObject saveObject;
             if (File.Exists(path))

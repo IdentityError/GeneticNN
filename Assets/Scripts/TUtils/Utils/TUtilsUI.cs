@@ -11,7 +11,6 @@ namespace Assets.Scripts.TUtils.Utils
     public class TUtilsUI
     {
         /// <summary>
-        ///   <para> Type: UI </para>
         ///   <para> Coroutine that fills an image in a specified time. (Image has to be set to filled image) </para>
         ///   Returns: the IEnumerator's reference
         /// </summary>
@@ -35,7 +34,6 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   <para> Type: UI </para>
         ///   <para>
         ///     Coroutine that fills an image in a specified time and calls a specified delegate at the end of the coroutine (Image has to
         ///     be set to filled image)
@@ -66,7 +64,6 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   <para> Type: UI </para>
         ///   <para> Coroutine that unfills an image in a specified time. (Image has to be set to filled image) </para>
         ///   Returns: the IEnumerator's reference
         /// </summary>
@@ -90,7 +87,6 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   <para> Type: UI </para>
         ///   <para>
         ///     Coroutine that unfills an image in a specified time and calls a specified delegate at the end of the coroutine (Image has to
         ///     be set to filled image)
@@ -169,7 +165,7 @@ namespace Assets.Scripts.TUtils.Utils
         }
 
         /// <summary>
-        ///   Return: formatted string "h:m:s" calculated from seconds
+        ///   Returns the formatted string "h:m:s" calculated from seconds
         /// </summary>
         public static string GetTimeStringFromSeconds(float _seconds)
         {
