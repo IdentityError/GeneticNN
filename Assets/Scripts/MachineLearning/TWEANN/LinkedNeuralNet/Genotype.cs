@@ -145,7 +145,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         ///   Mutate this genotype based on the specified probabilities
         /// </summary>
         /// <param name="mutation"> </param>
-        public void Mutate(DescriptorsWrapper.MutationRatesDescriptor rates)
+        public void Mutate(DescriptorsWrapper.RatesDescriptor rates)
         {
             if (UnityEngine.Random.Range(0F, 1F) < rates.splitLinkRate)
             {

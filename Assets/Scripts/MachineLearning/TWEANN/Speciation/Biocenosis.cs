@@ -10,12 +10,14 @@ namespace Assets.Scripts.MachineLearning.TWEANN
     [System.Serializable]
     public class Biocenosis
     {
-        [SerializeField] private List<Species> speciesList;
+        [SerializeField] private List<Specie> speciesList;
+        private CrossoverOperatorsWrapper crossoverOperatorsWrapper;
         private float speciesSharingThreshold;
 
-        public Biocenosis(float speciesSharingThreshold)
+        public Biocenosis(float speciesSharingThreshold, CrossoverOperatorsWrapper wrapper)
         {
-            speciesList = new List<Species>();
+            this.crossoverOperatorsWrapper = wrapper;
+            speciesList = new List<Specie>();
             this.speciesSharingThreshold = speciesSharingThreshold;
         }
 
@@ -25,7 +27,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         ///   2. Calculate the next generation expected number per species and total number of individuals
         /// </summary>
         /// <param name="population"> </param>
-        public void Speciate(IOrganism[] population)
+        public void Speciate(Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, IOrganism>[] population)
         {
             Reset();
             int lenght = population.Length;
@@ -42,22 +44,24 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             //}
         }
 
-        private void AddToSpeciesOrCreate(IOrganism individual)
+        private void AddToSpeciesOrCreate(Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, IOrganism> individual)
         {
-            foreach (Species species in speciesList)
+            foreach (Specie species in speciesList)
             {
-                if (species.Belongs(individual, speciesSharingThreshold))
+                if (species.Belongs(individual.Item2, speciesSharingThreshold))
                 {
-                    species.AddToSpecies(individual);
+                    species.AddToSpecies(individual.Item2);
+                    species.lastGenDescriptor.Add(individual);
                     return;
                 }
             }
-            Species newSpecies = new Species();
-            newSpecies.AddToSpecies(individual);
+            Specie newSpecies = new Specie(crossoverOperatorsWrapper);
+            newSpecies.AddToSpecies(individual.Item2);
+            newSpecies.lastGenDescriptor.Add(individual);
             AddSpecies(newSpecies);
         }
 
-        private void AddSpecies(Species species)
+        private void AddSpecies(Specie species)
         {
             if (!speciesList.Contains(species))
             {
@@ -73,7 +77,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         {
             int popSize = GetTotalIndividualNumber();
             int c = speciesList.Count;
-            foreach (Species species1 in speciesList)
+            foreach (Specie species1 in speciesList)
             {
                 if (species1.GetIndividualCount() <= popSize * 0.1)
                 {
@@ -86,33 +90,33 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             }
 
             double sum = 0;
-            foreach (Species species in speciesList)
+            foreach (Specie species in speciesList)
             {
                 foreach (IOrganism individual in species.GetIndividuals())
                 {
-                    individual.AdjustFitness(Mathf.Round((float)individual.ProvideRawFitness() / species.GetIndividualCount()));
+                    individual.AdjustFitness((float)individual.ProvideRawFitness() / species.GetIndividualCount());
                 }
                 sum += species.GetAdjustedFitnessSum();
             }
             Purge(s => s.atRiskGenerations >= 3);
 
             int count = 0;
-            foreach (Species species in speciesList)
+            foreach (Specie species in speciesList)
             {
                 int val = Mathf.RoundToInt(Mathf.Floor((float)(species.GetAdjustedFitnessSum() * popSize / sum)));
                 species.SetExpectedOffspringsCount(val);
                 count += val;
             }
             int rest = popSize - count;
-            Species spec = GetFittestSpecies();
+            Specie spec = GetFittestSpecies();
             spec.SetExpectedOffspringsCount(spec.GetExpectedOffpringsCount() + rest);
         }
 
-        public Species GetFittestSpecies()
+        public Specie GetFittestSpecies()
         {
-            Species fittest = null;
+            Specie fittest = null;
             double val = 0;
-            foreach (Species current in speciesList)
+            foreach (Specie current in speciesList)
             {
                 double sum = current.GetAdjustedFitnessSum();
                 if (sum > val)
@@ -127,7 +131,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         public int GetExpectedIndividualNumber()
         {
             int count = 0;
-            foreach (Species species in speciesList)
+            foreach (Specie species in speciesList)
             {
                 count += species.GetExpectedOffpringsCount();
             }
@@ -137,14 +141,14 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         public int GetTotalIndividualNumber()
         {
             int count = 0;
-            foreach (Species species in speciesList)
+            foreach (Specie species in speciesList)
             {
                 count += species.GetIndividualCount();
             }
             return count;
         }
 
-        public List<Species> GetSpeciesList()
+        public List<Specie> GetSpeciesList()
         {
             return speciesList;
         }
@@ -153,7 +157,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         {
             double max = -1;
             IOrganism fittest = null;
-            foreach (Species species in speciesList)
+            foreach (Specie species in speciesList)
             {
                 IOrganism current = species.GetChamp();
                 if (current != null && current.ProvideRawFitness() > max)
@@ -168,7 +172,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         public double GetAverageFitness()
         {
             double avg = 0F;
-            foreach (Species species in speciesList)
+            foreach (Specie species in speciesList)
             {
                 avg += species.GetRawFitnessSum() / species.GetIndividualCount();
             }
@@ -181,7 +185,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         /// </summary>
         private void Reset()
         {
-            foreach (Species species in speciesList)
+            foreach (Specie species in speciesList)
             {
                 species.Reset();
             }
@@ -190,7 +194,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         /// <summary>
         ///   Remove all the species matching the predicate
         /// </summary>
-        private void Purge(Predicate<Species> match)
+        private void Purge(Predicate<Specie> match)
         {
             speciesList.RemoveAll(match);
         }

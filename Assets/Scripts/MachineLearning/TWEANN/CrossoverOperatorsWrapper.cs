@@ -1,5 +1,4 @@
-﻿using Assets.Scripts.TUtils.Interfaces;
-using Assets.Scripts.TUtils.Utils;
+﻿using Assets.Scripts.TUtils.Utils;
 using System.Collections.Generic;
 
 namespace Assets.Scripts.MachineLearning.TWEANN
@@ -21,6 +20,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             {
                 crossoverOperators.Add(operators[i]);
                 crossoverOperators[i].SetSelectProbability(1F / operators.Count);
+                crossoverOperators[i].SetCurrentProgression(0F);
             }
         }
 
@@ -38,6 +38,16 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         public T GetOperatorOfType<T>() where T : CrossoverOperator
         {
             return (T)crossoverOperators.Find((x) => x is T);
+        }
+
+        public override string ToString()
+        {
+            string ret = "";
+            foreach (CrossoverOperator op in crossoverOperators)
+            {
+                ret += op.ToString() + "\n";
+            }
+            return ret;
         }
     }
 }

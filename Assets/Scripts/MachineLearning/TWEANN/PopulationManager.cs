@@ -1,12 +1,12 @@
 ﻿using Assets.Scripts.CustomBehaviour;
 using Assets.Scripts.TUtils.ObjectPooling;
 using Assets.Scripts.TUtils.SaveSystem;
-using Assets.Scripts.TUtils.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static Assets.Scripts.MachineLearning.TWEANN.DescriptorsWrapper;
 
 namespace Assets.Scripts.MachineLearning.TWEANN
 {
@@ -18,8 +18,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             [Header("Parameters")]
             [Tooltip("Number of the population")]
             public int populationNumber;
-            public DescriptorsWrapper.MutationRatesDescriptor rates;
-            public DescriptorsWrapper.TrainerPreferences preferences;
+            public TrainerPreferences preferences;
         }
 
         public List<ISimulatingOrganism> populationList;
@@ -46,7 +45,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         private TrainerNEAT trainerNEAT;
 
         private UIManager uiManager;
-        private List<Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, IOrganism>> operationsDescriptors = null;
+        private List<Tuple<CrossoverOperationDescriptor, IOrganism>> operationsDescriptors = null;
 
         private event Action ForceEnded;
 
@@ -124,15 +123,13 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         /// </summary>
         private void AdvanceGeneration()
         {
-            if (operationsDescriptors == null)
-            {
-                operationsDescriptors = new List<Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, IOrganism>>();
-            }
-            else
-            {
-                trainerNEAT.UpdateCrossoverOperatorsProgressions(operationsDescriptors);
-            }
             operationsDescriptors.Clear();
+            if (generationCount > 1)
+            {
+                trainerNEAT.UpdateCrossoverOperatorsProgressions(biocenosis);
+            }
+
+            #region Convergence
 
             IOrganism fittest = biocenosis.GetCurrentFittest();
             //Debug.Log("Generation: " + generationCount + "\nHighest fitness: " + ((MonoBehaviour)fittest).gameObject.name + ", " + fittest.ProvideRawFitness() + "\n" + "Average fitness: " + biocenosis.GetAverageFitness() + "\nCT: " + completedSimulationCount);
@@ -163,18 +160,21 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                 completedTrack = true;
                 uiManager.AppendToLog("90% of the population has completed the track in " + generationCount + " generations");
             }
+
+            #endregion Convergence
+
             //! Training
-            Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, Genotype>[] pop = trainerNEAT.Train(biocenosis);
+            Tuple<CrossoverOperationDescriptor, Genotype>[] pop = trainerNEAT.Train(biocenosis);
 
             //! Substitute population
             for (int i = 0; i < populationList.Count; i++)
             {
                 PoolManager.GetInstance().DeactivateObject(((MonoBehaviour)populationList.ElementAt(i)).gameObject);
                 ISimulatingOrganism childInd = InstantiateIndividual(new NeuralNetwork(pop[i].Item2), i.ToString());
-                operationsDescriptors.Add(new Tuple<DescriptorsWrapper.CrossoverOperationDescriptor, IOrganism>(pop[i].Item1, childInd));
+                operationsDescriptors.Add(new Tuple<CrossoverOperationDescriptor, IOrganism>(pop[i].Item1, childInd));
                 populationList[i] = childInd;
             }
-            biocenosis.Speciate(populationList.ToArray());
+            biocenosis.Speciate(operationsDescriptors.ToArray());
 
             generationCount++;
             currentSimulating = pop.Length;
@@ -188,15 +188,18 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         /// </summary>
         private void InitializeAncestors()
         {
+            operationsDescriptors = new List<Tuple<CrossoverOperationDescriptor, IOrganism>>();
             for (int i = 0; i < options.populationNumber; i++)
             {
-                populationList.Add(InstantiateIndividual(new NeuralNetwork(trainerNEAT.GetPredefinedGenotype()), i.ToString()));
+                ISimulatingOrganism org = InstantiateIndividual(new NeuralNetwork(trainerNEAT.GetPredefinedGenotype()), i.ToString());
+                populationList.Add(org);
+                operationsDescriptors.Add(new Tuple<CrossoverOperationDescriptor, IOrganism>(default, org));
             }
             generationCount++;
             currentSimulating = options.populationNumber;
             GlobalParams.InitializeGlobalInnovationNumber(trainerNEAT.GetPredefinedGenotype());
             simulating = true;
-            biocenosis.Speciate(populationList.ToArray());
+            biocenosis.Speciate(operationsDescriptors.ToArray());
         }
 
         /// <summary>
@@ -250,14 +253,14 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                 throw new System.Exception("There is no Crossover operator!");
             }
             options.preferences.maxAchievableFitness = 6F * track.Length();
-            trainerNEAT = new TrainerNEAT(new CrossoverOperatorsWrapper(crossoverOperators), options.preferences, options.rates);
+            trainerNEAT = new TrainerNEAT(options.preferences);
 
             uiManager = FindObjectOfType<UIManager>();
             uiManager?.UpdateTrackLength(track.Length());
             //uiManager?.DrawNetUI(trainerProvider.ProvideTrainer().GetPredefinedTopologyDescriptor());
             CheckSimStat_C = CheckSimulationState();
             populationList = new List<ISimulatingOrganism>();
-            biocenosis = new Biocenosis(options.preferences.sharingThreshold);
+            biocenosis = new Biocenosis(options.preferences.sharingThreshold, new CrossoverOperatorsWrapper(crossoverOperators));
             InitializeAncestors();
             StartCoroutine(CheckSimStat_C);
 

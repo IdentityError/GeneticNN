@@ -1111,17 +1111,12 @@ MonoBehaviour:
     speciesList: []
   options:
     populationNumber: 250
-    rates:
-      maxWeightMutationRate: 0.09
-      maxSplitLinkRate: 0.065
-      maxAddLinkRate: 0.1
-      crossoverRatio: 0
-      weightMutationRate: 0.15
-      splitLinkRate: 0.15
-      addLinkRate: 0.25
     preferences:
+      maxWeightMutationRate: 0.0925
+      maxSplitLinkRate: 0.1
+      maxAddLinkRate: 0.125
       minCrossoverRatio: 0.0875
-      sharingThreshold: 0.425
+      sharingThreshold: 0.45
       dynamicRates: 1
       enhancedSelectionOperator: 1
       maxAchievableFitness: 0
@@ -1151,5 +1146,5 @@ MonoBehaviour:
     - tag: prefab
       prefab: {fileID: 6791551976333570425, guid: dda260aae5911af48a27564e8179e873,
         type: 3}
-      poolSize: 600
+      poolSize: 500
       spawnProbability: 0

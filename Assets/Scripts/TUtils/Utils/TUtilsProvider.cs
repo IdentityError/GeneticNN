@@ -102,11 +102,18 @@ namespace Assets.Scripts.TUtils.Utils
         {
             int index = -1;
             float r = UnityEngine.Random.Range(0F, 1F);
-            while (r > 0)
+            while (r > 0 && index + 1 < set.Count)
             {
                 r -= set.ElementAt(++index).ProvideSelectProbability();
             }
-            return (T)set.ElementAt(index);
+            if (index < set.Count)
+            {
+                return (T)set.ElementAt(index);
+            }
+            else
+            {
+                return default(T);
+            }
         }
 
         /// <summary>

@@ -91,7 +91,7 @@ public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject
         {
             endedSimulation = true;
             SetRawFitness(EvaluateFitnessFunction());
-            populationManager?.IndividualEndedSimulation(this, throttle > 0);
+            populationManager?.IndividualEndedSimulation(this, stats.averageThrottle > 0);
         }
     }
 

@@ -1,5 +1,4 @@
 ﻿using Assets.Scripts.CustomBehaviour;
-using System;
 using UnityEngine;
 
 [System.Serializable]

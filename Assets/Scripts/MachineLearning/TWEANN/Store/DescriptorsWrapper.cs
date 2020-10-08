@@ -19,21 +19,18 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         }
 
         [System.Serializable]
-        public struct MutationRatesDescriptor
+        public struct RatesDescriptor
         {
-            public float maxWeightMutationRate;
-            public float maxSplitLinkRate;
-            public float maxAddLinkRate;
-            [HideInInspector] public float crossoverRatio;
-            [HideInInspector] public float weightMutationRate;
-            [HideInInspector] public float splitLinkRate;
-            [HideInInspector] public float addLinkRate;
+            public float crossoverRatio;
+            public float weightMutationRate;
+            public float splitLinkRate;
+            public float addLinkRate;
 
             public override string ToString()
             {
-                return "Weights\nCurrent: " + weightMutationRate + ", Max: " + maxWeightMutationRate + "\n" +
-                    "Split Link\nCurrent: " + splitLinkRate + ", Max: " + maxSplitLinkRate + "\n" +
-                    "Add Link\nCurrent: " + addLinkRate + ", Max: " + maxAddLinkRate + "\n" +
+                return "Weights\nCurrent: " + weightMutationRate + "\n" +
+                    "Split Link\nCurrent: " + splitLinkRate + "\n" +
+                    "Add Link\nCurrent: " + addLinkRate + "\n" +
                     "Crossover rate: " + crossoverRatio + "\n";
             }
         }
@@ -41,8 +38,15 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         [System.Serializable]
         public struct TrainerPreferences
         {
+            [Header("Mutations")]
+            public float maxWeightMutationRate;
+            public float maxSplitLinkRate;
+            public float maxAddLinkRate;
+            [Header("Crossover")]
             public float minCrossoverRatio;
+            [Header("Speciation")]
             public float sharingThreshold;
+            [Header("Operators")]
             public bool dynamicRates;
             public bool enhancedSelectionOperator;
 

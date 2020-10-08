@@ -1,20 +1,26 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using static Assets.Scripts.MachineLearning.TWEANN.DescriptorsWrapper;
 
 namespace Assets.Scripts.MachineLearning.TWEANN
 {
-    [System.Serializable]
-    public class Species
+    [Serializable]
+    public class Specie
     {
         [SerializeField] private int individualCount;
+        public int atRiskGenerations;
+        public RatesDescriptor rates;
+
+        private Genotype representative;
         private int expectedOffspringsCount;
         [HideInInspector] public List<IOrganism> individuals;
-        private Genotype representative;
-        public int atRiskGenerations;
+        [HideInInspector] public CrossoverOperatorsWrapper operatorsWrapper = null;
+        [HideInInspector] public List<Tuple<CrossoverOperationDescriptor, IOrganism>> lastGenDescriptor = new List<Tuple<CrossoverOperationDescriptor, IOrganism>>();
 
-        public Species()
+        public Specie(CrossoverOperatorsWrapper wrapper)
         {
+            this.operatorsWrapper = wrapper;
             individuals = new List<IOrganism>();
             individualCount = 0;
             atRiskGenerations = 0;
@@ -74,6 +80,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             individualCount = 0;
             expectedOffspringsCount = 0;
             individuals.Clear();
+            lastGenDescriptor.Clear();
         }
 
         public void SetExpectedOffspringsCount(int expectedOffspringsCount)
