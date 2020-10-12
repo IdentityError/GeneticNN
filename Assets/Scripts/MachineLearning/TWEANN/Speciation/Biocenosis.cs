@@ -79,7 +79,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             int c = speciesList.Count;
             foreach (Specie species1 in speciesList)
             {
-                if (species1.GetIndividualCount() <= popSize * 0.1)
+                if (species1.GetRawFitnessSum() / species1.GetIndividualCount() <= species1.LastGenAvgFitness)
                 {
                     species1.atRiskGenerations++;
                 }
@@ -98,7 +98,8 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                 }
                 sum += species.GetAdjustedFitnessSum();
             }
-            Purge(s => s.atRiskGenerations >= 3);
+            Purge(s => s.atRiskGenerations >= 3
+            );
 
             int count = 0;
             foreach (Specie species in speciesList)

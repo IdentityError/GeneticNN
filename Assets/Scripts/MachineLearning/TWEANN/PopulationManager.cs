@@ -42,6 +42,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         private int completedSimulationCount = 0;
         private bool completedTrack = false;
 
+        private int simulationCount = 0;
         private TrainerNEAT trainerNEAT;
 
         private UIManager uiManager;
@@ -123,6 +124,17 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         /// </summary>
         private void AdvanceGeneration()
         {
+            if (generationCount > 50)
+            {
+                for (int i = 0; i < populationList.Count; i++)
+                {
+                    PoolManager.GetInstance().DeactivateObject(((MonoBehaviour)populationList.ElementAt(i)).gameObject);
+                }
+                simulationCount++;
+                Debug.Log("restarting");
+                InitializeAncestors();
+                return;
+            }
             operationsDescriptors.Clear();
             if (generationCount > 1)
             {
@@ -134,8 +146,8 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             IOrganism fittest = biocenosis.GetCurrentFittest();
             //Debug.Log("Generation: " + generationCount + "\nHighest fitness: " + ((MonoBehaviour)fittest).gameObject.name + ", " + fittest.ProvideRawFitness() + "\n" + "Average fitness: " + biocenosis.GetAverageFitness() + "\nCT: " + completedSimulationCount);
 
-            TSaveManager.SerializeToFile("data/averageFitness.csv", biocenosis.GetAverageFitness().ToString(), true);
-            TSaveManager.SerializeToFile("data/completedTrack.csv", completedSimulationCount.ToString(), true);
+            TSaveManager.SerializeToFile("data/averageFitness" + simulationCount + ".csv", biocenosis.GetAverageFitness().ToString(), true);
+            TSaveManager.SerializeToFile("data/completedTrack" + simulationCount + ".csv", completedSimulationCount.ToString(), true);
 
             uiManager.UpdateTextBox1(completedSimulationCount.ToString());
             populationList = populationList.OrderByDescending(x => x.ProvideRawFitness()).ToList();
@@ -188,6 +200,8 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         /// </summary>
         private void InitializeAncestors()
         {
+            populationList.Clear();
+            generationCount = 1;
             operationsDescriptors = new List<Tuple<CrossoverOperationDescriptor, IOrganism>>();
             for (int i = 0; i < options.populationNumber; i++)
             {
@@ -195,9 +209,10 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                 populationList.Add(org);
                 operationsDescriptors.Add(new Tuple<CrossoverOperationDescriptor, IOrganism>(default, org));
             }
-            generationCount++;
+            uiManager.UpdateGenerationCount(generationCount);
             currentSimulating = options.populationNumber;
             GlobalParams.InitializeGlobalInnovationNumber(trainerNEAT.GetPredefinedGenotype());
+            GlobalParams.ResetGenerationMutations();
             simulating = true;
             biocenosis.Speciate(operationsDescriptors.ToArray());
         }
@@ -264,8 +279,8 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             InitializeAncestors();
             StartCoroutine(CheckSimStat_C);
 
-            TSaveManager.DeleteObjectData("data/averageFitness.csv");
-            TSaveManager.DeleteObjectData("data/completedTrack.csv");
+            //TSaveManager.DeleteObjectData("data/averageFitness.csv");
+            //TSaveManager.DeleteObjectData("data/completedTrack.csv");
         }
 
         private void Update()

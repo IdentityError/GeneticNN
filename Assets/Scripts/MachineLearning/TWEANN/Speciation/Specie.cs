@@ -17,6 +17,8 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         [HideInInspector] public List<IOrganism> individuals;
         [HideInInspector] public CrossoverOperatorsWrapper operatorsWrapper = null;
         [HideInInspector] public List<Tuple<CrossoverOperationDescriptor, IOrganism>> lastGenDescriptor = new List<Tuple<CrossoverOperationDescriptor, IOrganism>>();
+        private double lastGenAvgFitness = 0;
+        public double LastGenAvgFitness { get => lastGenAvgFitness; }
 
         public Specie(CrossoverOperatorsWrapper wrapper)
         {

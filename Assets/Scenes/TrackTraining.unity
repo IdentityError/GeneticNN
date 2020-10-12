@@ -191,6 +191,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Track02
       objectReference: {fileID: 0}
+    - target: {fileID: 6486783325030372511, guid: 8ad4a7ed4fa57e54baf109c449170f5d,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8ad4a7ed4fa57e54baf109c449170f5d, type: 3}
 --- !u!1 &578311205
@@ -650,18 +655,6 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 543053043}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2111517136 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2111517136, guid: 8ad4a7ed4fa57e54baf109c449170f5d,
-    type: 3}
-  m_PrefabInstance: {fileID: 543053043}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2111517135}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f09e8ba90547f3141a3894b29eb515b2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &3695772664775952726
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -677,7 +670,7 @@ PrefabInstance:
     - target: {fileID: 3695772663629603462, guid: 34299e5407c9d2c4e8da6481916355fd,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3695772663629603463, guid: 34299e5407c9d2c4e8da6481916355fd,
         type: 3}
@@ -702,7 +695,7 @@ PrefabInstance:
     - target: {fileID: 3695772663629603463, guid: 34299e5407c9d2c4e8da6481916355fd,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3695772663629603463, guid: 34299e5407c9d2c4e8da6481916355fd,
         type: 3}
@@ -712,7 +705,7 @@ PrefabInstance:
     - target: {fileID: 3695772663629603463, guid: 34299e5407c9d2c4e8da6481916355fd,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3695772663629603463, guid: 34299e5407c9d2c4e8da6481916355fd,
         type: 3}
@@ -727,7 +720,7 @@ PrefabInstance:
     - target: {fileID: 3695772663629603463, guid: 34299e5407c9d2c4e8da6481916355fd,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: 180
       objectReference: {fileID: 0}
     - target: {fileID: 3695772663629603463, guid: 34299e5407c9d2c4e8da6481916355fd,
         type: 3}
@@ -1112,11 +1105,11 @@ MonoBehaviour:
   options:
     populationNumber: 250
     preferences:
-      maxWeightMutationRate: 0.0925
-      maxSplitLinkRate: 0.1
-      maxAddLinkRate: 0.125
-      minCrossoverRatio: 0.0875
-      sharingThreshold: 0.45
+      maxWeightMutationRate: 0.08
+      maxSplitLinkRate: 0.07
+      maxAddLinkRate: 0.15
+      minCrossoverRatio: 0.09
+      sharingThreshold: 0.5
       dynamicRates: 1
       enhancedSelectionOperator: 1
       maxAchievableFitness: 0
@@ -1124,10 +1117,10 @@ MonoBehaviour:
       singlePointEnabled: 1
       kPointEnabled: 1
       averageEnabled: 1
-  timeScale: 2
+  timeScale: 1.25
   individualPrefab: {fileID: 6791551976333570425, guid: dda260aae5911af48a27564e8179e873,
     type: 3}
-  track: {fileID: 2111517136}
+  track: {fileID: 3695772664775952728}
 --- !u!114 &6509384906705858488
 MonoBehaviour:
   m_ObjectHideFlags: 0

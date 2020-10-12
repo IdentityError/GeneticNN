@@ -6,7 +6,7 @@ namespace Assets.Scripts.CustomBehaviour
     {
         public enum WheelType { FRONT_L, FRONT_R, REAR_L, REAR_R }
 
-        private Rigidbody rigidbody;
+        private new Rigidbody rigidbody;
 
         [Header("Suspension")]
         public float restLength;

@@ -47,11 +47,11 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                 if (preferences.dynamicRates)
                 {
                     // Dynamically set the mutation rate for the current species
-                    current.rates.weightMutationRate = (float)(preferences.maxWeightMutationRate * Math.Pow((averageFitness / maxFitness), 2D));
+                    current.rates.weightMutationRate = (float)(preferences.maxWeightMutationRate * Math.Pow((averageFitness / maxFitness), 2.5D));
                     current.rates.weightMutationRate *= (1F - (float)(averageFitness / preferences.maxAchievableFitness));
-                    current.rates.splitLinkRate = (float)(preferences.maxSplitLinkRate * Math.Pow((averageFitness / maxFitness), 2.5D));
+                    current.rates.splitLinkRate = (float)(preferences.maxSplitLinkRate * Math.Pow((averageFitness / maxFitness), 2D));
                     current.rates.splitLinkRate *= (1F - (float)(averageFitness / preferences.maxAchievableFitness));
-                    current.rates.addLinkRate = (float)(preferences.maxAddLinkRate * Math.Pow((averageFitness / maxFitness), 2.5D));
+                    current.rates.addLinkRate = (float)(preferences.maxAddLinkRate * Math.Pow((averageFitness / maxFitness), 2D));
                     current.rates.addLinkRate *= (1F - (float)(averageFitness / preferences.maxAchievableFitness));
                     //rates.crossoverRatio = (1F - Mathf.Pow(((float)(averageFitness / preferences.maxAchievableFitness)), 3.75F));
                     //rates.crossoverRatio *= (1F - (float)(averageFitness / preferences.maxAchievableFitness));
@@ -172,6 +172,10 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                     values = values.OrderByDescending(x => x).ToList();
                     double S = values[0] + values[1];
                     double value = S - (descriptor.Item1.parentFitness + descriptor.Item1.parent1Fitness);
+                    if (descriptor.Item1.operatorUsed is null)
+                    {
+                        continue;
+                    }
                     if (descriptor.Item1.operatorUsed is UniformCrossoverOperator)
                     {
                         uniformSum += value;
@@ -200,6 +204,10 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                 avgSum = avgCount > 0 ? avgSum / avgCount : 0;
 
                 double total = singlePointSum + kPointSum + uniformSum + avgSum;
+                if (total == 0)
+                {
+                    return;
+                }
                 //Debug.Log("SUM: " + total);
                 //Debug.Log("SPC: " + singlePointSum + "UC: " + uniformSum + "KPC:" + kPointSum + "AVGC: " + avgSum);
 
@@ -217,7 +225,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                 singleCrossoverOp?.SetSelectProbability((float)(singlePointSum / total * (specie.rates.crossoverRatio - specie.operatorsWrapper.OperatorsCount * preferences.minCrossoverRatio) + preferences.minCrossoverRatio));
                 kPointsCrossoverOp?.SetSelectProbability((float)(kPointSum / total * (specie.rates.crossoverRatio - specie.operatorsWrapper.OperatorsCount * preferences.minCrossoverRatio) + preferences.minCrossoverRatio));
                 averageCrossoverOp?.SetSelectProbability((float)(avgSum / total * (specie.rates.crossoverRatio - specie.operatorsWrapper.OperatorsCount * preferences.minCrossoverRatio) + preferences.minCrossoverRatio));
-                Debug.Log(specie.operatorsWrapper.ToString());
+                //Debug.Log(specie.operatorsWrapper.ToString());
             }
 
             //operatorsWrapper.crossoverOperators = operatorsWrapper.crossoverOperators.OrderByDescending(x => x.GetCurrentProgression()).ToList();

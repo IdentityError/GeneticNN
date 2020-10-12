@@ -3,6 +3,7 @@
 using Assets.Scripts.TUtils.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Assets.Scripts.TUtils.Utils
@@ -102,18 +103,15 @@ namespace Assets.Scripts.TUtils.Utils
         {
             int index = -1;
             float r = UnityEngine.Random.Range(0F, 1F);
-            while (r > 0 && index + 1 < set.Count)
+            while (r > 0)
             {
+                if (index + 1 >= set.Count)
+                {
+                    return default(T);
+                }
                 r -= set.ElementAt(++index).ProvideSelectProbability();
             }
-            if (index < set.Count)
-            {
-                return (T)set.ElementAt(index);
-            }
-            else
-            {
-                return default(T);
-            }
+            return (T)set.ElementAt(index);
         }
 
         /// <summary>
