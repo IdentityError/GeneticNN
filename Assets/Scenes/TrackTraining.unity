@@ -1105,9 +1105,9 @@ MonoBehaviour:
   options:
     populationNumber: 250
     preferences:
-      maxWeightMutationRate: 0.08
-      maxSplitLinkRate: 0.07
-      maxAddLinkRate: 0.15
+      maxWeightMutationRate: 0.125
+      maxSplitLinkRate: 0.065
+      maxAddLinkRate: 0.175
       minCrossoverRatio: 0.09
       sharingThreshold: 0.5
       dynamicRates: 1
@@ -1117,7 +1117,7 @@ MonoBehaviour:
       singlePointEnabled: 1
       kPointEnabled: 1
       averageEnabled: 1
-  timeScale: 1.25
+  timeScale: 1.5
   individualPrefab: {fileID: 6791551976333570425, guid: dda260aae5911af48a27564e8179e873,
     type: 3}
   track: {fileID: 3695772664775952728}

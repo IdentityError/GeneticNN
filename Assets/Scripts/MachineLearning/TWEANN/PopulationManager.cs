@@ -12,40 +12,43 @@ namespace Assets.Scripts.MachineLearning.TWEANN
 {
     public class PopulationManager : MonoBehaviour
     {
-        [System.Serializable]
-        public struct OptionsWrapper
-        {
-            [Header("Parameters")]
-            [Tooltip("Number of the population")]
-            public int populationNumber;
-            public TrainerPreferences preferences;
-        }
-
         public List<ISimulatingOrganism> populationList;
+
         private int currentSimulating;
+
         private int generationCount = 0;
 
         [SerializeField] private Biocenosis biocenosis;
+
         [SerializeField] private OptionsWrapper options;
+
         [Space(15)]
         [SerializeField] private float timeScale = 1F;
 
         [Header("References")]
         [SerializeField] private GameObject individualPrefab;
+
         [SerializeField] private Track track;
 
         [Header("Parameters")]
         private IEnumerator CheckSimStat_C;
+
         private bool simulating = false;
+
         private float simulationTime = 0;
+
         private bool shouldRestart = false;
+
         private int completedSimulationCount = 0;
+
         private bool completedTrack = false;
 
         private int simulationCount = 0;
+
         private TrainerNEAT trainerNEAT;
 
         private UIManager uiManager;
+
         private List<Tuple<CrossoverOperationDescriptor, IOrganism>> operationsDescriptors = null;
 
         private event Action ForceEnded;
@@ -140,38 +143,38 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             {
                 trainerNEAT.UpdateCrossoverOperatorsProgressions(biocenosis);
             }
+            TSaveManager.SerializeToFile("data/averageFitness" + simulationCount + ".csv", biocenosis.GetAverageFitness().ToString(), true);
 
             #region Convergence
 
-            IOrganism fittest = biocenosis.GetCurrentFittest();
-            //Debug.Log("Generation: " + generationCount + "\nHighest fitness: " + ((MonoBehaviour)fittest).gameObject.name + ", " + fittest.ProvideRawFitness() + "\n" + "Average fitness: " + biocenosis.GetAverageFitness() + "\nCT: " + completedSimulationCount);
+            //IOrganism fittest = biocenosis.GetCurrentFittest();
+            ////Debug.Log("Generation: " + generationCount + "\nHighest fitness: " + ((MonoBehaviour)fittest).gameObject.name + ", " + fittest.ProvideRawFitness() + "\n" + "Average fitness: " + biocenosis.GetAverageFitness() + "\nCT: " + completedSimulationCount);
 
-            TSaveManager.SerializeToFile("data/averageFitness" + simulationCount + ".csv", biocenosis.GetAverageFitness().ToString(), true);
-            TSaveManager.SerializeToFile("data/completedTrack" + simulationCount + ".csv", completedSimulationCount.ToString(), true);
+            //TSaveManager.SerializeToFile("data/completedTrack" + simulationCount + ".csv", completedSimulationCount.ToString(), true);
 
-            uiManager.UpdateTextBox1(completedSimulationCount.ToString());
-            populationList = populationList.OrderByDescending(x => x.ProvideRawFitness()).ToList();
-            List<ISimulatingOrganism> subList = populationList.GetRange(0, options.populationNumber / 2);
-            bool converged = true;
-            foreach (IOrganism organism in subList)
-            {
-                if (organism.ProvideRawFitness() < 1900)
-                {
-                    converged = false;
-                    break;
-                }
-            }
+            //uiManager.UpdateTextBox1(completedSimulationCount.ToString());
+            //populationList = populationList.OrderByDescending(x => x.ProvideRawFitness()).ToList();
+            //List<ISimulatingOrganism> subList = populationList.GetRange(0, options.populationNumber / 2);
+            //bool converged = true;
+            //foreach (IOrganism organism in subList)
+            //{
+            //    if (organism.ProvideRawFitness() < 1900)
+            //    {
+            //        converged = false;
+            //        break;
+            //    }
+            //}
 
-            if (converged)
-            {
-                uiManager.AppendToLog("50% of the population has converged to 90% of the max achievable fitness in " + generationCount + " generations");
-            }
+            //if (converged)
+            //{
+            //    uiManager.AppendToLog("50% of the population has converged to 90% of the max achievable fitness in " + generationCount + " generations");
+            //}
 
-            if (completedSimulationCount >= (int)(options.populationNumber * 0.9) && !completedTrack)
-            {
-                completedTrack = true;
-                uiManager.AppendToLog("90% of the population has completed the track in " + generationCount + " generations");
-            }
+            //if (completedSimulationCount >= (int)(options.populationNumber * 0.9) && !completedTrack)
+            //{
+            //    completedTrack = true;
+            //    uiManager.AppendToLog("90% of the population has completed the track in " + generationCount + " generations");
+            //}
 
             #endregion Convergence
 
@@ -315,6 +318,15 @@ namespace Assets.Scripts.MachineLearning.TWEANN
                 shouldRestart = shouldRestartSim;
                 yield return new WaitForSeconds(2.5F);
             }
+        }
+
+        [System.Serializable]
+        public struct OptionsWrapper
+        {
+            [Header("Parameters")]
+            [Tooltip("Number of the population")]
+            public int populationNumber;
+            public TrainerPreferences preferences;
         }
     }
 }
