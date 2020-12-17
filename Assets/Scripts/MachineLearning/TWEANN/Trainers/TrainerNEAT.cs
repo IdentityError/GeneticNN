@@ -1,7 +1,8 @@
-﻿using Assets.Scripts.TUtils.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using TUtils.Utils;
+using TUtils.Utils.Mathematics;
 using UnityEngine;
 
 namespace Assets.Scripts.MachineLearning.TWEANN
@@ -114,40 +115,6 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             return species.individuals.GetRange(0, number);
         }
 
-        /// <summary>
-        ///   Perform selection from a specified species
-        /// </summary>
-        /// <param name="species"> </param>
-        /// <returns> </returns>
-        private (IOrganism, IOrganism) SelectParents(List<IOrganism> organisms)
-        {
-            if (organisms.Count == 1)
-            {
-                IOrganism org = organisms[0];
-                return (org, org);
-            }
-            else if (!preferences.enhancedSelectionOperator)
-            {
-                TUtilsProvider.NormalizeProbabilities(organisms, (o) => (float)o.ProvideRawFitness());
-                IOrganism first = TUtilsProvider.SelectWithProbability(organisms);
-                organisms.Remove(first);
-                TUtilsProvider.NormalizeProbabilities(organisms, (o) => (float)o.ProvideRawFitness());
-                IOrganism second = TUtilsProvider.SelectWithProbability(organisms);
-                return (first, second);
-            }
-            else
-            {
-                if (organisms.Count > 1)
-                {
-                    return (organisms[0], organisms[1]);
-                }
-                else
-                {
-                    throw new System.Exception("Unable to select parents from a species");
-                }
-            }
-        }
-
         public void UpdateCrossoverOperatorsProgressions(Biocenosis biocenosis)
         {
             foreach (Specie specie in biocenosis.GetSpeciesList())
@@ -242,6 +209,40 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             //    rank += @operator.ToString() + ", " + @operator.ProvideSelectProbability() + "\n";
             //}
             ////Debug.Log(rank);
+        }
+
+        /// <summary>
+        ///   Perform selection from a specified species
+        /// </summary>
+        /// <param name="species"> </param>
+        /// <returns> </returns>
+        private (IOrganism, IOrganism) SelectParents(List<IOrganism> organisms)
+        {
+            if (organisms.Count == 1)
+            {
+                IOrganism org = organisms[0];
+                return (org, org);
+            }
+            else if (!preferences.enhancedSelectionOperator)
+            {
+                UtilsProvider.NormalizeProbabilities(organisms, (o) => (float)o.ProvideRawFitness());
+                IOrganism first = UtilsProvider.SelectWithProbability(organisms);
+                organisms.Remove(first);
+                UtilsProvider.NormalizeProbabilities(organisms, (o) => (float)o.ProvideRawFitness());
+                IOrganism second = UtilsProvider.SelectWithProbability(organisms);
+                return (first, second);
+            }
+            else
+            {
+                if (organisms.Count > 1)
+                {
+                    return (organisms[0], organisms[1]);
+                }
+                else
+                {
+                    throw new System.Exception("Unable to select parents from a species");
+                }
+            }
         }
     }
 }

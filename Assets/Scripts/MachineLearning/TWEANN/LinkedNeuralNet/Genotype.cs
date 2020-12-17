@@ -1,7 +1,8 @@
-﻿using Assets.Scripts.TUtils.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using TUtils.Utils;
+using TUtils.Utils.Mathematics;
 using UnityEngine;
 
 namespace Assets.Scripts.MachineLearning.TWEANN
@@ -129,7 +130,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         {
             int maxGenomes = this.LinkCount > from.LinkCount ? this.LinkCount : from.LinkCount;
             int genesDifference = TMath.Abs(this.LinkCount - from.LinkCount);
-            List<Tuple<LinkGene, LinkGene>> zippedLinks = TUtilsProvider.ZipWithFirstPredicateMatching(links, from.links, (item1, item2) => item1.GetInnovationNumber().Equals(item2.GetInnovationNumber()));
+            List<Tuple<LinkGene, LinkGene>> zippedLinks = UtilsProvider.ZipWithFirstPredicateMatching(links, from.links, (item1, item2) => item1.GetInnovationNumber().Equals(item2.GetInnovationNumber()));
             float differenceSum = 0;
             foreach (Tuple<LinkGene, LinkGene> current in zippedLinks)
             {

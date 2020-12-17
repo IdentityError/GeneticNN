@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.TUtils.Utils;
+﻿using TUtils.Utils;
+using TUtils.Utils.Mathematics;
 using UnityEngine;
 
 namespace Assets.Scripts.CustomBehaviour
@@ -18,27 +19,6 @@ namespace Assets.Scripts.CustomBehaviour
         public float Length()
         {
             return trackLength;
-        }
-
-        private void Awake()
-        {
-            finishLine = TUnityUtilsProvider.GetFirstGameObjectInChildrenWithTag(gameObject, "FinishLine", true);
-            startPoint = TUnityUtilsProvider.GetFirstComponentInChildrenWithTag<Transform>(gameObject, "StartPoint", true);
-            trackLength = CalculateTrackLength();
-        }
-
-        private float CalculateTrackLength()
-        {
-            float length = 0;
-            foreach (Transform child in transform)
-            {
-                if (child.tag.Equals("TrackPart"))
-                {
-                    length += child.localScale.z * 31;
-                }
-            }
-            length -= TMath.Abs((finishLine.transform.localPosition - startPoint.localPosition).magnitude);
-            return length;
         }
 
         /// <summary>
@@ -66,6 +46,27 @@ namespace Assets.Scripts.CustomBehaviour
         public string GetId()
         {
             return gameObject.name;
+        }
+
+        private void Awake()
+        {
+            finishLine = UnityUtilsProvider.GetFirstGameObjectInChildrenWithTag(gameObject, "FinishLine", true);
+            startPoint = UnityUtilsProvider.GetFirstComponentInChildrenWithTag<Transform>(gameObject, "StartPoint", true);
+            trackLength = CalculateTrackLength();
+        }
+
+        private float CalculateTrackLength()
+        {
+            float length = 0;
+            foreach (Transform child in transform)
+            {
+                if (child.tag.Equals("TrackPart"))
+                {
+                    length += child.localScale.z * 31;
+                }
+            }
+            length -= TMath.Abs((finishLine.transform.localPosition - startPoint.localPosition).magnitude);
+            return length;
         }
     }
 }

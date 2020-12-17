@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.TUtils.Interfaces;
+﻿using TUtils.Utils;
 
 namespace Assets.Scripts.MachineLearning.TWEANN
 {

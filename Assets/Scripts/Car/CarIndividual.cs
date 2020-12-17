@@ -1,8 +1,8 @@
 ﻿using Assets.Scripts.CustomBehaviour;
 using Assets.Scripts.MachineLearning.TWEANN;
-using Assets.Scripts.TUtils.ObjectPooling;
-using Assets.Scripts.TUtils.Utils;
 using System;
+using TUtils.ObjectPooling;
+using TUtils.Utils.Mathematics;
 using UnityEngine;
 
 public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject
@@ -42,6 +42,81 @@ public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject
     private Vector3[] sensesDirections;
 
     private float prob;
+
+    public double EvaluateFitnessFunction()
+    {
+        float length = populationManager.GetTrack().Length();
+        double fitness = 3D * (stats.distance) * Math.Pow(stats.averageThrottle + 1D, stats.distance / length);
+        if (fitness > 0) return fitness;
+        else return 0;
+    }
+
+    public bool IsSimulating()
+    {
+        return !endedSimulation;
+    }
+
+    public void OnObjectSpawn()
+    {
+        ResetParameters();
+    }
+
+    public double ProvideAdjustedFitness()
+    {
+        return this.fitness;
+    }
+
+    public NeuralNetwork ProvideNeuralNet()
+    {
+        return this.neuralNet;
+    }
+
+    public SimulationStats ProvideSimulationStats()
+    {
+        return stats;
+    }
+
+    public void AdjustFitness(double fitness)
+    {
+        this.fitness = fitness;
+    }
+
+    public void SetNeuralNet(NeuralNetwork net)
+    {
+        neuralNet = net;
+        Genotype gen = neuralNet.GetGenotype();
+        directionsCount = gen.InputCount - 1;
+        sensesDirections = new Vector3[directionsCount];
+        neuralNetInput = new double[gen.InputCount];
+        angleStride = 180F / (directionsCount + 1);
+        netInitialized = true;
+        endedSimulation = false;
+    }
+
+    public void SetPopulationManager(PopulationManager populationManager)
+    {
+        this.populationManager = populationManager;
+    }
+
+    public double ProvideRawFitness()
+    {
+        return rawFitness;
+    }
+
+    public void SetRawFitness(double rawFitness)
+    {
+        this.rawFitness = rawFitness;
+    }
+
+    public float ProvideSelectProbability()
+    {
+        return prob;
+    }
+
+    public void SetSelectProbability(float prob)
+    {
+        this.prob = prob;
+    }
 
     private void Start()
     {
@@ -191,83 +266,4 @@ public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject
         }
         SetRawFitness(EvaluateFitnessFunction());
     }
-
-    #region Interface
-
-    public double EvaluateFitnessFunction()
-    {
-        float length = populationManager.GetTrack().Length();
-        double fitness = 3D * (stats.distance) * Math.Pow(stats.averageThrottle + 1D, stats.distance / length);
-        if (fitness > 0) return fitness;
-        else return 0;
-    }
-
-    public bool IsSimulating()
-    {
-        return !endedSimulation;
-    }
-
-    public void OnObjectSpawn()
-    {
-        ResetParameters();
-    }
-
-    public double ProvideAdjustedFitness()
-    {
-        return this.fitness;
-    }
-
-    public NeuralNetwork ProvideNeuralNet()
-    {
-        return this.neuralNet;
-    }
-
-    public SimulationStats ProvideSimulationStats()
-    {
-        return stats;
-    }
-
-    public void AdjustFitness(double fitness)
-    {
-        this.fitness = fitness;
-    }
-
-    public void SetNeuralNet(NeuralNetwork net)
-    {
-        neuralNet = net;
-        Genotype gen = neuralNet.GetGenotype();
-        directionsCount = gen.InputCount - 1;
-        sensesDirections = new Vector3[directionsCount];
-        neuralNetInput = new double[gen.InputCount];
-        angleStride = 180F / (directionsCount + 1);
-        netInitialized = true;
-        endedSimulation = false;
-    }
-
-    public void SetPopulationManager(PopulationManager populationManager)
-    {
-        this.populationManager = populationManager;
-    }
-
-    public double ProvideRawFitness()
-    {
-        return rawFitness;
-    }
-
-    public void SetRawFitness(double rawFitness)
-    {
-        this.rawFitness = rawFitness;
-    }
-
-    public float ProvideSelectProbability()
-    {
-        return prob;
-    }
-
-    public void SetSelectProbability(float prob)
-    {
-        this.prob = prob;
-    }
-
-    #endregion Interface
 }

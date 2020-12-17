@@ -1,5 +1,5 @@
-﻿using Assets.Scripts.TUtils.Utils;
-using System;
+﻿using System;
+using TUtils.Utils.Mathematics;
 
 namespace Assets.Scripts.MachineLearning
 {

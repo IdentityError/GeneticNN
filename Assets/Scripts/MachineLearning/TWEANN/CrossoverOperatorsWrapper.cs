@@ -1,5 +1,5 @@
-﻿using Assets.Scripts.TUtils.Utils;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using TUtils.Utils;
 
 namespace Assets.Scripts.MachineLearning.TWEANN
 {
@@ -31,7 +31,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
 
         public CrossoverOperator GetRandomOperator()
         {
-            CrossoverOperator op = TUtilsProvider.SelectWithProbability(crossoverOperators);
+            CrossoverOperator op = UtilsProvider.SelectWithProbability(crossoverOperators);
             return op;
         }
 

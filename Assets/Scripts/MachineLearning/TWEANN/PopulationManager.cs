@@ -1,10 +1,10 @@
 ﻿using Assets.Scripts.CustomBehaviour;
-using Assets.Scripts.TUtils.ObjectPooling;
-using Assets.Scripts.TUtils.SaveSystem;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TUtils.ObjectPooling;
+using TUtils.SaveSystem;
 using UnityEngine;
 using static Assets.Scripts.MachineLearning.TWEANN.DescriptorsWrapper;
 
@@ -131,7 +131,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             {
                 for (int i = 0; i < populationList.Count; i++)
                 {
-                    PoolManager.GetInstance().DeactivateObject(((MonoBehaviour)populationList.ElementAt(i)).gameObject);
+                    PoolManager.Instance.DeactivateObject(((MonoBehaviour)populationList.ElementAt(i)).gameObject);
                 }
                 simulationCount++;
                 Debug.Log("restarting");
@@ -143,7 +143,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             {
                 trainerNEAT.UpdateCrossoverOperatorsProgressions(biocenosis);
             }
-            TSaveManager.SerializeToFile("data/averageFitness" + simulationCount + ".csv", biocenosis.GetAverageFitness().ToString(), true);
+            SaveManager.SerializeToFile("data/averageFitness" + simulationCount + ".csv", biocenosis.GetAverageFitness().ToString(), true);
 
             #region Convergence
 
@@ -184,7 +184,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
             //! Substitute population
             for (int i = 0; i < populationList.Count; i++)
             {
-                PoolManager.GetInstance().DeactivateObject(((MonoBehaviour)populationList.ElementAt(i)).gameObject);
+                PoolManager.Instance.DeactivateObject(((MonoBehaviour)populationList.ElementAt(i)).gameObject);
                 ISimulatingOrganism childInd = InstantiateIndividual(new NeuralNetwork(pop[i].Item2), i.ToString());
                 operationsDescriptors.Add(new Tuple<CrossoverOperationDescriptor, IOrganism>(pop[i].Item1, childInd));
                 populationList[i] = childInd;
@@ -228,7 +228,7 @@ namespace Assets.Scripts.MachineLearning.TWEANN
         /// <returns> </returns>
         private ISimulatingOrganism InstantiateIndividual(NeuralNetwork neuralNet, string name)
         {
-            GameObject obj = PoolManager.GetInstance().Spawn("Individual", "prefab", track.GetStartPoint().localPosition, track.GetStartPoint().rotation);
+            GameObject obj = PoolManager.Instance.Spawn("Individual", "prefab", track.GetStartPoint().localPosition, track.GetStartPoint().rotation);
             obj.name = name;
             ISimulatingOrganism individual = obj.GetComponent<ISimulatingOrganism>();
             if (individual == null)
