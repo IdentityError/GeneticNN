@@ -14,13 +14,6 @@ public class SimulationStats
     private Vector3 lastPosition;
     private float throttleSum;
 
-    private SimulationStats(Track track)
-    {
-        this.track = track;
-        cycles = 0;
-        throttleSum = 0F;
-    }
-
     public SimulationStats(float averageThrottle, float time, float distance, Track track) : this(track)
     {
         this.averageThrottle = averageThrottle;
@@ -29,11 +22,13 @@ public class SimulationStats
         this.lastThrottle = 0;
     }
 
-    /// <summary>
-    ///   Update the simulation stats, <b> Call this function every update cycle </b>
-    /// </summary>
-    /// <param name="throttle"> </param>
-    /// <param name="position"> </param>
+    private SimulationStats(Track track)
+    {
+        this.track = track;
+        cycles = 0;
+        throttleSum = 0F;
+    }
+
     public void Update(float throttle, Vector3 position)
     {
         if (cycles == 0)
@@ -43,7 +38,7 @@ public class SimulationStats
 
         distance = throttle > 0 ? distance + Vector3.Distance(position, lastPosition) : distance - Vector3.Distance(position, lastPosition);
 
-        distance = distance > track.Length() ? track.Length() : distance;
+        distance = distance > track.Length ? track.Length : distance;
         lastThrottle = throttle;
         lastPosition = position;
 

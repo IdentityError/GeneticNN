@@ -6,21 +6,20 @@ namespace Assets.Scripts.CustomBehaviour
     {
         public enum WheelType { FRONT_L, FRONT_R, REAR_L, REAR_R }
 
-        private new Rigidbody rigidbody;
-
-        [Header("Suspension")]
-        public float restLength;
-
-        public float springTravel;
-        public float springStiffness;
-        public float damperStiffness;
-
+        [HideInInspector] public float steerAngle;
+        [HideInInspector] public float motorPower;
+        [HideInInspector] public float steeringPower;
+        [HideInInspector] public float throttle;
+        [SerializeField] private float springTravel;
+        [SerializeField] private float springStiffness;
+        [SerializeField] private float damperStiffness;
         [Header("Wheel")]
-        public float wheelRadius;
-
-        public WheelType type;
-        public float steerTime;
-
+        [SerializeField] private float wheelRadius;
+        [SerializeField] private WheelType type;
+        [SerializeField] private float steerTime;
+        [Header("Suspension")]
+        [SerializeField] private float restLength;
+        private new Rigidbody rigidbody;
         private float minLength;
         private float maxLength;
         private float lastLength;
@@ -29,15 +28,13 @@ namespace Assets.Scripts.CustomBehaviour
         private float damperForce;
         private float springVelocity;
         private float wheelAngle = 0;
-        [HideInInspector] public float steerAngle;
-        [HideInInspector] public float motorPower;
-        [HideInInspector] public float steeringPower;
-        [HideInInspector] public float throttle;
         private Vector3 suspensionForce;
         private Vector3 wheelVelocity;
         private float forwardForce;
         private float rightForce;
         private Vector3 applicationOffset;
+
+        public WheelType Type => type;
 
         private void Start()
         {

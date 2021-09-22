@@ -1,53 +1,47 @@
-﻿using System.Collections.Generic;
-using TUtils.Utils;
+﻿using GibFrame.Utils;
+using System.Collections.Generic;
 
-namespace Assets.Scripts.MachineLearning.TWEANN
+[System.Serializable]
+public class CrossoverOperatorsWrapper
 {
-    [System.Serializable]
-    public class CrossoverOperatorsWrapper
+    public List<CrossoverOperator> crossoverOperators;
+
+    public int OperatorsCount => crossoverOperators.Count;
+
+    public CrossoverOperatorsWrapper(List<CrossoverOperator> operators)
     {
-        public List<CrossoverOperator> crossoverOperators;
-
-        public int OperatorsCount
+        crossoverOperators = new List<CrossoverOperator>();
+        for (int i = 0; i < operators.Count; i++)
         {
-            get => crossoverOperators.Count;
+            crossoverOperators.Add(operators[i]);
+            crossoverOperators[i].SetSelectProbability(1F / operators.Count);
+            crossoverOperators[i].SetCurrentProgression(0F);
         }
+    }
 
-        public CrossoverOperatorsWrapper(List<CrossoverOperator> operators)
-        {
-            crossoverOperators = new List<CrossoverOperator>();
-            for (int i = 0; i < operators.Count; i++)
-            {
-                crossoverOperators.Add(operators[i]);
-                crossoverOperators[i].SetSelectProbability(1F / operators.Count);
-                crossoverOperators[i].SetCurrentProgression(0F);
-            }
-        }
+    public CrossoverOperatorsWrapper Copy()
+    {
+        return new CrossoverOperatorsWrapper(this.crossoverOperators);
+    }
 
-        public CrossoverOperatorsWrapper Copy()
-        {
-            return new CrossoverOperatorsWrapper(this.crossoverOperators);
-        }
+    public CrossoverOperator GetRandomOperator()
+    {
+        crossoverOperators.NormalizeProbabilities();
+        return crossoverOperators.SelectWithProbability();
+    }
 
-        public CrossoverOperator GetRandomOperator()
-        {
-            CrossoverOperator op = UtilsProvider.SelectWithProbability(crossoverOperators);
-            return op;
-        }
+    public T GetOperatorOfType<T>() where T : CrossoverOperator
+    {
+        return (T)crossoverOperators.Find((x) => x is T);
+    }
 
-        public T GetOperatorOfType<T>() where T : CrossoverOperator
+    public override string ToString()
+    {
+        string ret = "";
+        foreach (CrossoverOperator op in crossoverOperators)
         {
-            return (T)crossoverOperators.Find((x) => x is T);
+            ret += op.ToString() + "\n";
         }
-
-        public override string ToString()
-        {
-            string ret = "";
-            foreach (CrossoverOperator op in crossoverOperators)
-            {
-                ret += op.ToString() + "\n";
-            }
-            return ret;
-        }
+        return ret;
     }
 }

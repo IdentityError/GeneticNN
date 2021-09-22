@@ -1,71 +1,64 @@
-﻿using System;
+﻿using GibFrame.Extensions;
+using System;
 using System.Collections.Generic;
-using TUtils.Utils;
 using UnityEngine;
 
-namespace Assets.Scripts.MachineLearning.TWEANN
+[System.Serializable]
+public class KPointsCrossoverOperator : CrossoverOperator
 {
-    [System.Serializable]
-    /// <summary>
-    ///   The K point Crossover operator splits the matching genes in k sub strings and copied them alternately into the child dna. Disjoint
-    ///   genes are all imported from the fittest parent
-    /// </summary>
-    public class KPointsCrossoverOperator : CrossoverOperator
+    public override Genotype Apply(IOrganism first, IOrganism second)
     {
-        public override Genotype Apply(IOrganism first, IOrganism second)
+        Genotype childGen = new Genotype();
+
+        Genotype firstGen = first.ProvideNeuralNet().GetGenotype();
+        Genotype secondGen = second.ProvideNeuralNet().GetGenotype();
+
+        List<LinkGene> remaining = new List<LinkGene>(firstGen.links);
+        List<LinkGene> partnerRemaining = new List<LinkGene>(secondGen.links);
+        // Zip togheter the links that have the same innovation number
+        List<Tuple<LinkGene, LinkGene>> zippedLinks = firstGen.links.ZipWithFirstPredicateMatching(secondGen.links, (item1, item2) => item1.InnovationNumber.Equals(item2.InnovationNumber));
+
+        int stride = Mathf.CeilToInt((float)zippedLinks.Count / UnityEngine.Random.Range(1, zippedLinks.Count));
+        //Add to che child all the matching genes(links)
+        int i = 0;
+        bool importFromFirst = true;
+        foreach (Tuple<LinkGene, LinkGene> gene in zippedLinks)
         {
-            Genotype childGen = new Genotype();
-
-            Genotype firstGen = first.ProvideNeuralNet().GetGenotype();
-            Genotype secondGen = second.ProvideNeuralNet().GetGenotype();
-
-            List<LinkGene> remaining = new List<LinkGene>(firstGen.links);
-            List<LinkGene> partnerRemaining = new List<LinkGene>(secondGen.links);
-            // Zip togheter the links that have the same innovation number
-            List<Tuple<LinkGene, LinkGene>> zippedLinks = UtilsProvider.ZipWithFirstPredicateMatching(firstGen.links, secondGen.links, (item1, item2) => item1.GetInnovationNumber().Equals(item2.GetInnovationNumber()));
-
-            int stride = Mathf.CeilToInt((float)zippedLinks.Count / UnityEngine.Random.Range(1, zippedLinks.Count));
-            //Add to che child all the matching genes(links)
-            int i = 0;
-            bool importFromFirst = true;
-            foreach (Tuple<LinkGene, LinkGene> gene in zippedLinks)
+            LinkGene copy;
+            if (++i % stride == 0)
             {
-                LinkGene copy;
-                if (++i % stride == 0)
-                {
-                    importFromFirst = !importFromFirst;
-                }
-                if (importFromFirst)
-                {
-                    copy = gene.Item1;
-                }
-                else
-                {
-                    copy = gene.Item2;
-                }
-
-                childGen.AddLinkAndNodes(copy);
-                remaining.RemoveAll(item => item.GetInnovationNumber().Equals(copy.GetInnovationNumber()));
-                partnerRemaining.RemoveAll(item => item.GetInnovationNumber().Equals(copy.GetInnovationNumber()));
+                importFromFirst = !importFromFirst;
             }
-
-            // At this point all common genes are added we add all the disjoint genes from the fittest
-            if (first.ProvideAdjustedFitness() > second.ProvideAdjustedFitness())
+            if (importFromFirst)
             {
-                foreach (LinkGene gene in remaining)
-                {
-                    childGen.AddLinkAndNodes(gene);
-                }
+                copy = gene.Item1;
             }
             else
             {
-                foreach (LinkGene gene in partnerRemaining)
-                {
-                    childGen.AddLinkAndNodes(gene);
-                }
+                copy = gene.Item2;
             }
 
-            return childGen;
+            childGen.AddLinkAndNodes(copy);
+            remaining.RemoveAll(item => item.InnovationNumber.Equals(copy.InnovationNumber));
+            partnerRemaining.RemoveAll(item => item.InnovationNumber.Equals(copy.InnovationNumber));
         }
+
+        // At this point all common genes are added we add all the disjoint genes from the fittest
+        if (first.ProvideAdjustedFitness() > second.ProvideAdjustedFitness())
+        {
+            foreach (LinkGene gene in remaining)
+            {
+                childGen.AddLinkAndNodes(gene);
+            }
+        }
+        else
+        {
+            foreach (LinkGene gene in partnerRemaining)
+            {
+                childGen.AddLinkAndNodes(gene);
+            }
+        }
+
+        return childGen;
     }
 }

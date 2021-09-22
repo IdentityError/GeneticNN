@@ -1,31 +1,31 @@
 ﻿using Assets.Scripts.CustomBehaviour;
-using Assets.Scripts.MachineLearning.TWEANN;
+using GibFrame.ObjectPooling;
+using GibFrame.Performance;
+using GibFrame.Utils.Mathematics;
 using System;
-using TUtils.ObjectPooling;
-using TUtils.Utils.Mathematics;
 using UnityEngine;
 
-public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject
+public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject, ICommonUpdate
 {
-    [HideInInspector] public Vector3 lastPosition;
     [Header("Senses")]
     [Tooltip("Length of the raycasted senses")]
-    public float length;
-    public bool manualControl;
-    public float motorPower;
+    [SerializeField] private float length;
+    [SerializeField] private bool manualControl;
+    [SerializeField] private float motorPower;
     [Tooltip("Length from left to right axes")]
-    public float rearTrack;
-    public SimulationStats stats;
+    [SerializeField] private float rearTrack;
+    [SerializeField] private SimulationStats stats;
     [Header("Debug")]
-    public float steering;
-    public float steeringPower;
-    public float throttle;
+    [SerializeField] private float steering;
+    [SerializeField] private float steeringPower;
+    [SerializeField] private float throttle;
     [Tooltip("Radius of the turn")]
-    public float turnRadius;
+    [SerializeField] private float turnRadius;
     [Tooltip("Length from rear to front axes")]
-    public float wheelBase;
+    [SerializeField] private float wheelBase;
     [Header("Specifications")]
-    public Wheel[] wheels;
+    [SerializeField] private Wheel[] wheels;
+
     private float ackermanAngleLeft;
     private float ackermanAngleRight;
     private float angleStride;
@@ -37,15 +37,14 @@ public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject
     private NeuralNetwork neuralNet;
     private double[] neuralNetInput;
     private double[] neuralNetOutput;
-    private PopulationManager populationManager;
-    private new Rigidbody rigidbody;
+
     private Vector3[] sensesDirections;
 
     private float prob;
 
     public double EvaluateFitnessFunction()
     {
-        float length = populationManager.GetTrack().Length();
+        float length = stats.track.Length;
         double fitness = 3D * (stats.distance) * Math.Pow(stats.averageThrottle + 1D, stats.distance / length);
         if (fitness > 0) return fitness;
         else return 0;
@@ -93,11 +92,6 @@ public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject
         endedSimulation = false;
     }
 
-    public void SetPopulationManager(PopulationManager populationManager)
-    {
-        this.populationManager = populationManager;
-    }
-
     public double ProvideRawFitness()
     {
         return rawFitness;
@@ -118,25 +112,7 @@ public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject
         this.prob = prob;
     }
 
-    private void Start()
-    {
-        lastPosition = transform.position;
-        rigidbody = GetComponent<Rigidbody>();
-
-        foreach (Wheel w in wheels)
-        {
-            w.motorPower = this.motorPower;
-            w.steeringPower = this.steeringPower;
-        }
-
-        if (populationManager != null)
-        {
-            stats.track = populationManager.GetTrack();
-            populationManager.SubscribeToForceEnded(OnForceEnded);
-        }
-    }
-
-    private void Update()
+    public void CommonUpdate(float deltaTime)
     {
         if (!endedSimulation && netInitialized)
         {
@@ -150,23 +126,48 @@ public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject
         }
     }
 
+    private void Start()
+    {
+        Events.ForceSimulationEvent.Subscribe(OnForceEnded);
+        foreach (Wheel w in wheels)
+        {
+            w.motorPower = this.motorPower;
+            w.steeringPower = this.steeringPower;
+        }
+
+        stats.track = Events.Queries.TrackQuery.Obtain();
+
+        if (CommonUpdateManager.Instance != null)
+        {
+            CommonUpdateManager.Instance.Register(this as MonoBehaviour);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (CommonUpdateManager.Instance != null)
+        {
+            CommonUpdateManager.Instance.Unregister(this as MonoBehaviour);
+        }
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
         if (!endedSimulation)
         {
             endedSimulation = true;
             SetRawFitness(EvaluateFitnessFunction());
-            populationManager?.IndividualEndedSimulation(this, false);
+            Events.IndividualEndedSimulationEvent.Broadcast(this, false);
         }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag.Equals("FinishLine"))
+        if (other.CompareTag("FinishLine"))
         {
             endedSimulation = true;
             SetRawFitness(EvaluateFitnessFunction());
-            populationManager?.IndividualEndedSimulation(this, stats.averageThrottle > 0);
+            Events.IndividualEndedSimulationEvent.Broadcast(this, stats.averageThrottle > 0);
         }
     }
 
@@ -200,11 +201,11 @@ public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject
 
         foreach (Wheel w in wheels)
         {
-            if (w.type == Wheel.WheelType.FRONT_L)
+            if (w.Type == Wheel.WheelType.FRONT_L)
             {
                 w.steerAngle = ackermanAngleLeft;
             }
-            if (w.type == Wheel.WheelType.FRONT_R)
+            if (w.Type == Wheel.WheelType.FRONT_R)
             {
                 w.steerAngle = ackermanAngleRight;
             }
@@ -219,7 +220,7 @@ public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject
         {
             float currentAngle = angleStride * (i + 1);
             currentAngle -= transform.rotation.eulerAngles.y;
-            sensesDirections[i] = new Vector3(Mathf.Cos(currentAngle * TMath.DegToRad), 0F, Mathf.Sin(currentAngle * TMath.DegToRad));
+            sensesDirections[i] = new Vector3(Mathf.Cos(currentAngle * GMath.DegToRad), 0F, Mathf.Sin(currentAngle * GMath.DegToRad));
 
             sensesDirections[i].Normalize();
 
@@ -248,8 +249,6 @@ public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject
         endedSimulation = true;
         netInitialized = false;
 
-        lastPosition = transform.position;
-
         throttle = 0;
         steering = 0;
         fitness = 0;
@@ -263,7 +262,7 @@ public class CarIndividual : MonoBehaviour, ISimulatingOrganism, IPooledObject
         if (IsSimulating())
         {
             endedSimulation = true;
+            SetRawFitness(EvaluateFitnessFunction());
         }
-        SetRawFitness(EvaluateFitnessFunction());
     }
 }

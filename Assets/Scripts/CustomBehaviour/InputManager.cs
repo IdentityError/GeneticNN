@@ -1,26 +1,16 @@
-﻿using Assets.Scripts.MachineLearning.TWEANN;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class InputManager : MonoBehaviour
 {
-    private UIManager UIManager = null;
-    private PopulationManager populationManager = null;
-
-    private void Start()
-    {
-        UIManager = FindObjectOfType<UIManager>();
-        populationManager = FindObjectOfType<PopulationManager>();
-    }
-
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.R))
         {
-            populationManager.ForceSimulationEnd();
+            Events.ForceSimulationEvent.Broadcast();
         }
         if (Input.GetKeyDown(KeyCode.C))
         {
-            UIManager?.ClearLog();
+            Events.ClearLogEvent.Broadcast();
         }
         if (Input.GetKeyDown(KeyCode.F))
         {

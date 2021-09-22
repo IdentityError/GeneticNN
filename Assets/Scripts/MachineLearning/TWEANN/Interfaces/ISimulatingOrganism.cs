@@ -1,11 +1,3 @@
-﻿using Assets.Scripts.MachineLearning.Interfaces;
-
-namespace Assets.Scripts.MachineLearning.TWEANN
+﻿public interface ISimulatingOrganism : ISimulationPerformer, IOrganism
 {
-    /// <summary>
-    ///   An individual and a simulation performer
-    /// </summary>
-    public interface ISimulatingOrganism : ISimulationPerformer, IOrganism
-    {
-    }
 }
